@@ -1,0 +1,93 @@
+﻿Property,Description
+Village,Name of the closest village to the field
+Subcounty,Name of the Subcounty where the field is located 
+District,Name of the District where the field is located 
+Moisture,Average moisture of the grains measured for the different quadrants
+Grain_W_g,Average grain weight measured for the different quadrants (1.5m x 1.5m)
+Stem_W_g,Average stem weight measured for the different quadrants (1.5m x 1.5m)
+Yield_KgHa,Average yield measured for the different quadrants in Kg per Ha
+HI,Average Harvest Index measured for the different quadrants
+surveyorid,Unique ID of the surveyor who sampled the field
+quadrant,Number of quadrants sampled in the field
+crop1,Crop type of the quadrant number 1
+variety1,Variety of the quadrant number 1 (indigenous or improved)
+m_plant1,Number of maize plants in the quadrant number (if crop1 = maize)
+m_cob1,Number of maize cobs in the quadrant number 1 (if crop1 = maize)
+m_disease1,"Are the plants located in the quadrant affected by a disease in the quadrant number 1 (1=Yes , 0=No). "
+m_worm1,"Are the plants located in the quadrant affected by the army worms in the quadrant number 1 (1=Yes , 0=No). "
+m_worm_nu1,Number of plant affected by the army worms in the quadrant number 1. 
+s_plant1,Number of sorghum plants in the quadrant number (if crop1 = sorghum)
+s_ear1,Number of sorghum ears in the quadrant number 1 (if crop1 = sorghum)
+s_disease1,"Are the plants located in the quadrant affected by a disease in the quadrant number 1 (1=Yes , 0=No). "
+crop2,Same as for quadrant number 1
+variety2,Same as for quadrant number 1
+m_plant2,Same as for quadrant number 1
+m_cob2,Same as for quadrant number 1
+m_disease2,Same as for quadrant number 1
+m_worm2,Same as for quadrant number 1
+m_worm_nu2,Same as for quadrant number 1
+s_plant2,Same as for quadrant number 1
+s_ear2,Same as for quadrant number 1
+s_disease2,Same as for quadrant number 1
+crop3,Same as for quadrant number 1
+variety3,Same as for quadrant number 1
+m_plant3,Same as for quadrant number 1
+m_cob3,Same as for quadrant number 1
+m_disease3,Same as for quadrant number 1
+m_worm3,Same as for quadrant number 1
+m_worm_nu3,Same as for quadrant number 1
+s_plant3,Same as for quadrant number 1
+s_ear3,Same as for quadrant number 1
+s_disease3,Same as for quadrant number 1
+crop4,Same as for quadrant number 1
+variety4,Same as for quadrant number 1
+m_plant4,Same as for quadrant number 1
+m_cob4,Same as for quadrant number 1
+m_disease4,Same as for quadrant number 1
+m_worm4,Same as for quadrant number 1
+m_worm_nu4,Same as for quadrant number 1
+s_plant4,Same as for quadrant number 1
+s_ear4,Same as for quadrant number 1
+s_disease4,Same as for quadrant number 1
+crop5,Same as for quadrant number 1
+variety5,Same as for quadrant number 1
+m_plant5,Same as for quadrant number 1
+m_cob5,Same as for quadrant number 1
+m_disease5,Same as for quadrant number 1
+m_worm5,Same as for quadrant number 1
+m_worm_nu5,Same as for quadrant number 1
+s_plant5,Same as for quadrant number 1
+s_ear5,Same as for quadrant number 1
+s_disease5,Same as for quadrant number 1
+crop6,Same as for quadrant number 1
+variety6,Same as for quadrant number 1
+m_plant6,Same as for quadrant number 1
+m_cob6,Same as for quadrant number 1
+m_disease6,Same as for quadrant number 1
+m_worm6,Same as for quadrant number 1
+m_worm_nu6,Same as for quadrant number 1
+s_plant6,Same as for quadrant number 1
+s_ear6,Same as for quadrant number 1
+s_disease6,Same as for quadrant number 1
+crop7,Same as for quadrant number 1
+variety7,Same as for quadrant number 1
+m_plant7,Same as for quadrant number 1
+m_cob7,Same as for quadrant number 1
+m_disease7,Same as for quadrant number 1
+m_worm7,Same as for quadrant number 1
+m_worm_nu7,Same as for quadrant number 1
+s_plant7,Same as for quadrant number 1
+s_ear7,Same as for quadrant number 1
+s_disease7,Same as for quadrant number 1
+crop8,Same as for quadrant number 1
+variety8,Same as for quadrant number 1
+m_plant8,Same as for quadrant number 1
+m_cob8,Same as for quadrant number 1
+m_disease8,Same as for quadrant number 1
+m_worm8,Same as for quadrant number 1
+m_worm_nu8,Same as for quadrant number 1
+s_plant8,Same as for quadrant number 1
+s_ear8,Same as for quadrant number 1
+s_disease8,Same as for quadrant number 1
+Estimated Planting Date,"Planting date not recorded for this dataset, and set to Jan 1, 2017"
+Estimated Harvest Date,"Harvest date not recorded for this dataset, and set to Dec 31, 2017"

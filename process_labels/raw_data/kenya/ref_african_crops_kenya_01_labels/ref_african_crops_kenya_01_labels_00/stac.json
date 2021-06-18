@@ -1,0 +1,645 @@
+{
+    "assets": {
+        "documentation": {
+            "href": "../_common/documentation.pdf",
+            "title": "Dataset Documentation",
+            "type": "application/pdf"
+        },
+        "labels": {
+            "href": "labels.geojson",
+            "title": "Crop Labels",
+            "type": "image/tiff"
+        },
+        "property_descriptions": {
+            "href": "../_common/property_descriptions.csv",
+            "title": "Label Property Descriptions",
+            "type": "text/csv"
+        }
+    },
+    "bbox": [
+        34.18191992149459,
+        0.4724181558451209,
+        34.2766208946704,
+        0.5894898556277989
+    ],
+    "collection": "ref_african_crops_kenya_01_labels",
+    "geometry": {
+        "coordinates": [
+            [
+                [
+                    34.2766208946704,
+                    0.4724181558451209
+                ],
+                [
+                    34.2766208946704,
+                    0.5894898556277989
+                ],
+                [
+                    34.18191992149459,
+                    0.5894898556277989
+                ],
+                [
+                    34.18191992149459,
+                    0.4724181558451209
+                ],
+                [
+                    34.2766208946704,
+                    0.4724181558451209
+                ]
+            ]
+        ],
+        "type": "Polygon"
+    },
+    "id": "ref_african_crops_kenya_01_labels_00",
+    "links": [
+        {
+            "href": "../collection.json",
+            "rel": "collection"
+        },
+        {
+            "href": "../collection.json",
+            "rel": "parent"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180412/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180417/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180422/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180427/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180502/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180507/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180512/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180517/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180522/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180527/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180601/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180606/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180611/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180616/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180621/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180626/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180701/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180706/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180711/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180716/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180721/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180726/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180731/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180805/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180810/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180815/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180820/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180825/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180830/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180904/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180909/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180914/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180919/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180924/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20180929/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181004/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181009/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181014/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181019/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181024/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181029/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181103/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181108/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181113/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181118/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181123/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181128/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181203/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181208/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181213/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181218/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181223/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20181228/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190102/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190107/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190112/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190117/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190122/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190127/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190201/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190206/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190211/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190216/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190221/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190226/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190303/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190308/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190313/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190318/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190323/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190328/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190402/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190407/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190412/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190417/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190422/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190427/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190502/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190507/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190512/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190517/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190522/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190527/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190601/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190606/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190611/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190616/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190621/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190626/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190701/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190706/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190711/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190716/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190721/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190726/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190731/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190805/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190810/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190815/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190820/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190825/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190830/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190904/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190909/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190914/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190919/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190924/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20190929/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191004/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191009/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191014/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191019/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191024/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191029/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191103/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191108/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191113/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191118/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191123/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191128/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191203/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191208/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191213/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191218/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191223/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20191228/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200102/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200107/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200112/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200117/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200122/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200127/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200201/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200206/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200211/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200216/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200221/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200226/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200302/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200307/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_kenya_01_source/ref_african_crops_kenya_01_source_00_20200312/stac.json",
+            "rel": "source"
+        }
+    ],
+    "properties": {
+        "datetime": "2018-07-01T00:00:00Z",
+        "label:description": "Kenya Tile 00 Labels",
+        "label:methods": [
+            "manual"
+        ],
+        "label:properties": null,
+        "label:tasks": [
+            "classification"
+        ],
+        "label:type": "vector"
+    },
+    "stac_extensions": [
+        "label"
+    ],
+    "stac_version": "1.0.0-beta.2",
+    "type": "Feature"
+}

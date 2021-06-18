@@ -1,0 +1,7 @@
+﻿Property,Description
+Village,Name of the closest village to the field
+Region,Name of the Region where the field is located 
+Plot Area (acre),Area of the plot in acres
+Planting Date,Date that the seeds are planted
+Estimated Harvest Date,"Harvest dates are not recorded for this dataset, and are estimated using the Planting Date and a common growing season length from FAO crop calendar"
+Crop,Crop type in the plot
