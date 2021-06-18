@@ -1,0 +1,86 @@
+from pathlib import Path
+import json
+import geopandas
+from datetime import datetime
+from shapely.geometry import Polygon
+
+from cropharvest.utils import DATASET_PATH
+
+from .utils import export_date_from_row
+
+from typing import Tuple, List
+
+LABEL_TO_CLASSIFICATION = {
+    "sorghum": "cereals",
+    "maize": "cereals",
+}
+
+
+def _load_single_stac(path_to_stac: Path) -> List[Tuple[Polygon, str, datetime, datetime]]:
+    with (path_to_stac / "labels.geojson").open("r") as f:
+        label_json = json.load(f)
+
+        # we only take monocropped fields
+        features = label_json["features"]
+        fields: List[Tuple[Polygon, str, datetime, datetime]] = []
+        for feature in features:
+            crops: List[str] = []
+            for crop_label in [f"crop{i}" for i in range(1, 9)]:
+                crop = feature["properties"][crop_label]
+                if crop is not None:
+                    crops.append(crop)
+            if all(crops[0] == crop for crop in crops):
+                fields.append(
+                    (
+                        Polygon(feature["geometry"]["coordinates"][0]),
+                        crops[0],
+                        datetime.strptime(
+                            feature["properties"]["Estimated Planting Date"], "%Y-%m-%d"
+                        ),
+                        datetime.strptime(
+                            feature["properties"]["Estimated Harvest Date"], "%Y-%m-%d"
+                        ),
+                    )
+                )
+
+    return fields
+
+
+def load_uganda():
+
+    data_folder = DATASET_PATH / "uganda"
+    # first, get all files
+    stac_folders = list(
+        (data_folder / "ref_african_crops_uganda_01_labels").glob(
+            "ref_african_crops_uganda_01_labels*"
+        )
+    )
+
+    labels: List[str] = []
+    polygons: List[Polygon] = []
+
+    all_fields: List[Tuple[Polygon, str, datetime, datetime]] = []
+    for stac_folder in stac_folders:
+        fields = _load_single_stac(stac_folder)
+        all_fields.extend(fields)
+
+    polygons, labels, planting_date, harvest_date = map(list, zip(*all_fields))
+    df = geopandas.GeoDataFrame(
+        data={"label": labels, "planting_date": planting_date, "harvest_date": harvest_date},
+        geometry=polygons,
+        crs="EPSG:32636",
+    )
+    df = df.to_crs("EPSG:4326")
+
+    # isolate the latitude and longitude
+    df["lon"] = df.geometry.centroid.x
+    df["lat"] = df.geometry.centroid.y
+
+    df["export_end_date"] = df.apply(export_date_from_row, axis=1)
+    # https://registry.mlhub.earth/10.34911/rdnt.eii04x/
+    df["collection_date"] = datetime(2017, 9, 30)
+    df["is_crop"] = 1
+    df["classification_label"] = df.apply(lambda x: LABEL_TO_CLASSIFICATION[x.label], axis=1)
+    df = df.reset_index(drop=True)
+    df["index"] = df.index
+    return df

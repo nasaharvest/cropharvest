@@ -1,0 +1,53 @@
+{
+    "description": "African Crops Kenya",
+    "extent": {
+        "spatial": {
+            "bbox": [
+                [
+                    34.18191992149459,
+                    0.4724181558451209,
+                    34.3714943155646,
+                    0.7144217206851109
+                ]
+            ]
+        },
+        "temporal": {
+            "interval": [
+                [
+                    "2018-04-10T00:00:00Z",
+                    "2020-03-13T00:00:00Z"
+                ]
+            ]
+        }
+    },
+    "id": "ref_african_crops_kenya_01_labels",
+    "license": "CC-BY-SA-4.0",
+    "links": [
+        {
+            "href": "ref_african_crops_kenya_01_labels_02/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_kenya_01_labels_00/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_kenya_01_labels_01/stac.json",
+            "rel": "item"
+        }
+    ],
+    "providers": [
+        {
+            "name": "Radiant Earth Foundation",
+            "roles": [
+                "licensor",
+                "host",
+                "processor"
+            ],
+            "url": "https://radiant.earth"
+        }
+    ],
+    "sci:citation": "PlantVillage. (2019) PlantVillage Kenya Ground Reference Crop Type Dataset, Version 1. [Indicate subset used]. Radiant ML Hub. [Date Accessed]",
+    "sci:doi": "10.34911/rdnt.u41j87",
+    "stac_version": "1.0.0-beta.2"
+}

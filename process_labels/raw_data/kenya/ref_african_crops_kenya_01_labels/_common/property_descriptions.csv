@@ -1,0 +1,21 @@
+﻿Property,Description
+Field ID,A 3 part field ID explained in the documentation
+Latitude,Latitude of the point where the surveyor collects data
+Longitude,Longitude of the point where the surveyor collects data
+Accuracy,Accuracy of the GPS Latitude and Longitude of the point where the surveyor collects data
+Survey Date,Date the survey was completed
+Water Resource,Rainfed vs Irrigated
+Planting Date,Date the field was planted
+PlantingDate Method,"Indicates if the planting date is ""Recorded"" or ""Estimated"""
+Estimated Harvest Date,"Harvest dates are not recorded for this dataset, and are estimated using the Planting Date and a common growing season length from FAO crop calendar"
+Crop1,Major crop in the field
+Crop2,Other crops in the field
+Crop3,Other crops in the field
+Crop4,Other crops in the field
+Crop5,Other crops in the field
+Crop Density,Estimated density of the field as described in the documentation
+Variety,Crop species variety
+CMD Rating,"Cassava Mosaic Disease Rating, range [0, 10], details explained in the documentation "
+CBSD Rating,"Cassava Brown Streak Disease Rating, range [0, 10], details explained in the documentation "
+CGM Rating,"Cassava Green Mites Rating, range [0, 10], details explained in the documentation "
+Disease Rating,"Rating for any other disease that could be present, range [0, 10], details explained in the documentation"
