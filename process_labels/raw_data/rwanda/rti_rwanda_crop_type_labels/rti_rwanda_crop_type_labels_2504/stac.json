@@ -1,0 +1,106 @@
+{
+    "assets": {
+        "documentation": {
+            "href": "../_common/documentation.pdf",
+            "type": "application/pdf"
+        },
+        "labels": {
+            "href": "labels.json",
+            "title": "Crop Type Labels",
+            "type": "application/geo+json"
+        }
+    },
+    "bbox": [
+        29.558698619999998,
+        -1.541946109,
+        29.55875422,
+        -1.541890509
+    ],
+    "collection": "rti_rwanda_crop_type_labels",
+    "geometry": {
+        "coordinates": [
+            [
+                [
+                    29.55875422,
+                    -1.541946109
+                ],
+                [
+                    29.55875422,
+                    -1.541890509
+                ],
+                [
+                    29.558698619999998,
+                    -1.541890509
+                ],
+                [
+                    29.558698619999998,
+                    -1.541946109
+                ],
+                [
+                    29.55875422,
+                    -1.541946109
+                ]
+            ]
+        ],
+        "type": "Polygon"
+    },
+    "id": "rti_rwanda_crop_type_labels_2504",
+    "links": [
+        {
+            "href": "../collection.json",
+            "rel": "collection"
+        },
+        {
+            "href": "../collection.json",
+            "rel": "parent"
+        },
+        {
+            "href": "../../rti_rwanda_crop_type_source/rti_rwanda_crop_type_source_2504/stac.json",
+            "rel": "source"
+        }
+    ],
+    "properties": {
+        "datetime": "2018-12-27T00:00:00+0000",
+        "label:classes": [
+            {
+                "classes": [
+                    "banana",
+                    "maize",
+                    "unknown",
+                    "avocados",
+                    "sweet_potatoe",
+                    "forest",
+                    "peas",
+                    "climbing_beans",
+                    "wheat",
+                    "natural_vegetation",
+                    "bush_beans",
+                    "ordinary_beans",
+                    "cassava",
+                    "mangoes",
+                    "other_known",
+                    "fallow",
+                    "irish_potatoe",
+                    "fodder",
+                    "eggplants",
+                    "tomato_trees",
+                    "carrots",
+                    "bare_earth",
+                    "structure",
+                    "passion_fruit"
+                ],
+                "name": "label"
+            }
+        ],
+        "label:description": "Crop Type Labels",
+        "label:properties": [
+            "label"
+        ],
+        "label:type": "vector"
+    },
+    "stac_extensions": [
+        "label"
+    ],
+    "stac_version": "1.0.0-beta.2",
+    "type": "Feature"
+}

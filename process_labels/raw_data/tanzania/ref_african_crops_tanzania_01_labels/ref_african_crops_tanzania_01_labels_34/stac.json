@@ -1,0 +1,365 @@
+{
+    "assets": {
+        "documentation": {
+            "href": "../_common/documentation.pdf",
+            "title": "Dataset Documentation",
+            "type": "application/pdf"
+        },
+        "labels": {
+            "href": "labels.geojson",
+            "title": "Crop Labels",
+            "type": "image/tiff"
+        },
+        "property_descriptions": {
+            "href": "../_common/property_descriptions.csv",
+            "title": "Label Property Descriptions",
+            "type": "text/csv"
+        }
+    },
+    "bbox": [
+        36.512606841660116,
+        -3.8129263414936085,
+        36.52888790300182,
+        -3.79383526335116
+    ],
+    "collection": "ref_african_crops_tanzania_01_labels",
+    "geometry": {
+        "coordinates": [
+            [
+                [
+                    36.52888790300182,
+                    -3.8129263414936085
+                ],
+                [
+                    36.52888790300182,
+                    -3.79383526335116
+                ],
+                [
+                    36.512606841660116,
+                    -3.79383526335116
+                ],
+                [
+                    36.512606841660116,
+                    -3.8129263414936085
+                ],
+                [
+                    36.52888790300182,
+                    -3.8129263414936085
+                ]
+            ]
+        ],
+        "type": "Polygon"
+    },
+    "id": "ref_african_crops_tanzania_01_labels_34",
+    "links": [
+        {
+            "href": "../collection.json",
+            "rel": "collection"
+        },
+        {
+            "href": "../collection.json",
+            "rel": "parent"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180104/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180109/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180114/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180119/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180124/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180129/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180208/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180213/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180218/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180223/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180228/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180305/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180310/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180315/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180320/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180325/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180330/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180404/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180409/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180414/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180419/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180424/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180429/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180504/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180509/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180514/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180519/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180524/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180529/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180603/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180608/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180613/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180618/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180623/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180628/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180703/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180708/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180713/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180718/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180723/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180728/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180802/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180807/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180812/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180817/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180822/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180827/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180901/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180906/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180911/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180916/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180921/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20180926/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181001/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181006/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181011/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181016/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181021/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181026/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181031/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181105/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181110/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181115/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181120/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181125/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181130/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181205/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181210/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181215/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181225/stac.json",
+            "rel": "source"
+        },
+        {
+            "href": "../../ref_african_crops_tanzania_01_source/ref_african_crops_tanzania_01_source_34_20181230/stac.json",
+            "rel": "source"
+        }
+    ],
+    "properties": {
+        "datetime": "2018-07-01T00:00:00Z",
+        "label:description": "Tanzania Tile 34 Labels",
+        "label:methods": [
+            "manual"
+        ],
+        "label:properties": null,
+        "label:tasks": [
+            "classification"
+        ],
+        "label:type": "vector"
+    },
+    "stac_extensions": [
+        "label"
+    ],
+    "stac_version": "1.0.0-beta.2",
+    "type": "Feature"
+}

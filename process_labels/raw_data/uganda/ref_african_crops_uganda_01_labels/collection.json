@@ -1,0 +1,253 @@
+{
+    "description": "African Crops Uganda",
+    "extent": {
+        "spatial": {
+            "bbox": [
+                [
+                    33.5466817,
+                    1.4271017000000001,
+                    35.00013415,
+                    3.7269467000000005
+                ]
+            ]
+        },
+        "temporal": {
+            "interval": [
+                [
+                    "2017-01-01T00:00:00Z",
+                    "2017-12-31T00:00:00Z"
+                ]
+            ]
+        }
+    },
+    "id": "ref_african_crops_uganda_01_labels",
+    "license": "CC-BY-SA-4.0",
+    "links": [
+        {
+            "href": "ref_african_crops_uganda_01_labels_50/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_03/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_04/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_32/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_35/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_51/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_34/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_33/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_05/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_02/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_20/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_18/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_27/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_11/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_29/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_16/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_42/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_45/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_28/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_17/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_10/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_19/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_26/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_21/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_44/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_43/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_07/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_38/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_00/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_36/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_09/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_31/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_30/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_37/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_08/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_01/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_06/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_39/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_52/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_46/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_41/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_48/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_24/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_23/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_15/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_12/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_49/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_40/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_47/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_13/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_14/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_22/stac.json",
+            "rel": "item"
+        },
+        {
+            "href": "ref_african_crops_uganda_01_labels_25/stac.json",
+            "rel": "item"
+        }
+    ],
+    "providers": [
+        {
+            "name": "Radiant Earth Foundation",
+            "roles": [
+                "licensor",
+                "host",
+                "processor"
+            ],
+            "url": "https://radiant.earth"
+        }
+    ],
+    "sci:citation": "Bocquet, C., Dalberg Data Insights. (2019) Dalberg Data Insights Uganda Crop Classification, Version 1. [Indicate subset used]. Radiant ML Hub. [Date Accessed]",
+    "sci:doi": "10.34911/rdnt.eii04x",
+    "stac_version": "1.0.0-beta.2"
+}

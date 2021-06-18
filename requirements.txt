@@ -1,0 +1,5 @@
+geopandas
+xarray
+earthengine-api
+tqdm
+cartopy
