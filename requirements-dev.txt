@@ -1,4 +1,0 @@
-mypy==0.812  # so that stubs are bundled in with mypy
-pytest
-pytest-flake8
-black
