@@ -77,23 +77,7 @@ def computeQualityScore(img):
 
 
 def computeS2CloudScore(img):
-    toa = img.select(
-        [
-            "B1",
-            "B2",
-            "B3",
-            "B4",
-            "B5",
-            "B6",
-            "B7",
-            "B8",
-            "B8A",
-            "B9",
-            "B10",
-            "B11",
-            "B12",
-        ]
-    ).divide(10000)
+    toa = img.select(BANDS).divide(10000)
 
     toa = toa.addBands(img.select(["QA60"]))
 
@@ -175,9 +159,7 @@ def projectShadows(image):
         **{"reducer": ee.Reducer.max(), "kernel": ee.Kernel.square(1)}
     )
 
-    image = image.addBands(shadowScore.rename(["shadowScore"]))
-
-    return image
+    return image.addBands(shadowScore.rename(["shadowScore"]))
 
 
 def dilatedErossion(score):
@@ -205,5 +187,4 @@ def dilatedErossion(score):
 
 
 def mergeCollection(imgC):
-    filtered = imgC.qualityMosaic("cloudShadowScore")
-    return filtered
+    return imgC.qualityMosaic("cloudShadowScore")

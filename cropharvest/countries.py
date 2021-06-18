@@ -20,25 +20,31 @@ class BBox:
     min_lon: float
     max_lon: float
 
+    def __post_init__(self):
+        if self.max_lon < self.min_lon:
+            raise ValueError("max_lon should be larger than min_lon")
+        if self.max_lat < self.min_lat:
+            raise ValueError("max_lat should be larger than min_lat")
+
+        self.url = (
+            f"http://bboxfinder.com/#{self.min_lat},{self.min_lon},{self.max_lat},{self.max_lon}"
+        )
+
     def contains(self, lat: float, lon: float) -> bool:
-        if (
+        return (
             (lat >= self.min_lat)
             & (lat <= self.max_lat)
             & (lon >= self.min_lon)
             & (lon <= self.max_lon)
-        ):
-            return True
-        return False
+        )
 
     def contains_bbox(self, bbox) -> bool:
-        if (
+        return (
             (bbox.min_lat >= self.min_lat)
             & (bbox.max_lat <= self.max_lat)
             & (bbox.min_lon >= self.min_lon)
             & (bbox.max_lon <= self.max_lon)
-        ):
-            return True
-        return False
+        )
 
     @property
     def three_dimensional_points(self) -> List[float]:
@@ -60,39 +66,36 @@ class BBox:
         else:
             return lat, lon
 
-
-def _polygon_to_bbox(polygon: Polygon) -> BBox:
-
-    (min_lon, min_lat, max_lon, max_lat) = polygon.bounds
-    return BBox(min_lat, max_lat, min_lon, max_lon)
+    @classmethod
+    def polygon_to_bbox(cls, polygon: Polygon):
+        (min_lon, min_lat, max_lon, max_lat) = polygon.bounds
+        return cls(min_lat, max_lat, min_lon, max_lon)
 
 
 def get_country_bbox(country_name: str) -> List[BBox]:
 
     country = COUNTRY_SHAPEFILE[COUNTRY_SHAPEFILE.NAME_EN == country_name]
-    if len(country) == 1:
-        polygon = country.geometry.iloc[0]
-        if isinstance(polygon, Polygon):
-            return [_polygon_to_bbox(polygon)]
-        elif isinstance(polygon, MultiPolygon):
-            bboxes = [_polygon_to_bbox(x) for x in polygon]
-            # we want to remove any bounding boxes which are contained within
-            # another bounding box
-            indices_to_remove = set()
-            for big_idx in range(len(bboxes)):
-                for small_idx in range(len(bboxes)):
-                    if big_idx == small_idx:
-                        continue
-                    elif small_idx in indices_to_remove:
-                        continue
-                    else:
-                        if bboxes[big_idx].contains_bbox(bboxes[small_idx]):
-                            indices_to_remove.add(small_idx)
-            return [box for i, box in enumerate(bboxes) if i not in indices_to_remove]
-        else:
-            raise RuntimeError(f"Unrecognize geometry {type(polygon)}")
-    else:
+    if len(country) != 1:
         raise RuntimeError(f"Unrecognized country {country_name}")
+    polygon = country.geometry.iloc[0]
+    if isinstance(polygon, Polygon):
+        return [BBox.polygon_to_bbox(polygon)]
+    elif isinstance(polygon, MultiPolygon):
+        bboxes = [BBox.polygon_to_bbox(x) for x in polygon]
+        # we want to remove any bounding boxes which are contained within
+        # another bounding box
+        indices_to_remove = set()
+        for big_idx in range(len(bboxes)):
+            for small_idx in range(len(bboxes)):
+                if big_idx == small_idx:
+                    continue
+                elif small_idx in indices_to_remove:
+                    continue
+                else:
+                    if bboxes[big_idx].contains_bbox(bboxes[small_idx]):
+                        indices_to_remove.add(small_idx)
+        return [box for i, box in enumerate(bboxes) if i not in indices_to_remove]
+    raise RuntimeError(f"Unrecognize geometry {type(polygon)}")
 
 
 def get_countries() -> List[str]:
