@@ -349,7 +349,7 @@ class Engineer:
             dataset=row.dataset,
         )
 
-    def engineer_test_instances(
+    def pickle_test_instances(
         self,
     ) -> None:
         test_savedir = self.savedir / "test_arrays"
@@ -361,7 +361,7 @@ class Engineer:
             with (self.test_savedir / f"{instance_name}.pkl").open("wb") as f:
                 pickle.dump(test_instance, f)
 
-    def engineer(
+    def create_pickled_dataset(
         self,
         checkpoint: bool = True,
     ) -> None:
