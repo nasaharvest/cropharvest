@@ -21,9 +21,6 @@ LABELS_FILENAME = "labels.geojson"
 
 # test regions should have the naming schema
 # {country}_{test_crop}_{export_end_year}_{identifer}
-# Togo is not included here, because we
-# explicitly remove all Togo datapoints when training
-# MAML (as opposed to a subset of the country)
 TEST_REGIONS: Dict[str, BBox] = {
     "Kenya_maize_2020_0": BBox(
         min_lat=0.47190, max_lat=0.47749, min_lon=34.22847, max_lon=34.23266
