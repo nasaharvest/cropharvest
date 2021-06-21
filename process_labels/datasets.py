@@ -5,6 +5,7 @@ from . import loading_funcs
 
 from cropharvest.utils import DATAFOLDER_PATH
 from cropharvest.config import LABELS_FILENAME
+from .utils import add_is_test_column
 
 from typing import cast, Callable, List, Optional
 
@@ -207,7 +208,7 @@ def combine_datasets(ignore_datasets: Optional[List[str]] = None) -> geopandas.G
     dataset = pd.concat(all_datasets)
     # finally, some updates to the labels to make them more homogeneous
     dataset["label"] = dataset.label.str.lower().replace(" ", "_")
-    return dataset
+    return add_is_test_column(dataset)
 
 
 def update_processed_datasets(data_folder: Path = DATAFOLDER_PATH) -> None:
