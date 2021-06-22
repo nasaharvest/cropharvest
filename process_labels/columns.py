@@ -14,9 +14,9 @@ class RequiredColumns(Columns):
     IS_CROP = "is_crop"
     LAT = "lat"
     LON = "lon"
-    DATASET = ("dataset",)
-    COLLECTION_DATE = ("collection_date",)
-    EXPORT_END_DATE = ("export_end_date",)
+    DATASET = "dataset"
+    COLLECTION_DATE = "collection_date"
+    EXPORT_END_DATE = "export_end_date"
     GEOMETRY = "geometry"
     IS_TEST = "is_test"
 
