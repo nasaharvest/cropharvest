@@ -1,6 +1,6 @@
 from .countries import BBox
 
-from typing import Dict, Optional
+from typing import Dict
 
 
 DAYS_PER_TIMESTEP = 30
