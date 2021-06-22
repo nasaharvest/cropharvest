@@ -4,8 +4,9 @@ from datetime import datetime
 import numpy as np
 
 from cropharvest.utils import DATASET_PATH
-from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH
+from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH, NUM_TIMESTEPS
 from .utils import process_crop_non_crop
+from ..columns import RequiredColumns, NullableColumns
 
 
 LABEL_TO_CLASSIFICATION = {
@@ -49,15 +50,19 @@ def load_lem_brazil():
             condition &= df[group[0]] == df[val]
 
         year_df = df[condition]
-        year_df["label"] = df[group[0]]
+        year_df[NullableColumns.LABEL] = df[group[0]]
         # we will say the collection date is the latest possible
         # date in the year_df
         if year == 2020:
-            year_df["collection_date"] = datetime(year, 9, 30)
-            year_df["export_end_date"] = datetime(year + 1, EXPORT_END_MONTH, EXPORT_END_DAY)
+            year_df[RequiredColumns.COLLECTION_DATE] = datetime(year, 9, 30)
+            year_df[RequiredColumns.EXPORT_END_DATE] = datetime(
+                year + 1, EXPORT_END_MONTH, EXPORT_END_DAY
+            )
         elif year == 2019:
-            year_df["collection_date"] = datetime(year + 1, 1, 30)
-            year_df["export_end_date"] = datetime(year + 1, EXPORT_END_MONTH, EXPORT_END_DAY)
+            year_df[RequiredColumns.COLLECTION_DATE] = datetime(year + 1, 1, 30)
+            year_df[RequiredColumns.EXPORT_END_DATE] = datetime(
+                year + 1, EXPORT_END_MONTH, EXPORT_END_DAY
+            )
 
         year_dfs.append(year_df)
 
@@ -66,12 +71,16 @@ def load_lem_brazil():
     x = df.geometry.centroid.x.values
     y = df.geometry.centroid.y.values
 
-    df["lat"] = y
-    df["lon"] = x
+    df[RequiredColumns.LAT] = y
+    df[RequiredColumns.LON] = x
     df = df.reset_index(drop=True)
-    df["index"] = df.index
-    df["classification_label"] = df.apply(lambda x: LABEL_TO_CLASSIFICATION[x.label], axis=1)
-    df["is_crop"] = np.where((df["classification_label"] == "non_crop"), 0, 1)
+    df[RequiredColumns.INDEX] = df.index
+    df[NullableColumns.CLASSIFICATION_LABEL] = df.apply(
+        lambda x: LABEL_TO_CLASSIFICATION[x[NullableColumns.LABEL]], axis=1
+    )
+    df[RequiredColumns.IS_CROP] = np.where(
+        (df[NullableColumns.CLASSIFICATION_LABEL] == "non_crop"), 0, 1
+    )
 
     return df
 
@@ -81,8 +90,8 @@ def load_brazil_noncrop() -> geopandas.GeoDataFrame:
     filepath = DATASET_PATH / "brazil" / "brazil_noncrop"
     df = process_crop_non_crop(filepath)
 
-    df["collection_date"] = datetime(2021, 2, 1)
-    df["export_end_date"] = datetime(2021, EXPORT_END_MONTH, EXPORT_END_DAY)
+    df[RequiredColumns.COLLECTION_DATE] = datetime(2021, 2, 1)
+    df[RequiredColumns.EXPORT_END_DATE] = datetime(2021, EXPORT_END_MONTH, EXPORT_END_DAY)
     df = df.reset_index(drop=True)
-    df["index"] = df.index
+    df[RequiredColumns.INDEX] = df.index
     return df
