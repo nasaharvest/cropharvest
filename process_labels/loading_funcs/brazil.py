@@ -3,9 +3,9 @@ import pandas as pd
 from datetime import datetime
 import numpy as np
 
-from cropharvest.utils import DATASET_PATH
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH, NUM_TIMESTEPS
 from .utils import process_crop_non_crop
+from ..utils import DATASET_PATH
 from ..columns import RequiredColumns, NullableColumns
 
 

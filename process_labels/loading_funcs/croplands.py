@@ -3,8 +3,9 @@ import geopandas
 from datetime import datetime
 from shapely.geometry import Point
 
-from cropharvest.utils import DATASET_PATH
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH
+from ..utils import DATASET_PATH
+from ..columns import RequiredColumns, NullableColumns
 
 
 # Mapping copied from
@@ -45,9 +46,11 @@ def load_croplands():
     df = df[((df.crop_primary == df.crop_secondary) | (df.crop_secondary == 0))]
     df = df[df.crop_primary <= 19]
 
-    df["is_crop"] = (df.land_use_type == 1).astype(int)
-    df["label"] = df.apply(lambda x: CROP_INT_TO_LABEL_CLASSIFICATION[x.crop_primary][0], axis=1)
-    df["classification_label"] = df.apply(
+    df[RequiredColumns.IS_CROP] = (df.land_use_type == 1).astype(int)
+    df[NullableColumns.LABEL] = df.apply(
+        lambda x: CROP_INT_TO_LABEL_CLASSIFICATION[x.crop_primary][0], axis=1
+    )
+    df[NullableColumns.CLASSIFICATION_LABEL] = df.apply(
         lambda x: CROP_INT_TO_LABEL_CLASSIFICATION[x.crop_primary][1], axis=1
     )
 
@@ -57,18 +60,18 @@ def load_croplands():
         else:
             return datetime(row.year + 1, EXPORT_END_MONTH, EXPORT_END_DAY)
 
-    df["export_end_date"] = df.apply(get_export_end_date, axis=1)
+    df[RequiredColumns.EXPORT_END_DATE] = df.apply(get_export_end_date, axis=1)
     # remove any rows which export Feb 2016 to Feb 2015, since those would not
     # be covered by Earth Engine's Sentinel 2 data
-    df = df[df["export_end_date"] >= datetime(2017, 2, 1)]
+    df = df[df[RequiredColumns.EXPORT_END_DATE] >= datetime(2017, 2, 1)]
 
     df = df.reset_index(drop=True)
-    df["index"] = df.index
+    df[RequiredColumns.INDEX] = df.index
 
     # this data has been continually collected since 2012. This date
     # is the date the csv was exported off the croplands website
-    df["collection_date"] = datetime(2021, 4, 29)
-    df["geometry"] = df.apply(lambda x: Point(x.lon, x.lat), axis=1)
-    geodf = geopandas.GeoDataFrame(df, geometry="geometry")
+    df[RequiredColumns.COLLECTION_DATE] = datetime(2021, 4, 29)
+    df[RequiredColumns.GEOMETRY] = df.apply(lambda x: Point(x.lon, x.lat), axis=1)
+    geodf = geopandas.GeoDataFrame(df, geometry=RequiredColumns.GEOMETRY)
 
     return geodf

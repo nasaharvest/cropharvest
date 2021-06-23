@@ -5,7 +5,8 @@ from datetime import datetime
 from shapely.geometry import Polygon
 
 from .utils import export_date_from_row
-from cropharvest.utils import DATASET_PATH
+from ..columns import RequiredColumns, NullableColumns
+from ..utils import DATASET_PATH
 
 from typing import Tuple, List
 
@@ -62,10 +63,10 @@ def load_tanzania():
     # the planting date
     df = geopandas.GeoDataFrame(
         data={
-            "label": labels,
-            "planting_date": planting_date,
-            "harvest_date": harvest_date,
-            "collection_date": planting_date,
+            NullableColumns.LABEL: labels,
+            NullableColumns.PLANTING_DATE: planting_date,
+            NullableColumns.HARVEST_DATE: harvest_date,
+            RequiredColumns.COLLECTION_DATE: planting_date,
         },
         geometry=polygons,
         crs="EPSG:32736",
@@ -73,12 +74,14 @@ def load_tanzania():
     df = df.to_crs("EPSG:4326")
 
     # isolate the latitude and longitude
-    df["lon"] = df.geometry.centroid.x
-    df["lat"] = df.geometry.centroid.y
+    df[RequiredColumns.LON] = df.geometry.centroid.x
+    df[RequiredColumns.LAT] = df.geometry.centroid.y
 
-    df["export_end_date"] = df.apply(export_date_from_row, axis=1)
-    df["classification_label"] = df.apply(lambda x: LABEL_TO_CLASSIFICATION[x.label], axis=1)
-    df["is_crop"] = 1
+    df[RequiredColumns.EXPORT_END_DATE] = df.apply(export_date_from_row, axis=1)
+    df[NullableColumns.CLASSIFICATION_LABEL] = df.apply(
+        lambda x: LABEL_TO_CLASSIFICATION[x[NullableColumns.LABEL]], axis=1
+    )
+    df[RequiredColumns.IS_CROP] = 1
     df = df.reset_index(drop=True)
-    df["index"] = df.index
+    df[RequiredColumns.INDEX] = df.index
     return df

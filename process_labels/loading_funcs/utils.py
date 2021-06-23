@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH, NUM_TIMESTEPS, DAYS_PER_TIMESTEP
+from ..columns import RequiredColumns
 
 from typing import Optional, Dict
 
@@ -29,14 +30,22 @@ def process_crop_non_crop(filepath: Path, org_crs: Optional[str] = None) -> geop
 
     is_crop = 0 if "non" in filepath.name.lower() else 1
 
-    df["is_crop"] = is_crop
+    df[RequiredColumns.IS_CROP] = is_crop
 
-    df["lon"] = df.geometry.centroid.x
-    df["lat"] = df.geometry.centroid.y
+    df[RequiredColumns.LON] = df.geometry.centroid.x
+    df[RequiredColumns.LAT] = df.geometry.centroid.y
 
     df["org_file"] = filepath.name
 
-    return df[["is_crop", "geometry", "lat", "lon", "org_file"]]
+    return df[
+        [
+            RequiredColumns.IS_CROP,
+            RequiredColumns.GEOMETRY,
+            RequiredColumns.LAT,
+            RequiredColumns.LON,
+            "org_file",
+        ]
+    ]
 
 
 def _date_overlap(start1: datetime, end1: datetime, start2: datetime, end2: datetime) -> int:

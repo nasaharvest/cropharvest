@@ -4,8 +4,9 @@ import numpy as np
 from datetime import datetime
 
 from .utils import LATLON_CRS
-from cropharvest.utils import DATASET_PATH
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH
+from ..columns import RequiredColumns, NullableColumns
+from ..utils import DATASET_PATH
 
 from typing import Dict, Tuple
 
@@ -110,18 +111,20 @@ def _process_france_2019_rpg(df: geopandas.GeoDataFrame) -> geopandas.GeoDataFra
         code_df = df[df.CODE_CULTU == unique_code][:MAX_ROWS_PER_LABEL]
         if len(code_df) > 0:
             label, classification_label = mapper[unique_code]
-            code_df["label"] = label
-            code_df["classification_label"] = classification_label
+            code_df[NullableColumns.LABEL] = label
+            code_df[NullableColumns.CLASSIFICATION_LABEL] = classification_label
             all_dfs.append(code_df)
 
     df = pd.concat(all_dfs)
-    df["lon"] = df.geometry.centroid.x.values
-    df["lat"] = df.geometry.centroid.y.values
-    df["collection_date"] = datetime(2019, 1, 1)
-    df["export_end_date"] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
-    df["is_crop"] = np.where((df["classification_label"] == "non_crop"), 0, 1)
+    df[RequiredColumns.LON] = df.geometry.centroid.x.values
+    df[RequiredColumns.LAT] = df.geometry.centroid.y.values
+    df[RequiredColumns.COLLECTION_DATE] = datetime(2019, 1, 1)
+    df[RequiredColumns.EXPORT_END_DATE] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
+    df[RequiredColumns.IS_CROP] = np.where(
+        (df[NullableColumns.CLASSIFICATION_LABEL] == "non_crop"), 0, 1
+    )
     df = df.reset_index(drop=True)
-    df["index"] = df.index
+    df[RequiredColumns.INDEX] = df.index
     return df
 
 

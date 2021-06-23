@@ -7,10 +7,11 @@ from datetime import datetime
 
 from typing import List, Tuple, Sequence, Optional
 
-from cropharvest.utils import DATASET_PATH
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
 
 from .utils import process_crop_non_crop
+from ..columns import RequiredColumns
+from ..utils import DATASET_PATH
 
 
 def _process_eval_shapefile(filepaths: Sequence[Tuple[Path, str, bool]]) -> geopandas.GeoDataFrame:
@@ -28,7 +29,7 @@ def _process_eval_shapefile(filepaths: Sequence[Tuple[Path, str, bool]]) -> geop
         df = df.rename(columns={label: clean_label})
         labels.append(clean_label)
 
-        lat_label, lon_label = "lat", "lon"
+        lat_label, lon_label = RequiredColumns.LAT, RequiredColumns.LON
         if idx > 0:
             lat_label, lon_label = f"{lat_label}_{idx}", f"{lon_label}_{idx}"
 
@@ -62,15 +63,22 @@ def _process_eval_shapefile(filepaths: Sequence[Tuple[Path, str, bool]]) -> geop
     df.loc[:, "sum"] = df[labels].sum(axis=1)
 
     assert len(filepaths) == 4, "The logic in process_eval_shapefile assumes 4 labellers"
-    df.loc[:, "is_crop"] = 0
+    df.loc[:, RequiredColumns.IS_CROP] = 0
     # anywhere where two labellers agreed is crop, we will label as crop
     # this means that rows with 0 or 1 labeller agreeing is crop will be left as non crop
     # so we are always taking the majority
-    df.loc[df["sum"] >= 3, "is_crop"] = 1
+    df.loc[df["sum"] >= 3, RequiredColumns.IS_CROP] = 1
 
     # remove ties
     df = df[df["sum"] != 2]
-    return df[["is_crop", "lat", "lon", "geometry"]]
+    return df[
+        [
+            RequiredColumns.IS_CROP,
+            RequiredColumns.LAT,
+            RequiredColumns.LON,
+            RequiredColumns.GEOMETRY,
+        ]
+    ]
 
 
 def load_togo() -> geopandas.GeoDataFrame:
@@ -85,9 +93,9 @@ def load_togo() -> geopandas.GeoDataFrame:
 
     df = pd.concat(output_dfs)
     df = df.reset_index(drop=True)
-    df["index"] = df.index
-    df["collection_date"] = datetime(2020, 5, 9)
-    df["export_end_date"] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
+    df[RequiredColumns.INDEX] = df.index
+    df[RequiredColumns.COLLECTION_DATE] = datetime(2020, 5, 9)
+    df[RequiredColumns.EXPORT_END_DATE] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
 
     return df
 
@@ -106,8 +114,8 @@ def load_togo_eval() -> geopandas.GeoDataFrame:
     eval_df = _process_eval_shapefile(evaluation_shapefiles)
 
     eval_df = eval_df.reset_index(drop=True)
-    eval_df["index"] = eval_df.index
-    eval_df["collection_date"] = datetime(2020, 5, 19)
-    eval_df["export_end_date"] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
+    eval_df[RequiredColumns.INDEX] = eval_df.index
+    eval_df[RequiredColumns.COLLECTION_DATE] = datetime(2020, 5, 19)
+    eval_df[RequiredColumns.EXPORT_END_DATE] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
 
     return eval_df

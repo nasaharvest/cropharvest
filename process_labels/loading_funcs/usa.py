@@ -3,11 +3,11 @@ import numpy as np
 from datetime import datetime
 from tqdm import tqdm
 
-from cropharvest.utils import DATASET_PATH
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH
 
 from .utils import LATLON_CRS
-
+from ..columns import NullableColumns, RequiredColumns
+from ..utils import DATASET_PATH
 
 from typing import Set
 
@@ -129,31 +129,33 @@ def load_kern_2020():
 
     x = df.geometry.centroid.x.values
     y = df.geometry.centroid.y.values
-    df["lat"] = y
-    df["lon"] = x
+    df[RequiredColumns.LAT] = y
+    df[RequiredColumns.LON] = x
 
-    df = df.rename(columns={"COMM": "label"})
+    df = df.rename(columns={"COMM": NullableColumns.LABEL})
 
     def label_to_classification_label(row: geopandas.GeoSeries) -> str:
         if row.SYMBOL == "VEGETABLE":
-            if row.label in KERN_NOT_VEGETABLE_CLASSIFICATION.keys():
-                return KERN_NOT_VEGETABLE_CLASSIFICATION[row.label]
+            if row[NullableColumns.LABEL] in KERN_NOT_VEGETABLE_CLASSIFICATION.keys():
+                return KERN_NOT_VEGETABLE_CLASSIFICATION[row[NullableColumns.LABEL]]
             return KERN_LABEL_TO_CLASSIFICATION["VEGETABLE"]
         elif row.SYMBOL == "FRUIT_TREE":
-            return KERN_FRUIT_TREE_TO_CLASSIFICATION[row.label]
+            return KERN_FRUIT_TREE_TO_CLASSIFICATION[row[NullableColumns.LABEL]]
         elif row.SYMBOL == "FIELD":
-            return KERN_FIELD_TO_CLASSIFICATION[row.label]
+            return KERN_FIELD_TO_CLASSIFICATION[NullableColumns.LABEL]
         else:
             return KERN_LABEL_TO_CLASSIFICATION[row.SYMBOL]
 
-    df["classification_label"] = df.apply(label_to_classification_label, axis=1)
-    df["is_crop"] = np.where((df["classification_label"] == "non_crop"), 0, 1)
+    df[NullableColumns.CLASSIFICATION_LABEL] = df.apply(label_to_classification_label, axis=1)
+    df[RequiredColumns.IS_CROP] = np.where(
+        (df[NullableColumns.CLASSIFICATION_LABEL] == "non_crop"), 0, 1
+    )
 
     # collection date reported on the website
-    df["collection_date"] = datetime(2020, 6, 10)
-    df["export_end_date"] = datetime(2021, EXPORT_END_MONTH, EXPORT_END_DAY)
+    df[RequiredColumns.COLLECTION_DATE] = datetime(2020, 6, 10)
+    df[RequiredColumns.EXPORT_END_DATE] = datetime(2021, EXPORT_END_MONTH, EXPORT_END_DAY)
 
     df = df.reset_index(drop=True)
-    df["index"] = df.index
+    df[RequiredColumns.INDEX] = df.index
 
     return df
