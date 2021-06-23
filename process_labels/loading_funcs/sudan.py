@@ -4,10 +4,11 @@ from datetime import datetime
 
 from typing import List
 
-from cropharvest.utils import DATASET_PATH
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
 
 from .utils import process_crop_non_crop
+from ..utils import DATASET_PATH
+from ..columns import RequiredColumns
 
 
 def load_sudan() -> geopandas.GeoDataFrame:
@@ -21,9 +22,9 @@ def load_sudan() -> geopandas.GeoDataFrame:
         output_dfs.append(process_crop_non_crop(filepath))
 
     df = pd.concat(output_dfs)
-    df["collection_date"] = datetime(2020, 10, 22)
+    df[RequiredColumns.COLLECTION_DATE] = datetime(2020, 10, 22)
     df = df.reset_index(drop=True)
-    df["index"] = df.index
-    df["export_end_date"] = datetime(2021, EXPORT_END_MONTH, EXPORT_END_DAY)
+    df[RequiredColumns.INDEX] = df.index
+    df[RequiredColumns.EXPORT_END_DATE] = datetime(2021, EXPORT_END_MONTH, EXPORT_END_DAY)
 
     return df

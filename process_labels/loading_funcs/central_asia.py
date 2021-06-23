@@ -2,8 +2,10 @@ import geopandas
 import pandas as pd
 from datetime import datetime
 
-from cropharvest.utils import DATASET_PATH
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
+
+from ..utils import DATASET_PATH
+from ..columns import RequiredColumns, NullableColumns
 
 
 LABEL_TO_CLASSIFICATION = {
@@ -39,22 +41,24 @@ def load_central_asia():
     df = df[~df.label_1.str.contains("-")]
     # remove unclear seasons
     df = df[~df.label_2.isin(["unclear", "fallow"])]
-    df = df.rename(columns={"label_1": "label"})
+    df = df.rename(columns={"label_1": NullableColumns.LABEL})
     df["harvest_date"] = df.apply(make_harvest_date, axis=1)
 
-    df["lon"] = df.geometry.centroid.x
-    df["lat"] = df.geometry.centroid.y
+    df[RequiredColumns.LON] = df.geometry.centroid.x
+    df[RequiredColumns.LAT] = df.geometry.centroid.y
 
-    df["is_crop"] = 1
-    df["collection_date"] = pd.to_datetime(df.date).dt.to_pydatetime()
+    df[RequiredColumns.IS_CROP] = 1
+    df[RequiredColumns.COLLECTION_DATE] = pd.to_datetime(df.date).dt.to_pydatetime()
 
     # again, motivated by Figure 4 from
     # https://www.nature.com/articles/s41597-020-00591-2.pdf
-    df["export_end_date"] = df.apply(
+    df[RequiredColumns.EXPORT_END_DATE] = df.apply(
         lambda x: datetime(x.collection_date.year + 1, EXPORT_END_MONTH, EXPORT_END_DAY), axis=1
     )
-    df["classification_label"] = df.apply(lambda x: LABEL_TO_CLASSIFICATION[x.label], axis=1)
+    df[NullableColumns.CLASSIFICATION_LABEL] = df.apply(
+        lambda x: LABEL_TO_CLASSIFICATION[x[NullableColumns.LABEL]], axis=1
+    )
 
     df = df.reset_index(drop=True)
-    df["index"] = df.index
+    df[RequiredColumns.INDEX] = df.index
     return df

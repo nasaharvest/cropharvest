@@ -4,8 +4,10 @@ import numpy as np
 from datetime import datetime
 
 from .utils import process_crop_non_crop, export_date_from_row, LATLON_CRS
-from cropharvest.utils import DATASET_PATH
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
+
+from ..columns import RequiredColumns, NullableColumns
+from ..utils import DATASET_PATH
 
 from typing import List
 
@@ -42,20 +44,30 @@ def load_kenya():
         )
         df = df.rename(
             columns={
-                "Latitude": "lat",
-                "Longitude": "lon",
-                "Planting Date": "planting_date",
-                "Estimated Harvest Date": "harvest_date",
-                "Crop1": "label",
-                "Survey Date": "collection_date",
+                "Latitude": RequiredColumns.LAT,
+                "Longitude": RequiredColumns.LON,
+                "Planting Date": NullableColumns.PLANTING_DATE,
+                "Estimated Harvest Date": NullableColumns.HARVEST_DATE,
+                "Crop1": NullableColumns.LABEL,
+                "Survey Date": RequiredColumns.COLLECTION_DATE,
             }
         )
-        df["planting_date"] = pd.to_datetime(df["planting_date"]).dt.to_pydatetime()
-        df["harvest_date"] = pd.to_datetime(df["harvest_date"]).dt.to_pydatetime()
-        df["collection_date"] = pd.to_datetime(df["collection_date"]).dt.to_pydatetime()
-        df["export_end_date"] = df.apply(export_date_from_row, axis=1)
-        df["classification_label"] = df.apply(lambda x: LABEL_TO_CLASSIFICATION[x.label], axis=1)
-        df["is_crop"] = np.where((df["classification_label"] == "non_crop"), 0, 1)
+        df[NullableColumns.PLANTING_DATE] = pd.to_datetime(
+            df[NullableColumns.PLANTING_DATE]
+        ).dt.to_pydatetime()
+        df[NullableColumns.HARVEST_DATE] = pd.to_datetime(
+            df[NullableColumns.HARVEST_DATE]
+        ).dt.to_pydatetime()
+        df[RequiredColumns.COLLECTION_DATE] = pd.to_datetime(
+            df[RequiredColumns.COLLECTION_DATE]
+        ).dt.to_pydatetime()
+        df[RequiredColumns.EXPORT_END_DATE] = df.apply(export_date_from_row, axis=1)
+        df[NullableColumns.CLASSIFICATION_LABEL] = df.apply(
+            lambda x: LABEL_TO_CLASSIFICATION[x.label], axis=1
+        )
+        df[RequiredColumns.IS_CROP] = np.where(
+            (df[NullableColumns.CLASSIFICATION_LABEL] == "non_crop"), 0, 1
+        )
         df = df.to_crs(LATLON_CRS)
         dfs.append(df)
 
@@ -84,8 +96,8 @@ def load_kenya_non_crop():
 
     df = pd.concat(dfs)
     df = df.reset_index(drop=True)
-    df["index"] = df.index
-    df["collection_date"] = datetime(2020, 4, 16)
-    df["export_end_date"] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
+    df[RequiredColumns.INDEX] = df.index
+    df[RequiredColumns.COLLECTION_DATE] = datetime(2020, 4, 16)
+    df[RequiredColumns.EXPORT_END_DATE] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
 
     return df
