@@ -1,7 +1,10 @@
 import geopandas
 import pandas as pd
 from pathlib import Path
+
 from . import loading_funcs
+from .utils import add_is_test_column
+from .columns import NullableColumns, RequiredColumns
 
 from cropharvest.utils import DATAFOLDER_PATH
 from cropharvest.config import LABELS_FILENAME
@@ -165,19 +168,6 @@ DATASETS = {
 }
 
 
-NON_NULLABLE_COLUMNS = [
-    "index",
-    "is_crop",
-    "lat",
-    "lon",
-    "dataset",
-    "collection_date",
-    "export_end_date",
-    "geometry",
-]
-NULLABLE_COLUMNS = ["harvest_date", "planting_date", "label", "classification_label"]
-
-
 def load(dataset_name: str) -> geopandas.GeoDataFrame:
     return cast(Callable, DATASETS[dataset_name]["function"])()
 
@@ -192,7 +182,7 @@ def list_datasets() -> List[str]:
 
 def combine_datasets(ignore_datasets: Optional[List[str]] = None) -> geopandas.GeoDataFrame:
     all_datasets: List[geopandas.GeoDataFrame] = []
-    all_columns = NON_NULLABLE_COLUMNS + NULLABLE_COLUMNS
+    all_columns = NullableColumns.tolist() + RequiredColumns.tolist()
 
     for dataset_name in list_datasets():
         if (ignore_datasets is not None) and (dataset_name in ignore_datasets):
@@ -200,14 +190,14 @@ def combine_datasets(ignore_datasets: Optional[List[str]] = None) -> geopandas.G
         dataset = load(dataset_name)
         dataset = dataset.assign(dataset=dataset_name)
 
-        for column in NULLABLE_COLUMNS:
+        for column in NullableColumns.tolist():
             if column not in dataset:
                 dataset = dataset.assign(**{column: None if "date" not in column else pd.NaT})
         all_datasets.append(dataset[all_columns])
     dataset = pd.concat(all_datasets)
     # finally, some updates to the labels to make them more homogeneous
     dataset["label"] = dataset.label.str.lower().replace(" ", "_")
-    return dataset
+    return add_is_test_column(dataset)
 
 
 def update_processed_datasets(data_folder: Path = DATAFOLDER_PATH) -> None:

@@ -1,6 +1,6 @@
 from .countries import BBox
 
-from typing import Dict, Optional
+from typing import Dict
 
 
 DAYS_PER_TIMESTEP = 30
@@ -20,10 +20,7 @@ LABELS_FILENAME = "labels.geojson"
 
 
 # test regions should have the naming schema
-# {country}_{region}_{test_crop}_{export_end_year}_{identifer}
-# Togo is not included here, because we
-# explicitly remove all Togo datapoints when training
-# MAML (as opposed to a subset of the country)
+# {country}_{test_crop}_{export_end_year}_{identifer}
 TEST_REGIONS: Dict[str, BBox] = {
     "Kenya_maize_2020_0": BBox(
         min_lat=0.47190, max_lat=0.47749, min_lon=34.22847, max_lon=34.23266
@@ -37,11 +34,9 @@ TEST_REGIONS: Dict[str, BBox] = {
     "Brazil_coffee_2021_0": BBox(
         min_lat=-12.1995, max_lat=-12.1226, min_lon=-45.8238, max_lon=-45.7579
     ),
+    "United States of America_almond_2021_0": BBox(
+        min_lon=-119.35901, max_lon=-118.7524, min_lat=34.9329, max_lat=35.34763
+    ),
 }
 
-# test tasks, for which we won't have wall to wall tests but will instead use
-# a randomly sampled evaluation set, or a train / test split.
-# The dict is {country: {optional crop}}. If no optional crop is passed,
-# the entire country is ignored
-TEST_RATIO = 0.25
-TEST_TASKS: Dict[str, Optional[str]] = {"Togo": None, "United States of America": "almond"}
+TEST_DATASETS = ["togo-eval"]

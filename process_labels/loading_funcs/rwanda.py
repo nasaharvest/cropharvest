@@ -7,8 +7,10 @@ from datetime import datetime
 from shapely import wkt
 from shapely.geometry import Polygon
 
-from cropharvest.utils import DATASET_PATH, distance_between_latlons
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
+
+from ..columns import NullableColumns, RequiredColumns
+from ..utils import DATASET_PATH, distance_between_latlons
 
 from typing import Tuple, List, Set
 
@@ -66,39 +68,48 @@ def load_rwanda():
         polygons.append(polygon)
         labels.append(label)
 
-    df = geopandas.GeoDataFrame(data={"label": labels}, geometry=polygons)
+    df = geopandas.GeoDataFrame(data={NullableColumns.LABEL: labels}, geometry=polygons)
     # isolate the latitude and longitude
-    df["lon"] = df.geometry.centroid.x
-    df["lat"] = df.geometry.centroid.y
+    df[RequiredColumns.LON] = df.geometry.centroid.x
+    df[RequiredColumns.LAT] = df.geometry.centroid.y
 
     # remove unknown labels, and "other_known"
-    df = df[df.label != "unknown"]
-    df = df[df.label != "other_known"]
+    df = df[df[NullableColumns.LABEL] != "unknown"]
+    df = df[df[NullableColumns.LABEL] != "other_known"]
 
-    unique_labels = df.label.unique()
+    unique_labels = df[NullableColumns.LABEL].unique()
 
     # minimum distance between points of the same labels
     # is set to 100m
     min_distance_in_km = 0.1
     idx_to_remove: Set[int] = set()
     for label in unique_labels:
-        label_df = df[df.label == label]
+        label_df = df[df[NullableColumns.LABEL] == label]
         for idx, row in label_df.iterrows():
             if idx not in idx_to_remove:
                 for idx_2, row_2 in label_df.loc[idx + 1 :].iterrows():
                     if idx_2 not in idx_to_remove:
-                        distance = distance_between_latlons(row.lat, row.lon, row_2.lat, row_2.lon)
+                        distance = distance_between_latlons(
+                            row[RequiredColumns.LAT],
+                            row[RequiredColumns.LON],
+                            row_2[RequiredColumns.LAT],
+                            row_2[RequiredColumns.LON],
+                        )
                         if distance <= min_distance_in_km:
                             idx_to_remove.add(idx_2)
     df = df.drop(list(idx_to_remove))
 
     # https://radiant-mlhub.s3-us-west-2.amazonaws.com/rti-rwanda-crop-type/documentation.pdf
-    df["collection_date"] = datetime(2019, 2, 28)
-    df["export_end_date"] = datetime(2019, EXPORT_END_MONTH, EXPORT_END_DAY)
-    df["classification_label"] = df.apply(lambda x: LABEL_TO_CLASSIFICATION[x.label], axis=1)
-    df["is_crop"] = np.where((df["classification_label"] == "non_crop"), 0, 1)
+    df[RequiredColumns.COLLECTION_DATE] = datetime(2019, 2, 28)
+    df[RequiredColumns.EXPORT_END_DATE] = datetime(2019, EXPORT_END_MONTH, EXPORT_END_DAY)
+    df[NullableColumns.CLASSIFICATION_LABEL] = df.apply(
+        lambda x: LABEL_TO_CLASSIFICATION[x[NullableColumns.LABEL]], axis=1
+    )
+    df[RequiredColumns.IS_CROP] = np.where(
+        (df[NullableColumns.CLASSIFICATION_LABEL] == "non_crop"), 0, 1
+    )
     df = df.reset_index(drop=True)
-    df["index"] = df.index
+    df[RequiredColumns.INDEX] = df.index
     return df
 
 
@@ -109,7 +120,7 @@ def load_rwanda_ceo():
     gdfs: List[geopandas.GeoDataFrame] = []
     for filepath in ceo_files:
         single_df = pd.read_csv(filepath)
-        single_df["geometry"] = single_df["sample_geom"].apply(wkt.loads)
+        single_df[RequiredColumns.GEOMETRY] = single_df["sample_geom"].apply(wkt.loads)
         single_df["is_crop_mean"] = single_df.apply(
             lambda x: x["Crop/ or not"] == "Cropland", axis=1
         )
@@ -117,12 +128,17 @@ def load_rwanda_ceo():
 
     df = pd.concat(gdfs)
     df = df.groupby("plot_id").agg(
-        {"lon": "first", "lat": "first", "geometry": "first", "is_crop_mean": "mean"}
+        {
+            RequiredColumns.LON: "first",
+            RequiredColumns.LAT: "first",
+            RequiredColumns.GEOMETRY: "first",
+            "is_crop_mean": "mean",
+        }
     )
 
-    df["collection_date"] = datetime(2021, 4, 20)
-    df["export_end_date"] = datetime(2021, EXPORT_END_MONTH, EXPORT_END_DAY)
-    df["is_crop"] = np.where(df["is_crop_mean"] > 0.5, 1, 0)
+    df[RequiredColumns.COLLECTION_DATE] = datetime(2021, 4, 20)
+    df[RequiredColumns.EXPORT_END_DATE] = datetime(2021, EXPORT_END_MONTH, EXPORT_END_DAY)
+    df[RequiredColumns.IS_CROP] = np.where(df["is_crop_mean"] > 0.5, 1, 0)
     df = df.reset_index(drop=True)
-    df["index"] = df.index
+    df[RequiredColumns.INDEX] = df.index
     return df
