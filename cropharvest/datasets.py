@@ -10,7 +10,7 @@ class BaseDataset:
     def __init__(self, root, download: bool, download_url: str, filename: str):
         self.root = Path(root)
         if download:
-            download_from_url(download_url, str(root / filename))
+            download_from_url(download_url, str(self.root / filename))
 
     def __getitem__(self, index: int):
         raise NotImplementedError
