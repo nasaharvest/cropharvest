@@ -37,7 +37,6 @@ class CropHarvestLabels(BaseDataset):
 
 
 class CropHarvestTifs(BaseDataset):
-
     def __init__(self, root, download=False):
         super().__init__(root, download, download_url="", filename="")
 
