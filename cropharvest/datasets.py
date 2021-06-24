@@ -2,7 +2,6 @@ from pathlib import Path
 
 import geopandas
 
-from cropharvest.engineer import DataInstance
 from cropharvest.utils import download_from_url
 from cropharvest.config import LABELS_FILENAME
 
@@ -56,7 +55,4 @@ class CropHarvest(BaseDataset):
     @classmethod
     def from_labels_and_tifs(cls, labels: CropHarvestLabels, tifs: CropHarvestTifs):
         "Creates CropHarvest dataset from CropHarvestLabels and CropHarvestTifs"
-        pass
-
-    def __getitem__(self, index: int) -> DataInstance:
         pass
