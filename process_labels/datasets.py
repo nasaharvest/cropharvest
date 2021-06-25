@@ -203,11 +203,13 @@ def combine_datasets(ignore_datasets: Optional[List[str]] = None) -> geopandas.G
     return add_is_test_column(dataset)
 
 
-def update_processed_datasets(data_folder: Path = DATAFOLDER_PATH) -> None:
+def update_processed_datasets(
+    data_folder: Path = DATAFOLDER_PATH, overwrite: bool = False
+) -> None:
 
     original_dataset: Optional[geopandas.GeoDataFrame] = None
     datasets_to_ignore = None
-    if (data_folder / LABELS_FILENAME).exists():
+    if (not overwrite) and (data_folder / LABELS_FILENAME).exists():
         original_dataset = geopandas.read_file(data_folder / LABELS_FILENAME)
         datasets_to_ignore = original_dataset[RequiredColumns.DATASET].unique().tolist()
     combined_datasets = combine_datasets(ignore_datasets=datasets_to_ignore)
