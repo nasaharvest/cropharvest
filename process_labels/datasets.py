@@ -184,6 +184,9 @@ def combine_datasets(ignore_datasets: Optional[List[str]] = None) -> geopandas.G
     all_datasets: List[geopandas.GeoDataFrame] = []
     all_columns = NullableColumns.tolist() + RequiredColumns.tolist()
 
+    # the IS_TEST column is the last one to get added, on the combined data
+    all_columns.remove(RequiredColumns.IS_TEST)
+
     for dataset_name in list_datasets():
         if (ignore_datasets is not None) and (dataset_name in ignore_datasets):
             continue
@@ -196,11 +199,26 @@ def combine_datasets(ignore_datasets: Optional[List[str]] = None) -> geopandas.G
         all_datasets.append(dataset[all_columns])
     dataset = pd.concat(all_datasets)
     # finally, some updates to the labels to make them more homogeneous
-    dataset["label"] = dataset.label.str.lower().replace(" ", "_")
+    dataset[NullableColumns.LABEL] = dataset.label.str.lower().replace(" ", "_")
     return add_is_test_column(dataset)
 
 
 def update_processed_datasets(data_folder: Path = DATAFOLDER_PATH) -> None:
 
-    combined_datasets = combine_datasets()
+    original_dataset: Optional[geopandas.GeoDataFrame] = None
+    datasets_to_ignore = None
+    if (data_folder / LABELS_FILENAME).exists():
+        original_dataset = geopandas.read_file(data_folder / LABELS_FILENAME)
+        datasets_to_ignore = original_dataset[RequiredColumns.DATASET].unique().tolist()
+    combined_datasets = combine_datasets(ignore_datasets=datasets_to_ignore)
+    if original_dataset is not None:
+
+        # we save and re-read the file to handle differences in the datetime formats
+        # between the original_dataset (timestamps are strings when written) and
+        # combined_dataset (timestamps are pd.Datetetime objects until written)
+        tmp_file = data_folder / "tmp.geojson"
+        combined_datasets.to_file(tmp_file, driver="GeoJSON")
+        combined_datasets = geopandas.read_file(tmp_file)
+        tmp_file.unlink()
+        combined_datasets = pd.concat([original_dataset, combined_datasets])
     combined_datasets.to_file(data_folder / LABELS_FILENAME, driver="GeoJSON")
