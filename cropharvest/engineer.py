@@ -9,7 +9,7 @@ import rasterio
 from rasterio import mask
 from tqdm import tqdm
 import warnings
-import pickle
+import h5py
 
 from cropharvest.eo import STATIC_BANDS, DYNAMIC_BANDS
 from .config import (
@@ -20,7 +20,7 @@ from .config import (
     NUM_TIMESTEPS,
     TEST_REGIONS,
 )
-from .utils import DATAFOLDER_PATH
+from .utils import DATAFOLDER_PATH, load_normalizing_dict
 
 from typing import cast, Optional, Dict, Union, Tuple, List, Sequence
 
@@ -41,6 +41,15 @@ class DataInstance:
     is_crop: int
     label: Optional[str] = None
 
+    @property
+    def attrs(self) -> Dict:
+        attrs: Dict = {}
+        for key, _ in self.__annotations__.items():
+            val = self.__getattribute__(key)
+            if (key != "array") and (val is not None):
+                attrs[key] = val
+        return attrs
+
 
 MISSING_DATA = -1
 
@@ -51,6 +60,18 @@ class TestInstance:
     y: np.ndarray  # 1 is positive, 0 is negative and -1 (MISSING_DATA) is no label
     lats: np.ndarray
     lons: np.ndarray
+
+    @property
+    def datasets(self) -> Dict[str, np.ndarray]:
+        ds: Dict = {}
+        for key, _ in self.__annotations__.items():
+            val = self.__getattribute__(key)
+            ds[key] = val
+        return ds
+
+    @classmethod
+    def load_from_h5(cls, h5: h5py.File):
+        return cls(x=h5.get("x"), y=h5.get("y"), lats=h5.get("lats"), lons=h5.get("lons"))
 
 
 class Engineer:
@@ -271,10 +292,11 @@ class Engineer:
         elif num_dims == 3:
             return array[:, :, indices_to_keep]
 
-    def process_test_file(self, path_to_file: Path) -> Tuple[str, TestInstance]:
+    def process_test_file(self, path_to_file: Path, id_in_region: int) -> Tuple[str, TestInstance]:
         id_components = path_to_file.name.split("_")
         crop, end_year = id_components[1], id_components[2]
         identifier = "_".join(id_components[:4])
+        identifier_plus_idx = f"{identifier}_{id_in_region}"
         start_date = datetime(int(end_year), EXPORT_END_MONTH, EXPORT_END_DAY) - timedelta(
             days=NUM_TIMESTEPS * DAYS_PER_TIMESTEP
         )
@@ -320,7 +342,7 @@ class Engineer:
         y[missing] = MISSING_DATA
         assert len(y) == x_np.shape[0]
 
-        return identifier, TestInstance(x=x_np, y=y, lats=flat_lat, lons=flat_lon)
+        return identifier_plus_idx, TestInstance(x=x_np, y=y, lats=flat_lat, lons=flat_lon)
 
     def process_single_file(self, path_to_file: Path, row: pd.Series) -> Optional[DataInstance]:
         start_date = row.export_end_date - timedelta(days=NUM_TIMESTEPS * DAYS_PER_TIMESTEP)
@@ -349,31 +371,32 @@ class Engineer:
             dataset=row.dataset,
         )
 
-    def pickle_test_instances(
+    def create_h5_test_instances(
         self,
     ) -> None:
-        test_savedir = self.savedir / "test_arrays"
-        test_savedir.mkdir(exist_ok=True)
+        for region_identifier, _ in TEST_REGIONS.items():
+            all_region_files = list(self.test_eo_files.glob(f"{region_identifier}*.tif"))
+            if len(all_region_files) == 0:
+                print(f"No downloaded files for {region_identifier}")
+                continue
+            for region_idx, filepath in enumerate(all_region_files):
+                instance_name, test_instance = self.process_test_file(filepath, region_idx)
+                if test_instance is not None:
+                    hf = h5py.File(self.test_savedir / f"{instance_name}.h5", "w")
 
-        for filepath in tqdm(list(self.test_eo_files.glob("*.tif"))):
-            instance_name, test_instance = self.process_test_file(filepath)
+                    for key, val in test_instance.datasets.items():
+                        hf.create_dataset(key, data=val)
+                    hf.close()
 
-            with (self.test_savedir / f"{instance_name}.pkl").open("wb") as f:
-                pickle.dump(test_instance, f)
-
-    def create_pickled_dataset(
-        self,
-        checkpoint: bool = True,
-    ) -> None:
+    def create_h5_dataset(self, checkpoint: bool = True) -> None:
         arrays_dir = self.savedir / "arrays"
         arrays_dir.mkdir(exist_ok=True)
 
         old_normalizing_dict: Optional[Tuple[int, Optional[Dict[str, np.ndarray]]]] = None
         if checkpoint:
             # check for an already existing normalizing dict
-            if (self.savedir / "normalizing_dict.pkl").exists():
-                with (self.savedir / "normalizing_dict.pkl").open("rb") as f:
-                    old_nd = pickle.load(f)
+            if (self.savedir / "normalizing_dict.h5").exists():
+                old_nd = load_normalizing_dict(self.savedir / "normalizing_dict.hf")
                 num_existing_files = len(list(arrays_dir.glob("*")))
                 old_normalizing_dict = (num_existing_files, old_nd)
 
@@ -381,7 +404,7 @@ class Engineer:
         num_new_files: int = 0
         for file_path in tqdm(list(self.eo_files.glob("*.tif"))):
             file_index, dataset = self.process_filename(file_path.name)
-            file_name = f"{file_index}_{dataset}.pkl"
+            file_name = f"{file_index}_{dataset}.h5"
             if (checkpoint) & ((arrays_dir / file_name).exists()):
                 # we check if the file has already been written
                 continue
@@ -390,13 +413,16 @@ class Engineer:
                 ((self.labels.dataset == dataset) & (self.labels["index"] == file_index))
             ].iloc[0]
 
-            instance = self.process_single_file(
-                file_path,
-                row=file_row,
-            )
+            instance = self.process_single_file(file_path, row=file_row)
             if instance is not None:
-                with (arrays_dir / file_name).open("wb") as f:
-                    pickle.dump(instance, f)
+
+                hf = h5py.File(arrays_dir / file_name, "w")
+                hf.create_dataset("array", data=instance.array)
+
+                for key, val in instance.attrs.items():
+                    hf.attrs[key] = val
+                hf.close()
+
                 num_new_files += 1
             else:
                 skipped_files += 1
@@ -409,8 +435,10 @@ class Engineer:
             normalizing_dicts = [old_normalizing_dict, (num_new_files, normalizing_dict)]
             normalizing_dict = self.adjust_normalizing_dict(normalizing_dicts)
         if normalizing_dict is not None:
-            save_path = self.savedir / "normalizing_dict.pkl"
-            with save_path.open("wb") as f:
-                pickle.dump(normalizing_dict, f)
+            save_path = self.savedir / "normalizing_dict.h5"
+            hf = h5py.File(save_path, "w")
+            for key, val in normalizing_dict.items():
+                hf.create_dataset(key, data=val)
+            hf.close()
         else:
             print("No normalizing dict calculated!")
