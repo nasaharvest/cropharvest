@@ -3,3 +3,4 @@ xarray
 earthengine-api
 tqdm
 cartopy
+h5py
