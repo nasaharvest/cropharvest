@@ -9,8 +9,19 @@ from cropharvest.config import LABELS_FILENAME
 class BaseDataset:
     def __init__(self, root, download: bool, download_url: str, filename: str):
         self.root = Path(root)
+        if not self.root.is_dir():
+            raise NotADirectoryError(f"{root} should be a directory.")
+
+        path_to_data = self.root / filename
+
         if download:
-            download_from_url(download_url, str(self.root / filename))
+            if path_to_data.exists():
+                print(f"Files already downloaded.")
+            else:
+                download_from_url(download_url, str(path_to_data))
+
+        if not path_to_data.exists():
+            raise FileNotFoundError(f"{path_to_data} does not exist, it can be downloaded by setting download=True")
 
     def __getitem__(self, index: int):
         raise NotImplementedError
@@ -46,7 +57,7 @@ class CropHarvestTifs(BaseDataset):
 
 
 class CropHarvest(BaseDataset):
-    "Dataset consisting of satellite data and associate labels"
+    "Dataset consisting of satellite data and associated labels"
 
     def __init__(self, root, download=False):
         super().__init__(root, download, download_url="", filename="")
