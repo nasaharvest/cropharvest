@@ -274,12 +274,13 @@ class Engineer:
         [batches, timesteps, bands]
         """
         num_dims = len(array.shape)
+        error_message = f"Expected num_dims to be 2 or 3 - got {num_dims}"
         if num_dims == 2:
             bands_index = 1
         elif num_dims == 3:
             bands_index = 2
         else:
-            raise ValueError(f"Expected num_dims to be 2 or 3 - got {num_dims}")
+            raise ValueError(error_message)
 
         indices_to_remove: List[int] = []
         for band in REMOVED_BANDS:
@@ -291,6 +292,11 @@ class Engineer:
             return array[:, indices_to_keep]
         elif num_dims == 3:
             return array[:, :, indices_to_keep]
+        else:
+            # Unreachable code logically but mypy does not see it this way
+            raise ValueError(error_message)
+
+
 
     def process_test_file(self, path_to_file: Path, id_in_region: int) -> Tuple[str, TestInstance]:
         id_components = path_to_file.name.split("_")
