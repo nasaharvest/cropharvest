@@ -1,15 +1,11 @@
 from dataclasses import dataclass
-from cartopy.io import shapereader
 import geopandas
 from shapely.geometry import Polygon, MultiPolygon
 from math import sin, cos, radians
-
 from typing import List, Tuple
+from pathlib import Path
 
-
-COUNTRY_SHAPEFILE = geopandas.read_file(
-    shapereader.natural_earth("50m", "cultural", "admin_0_countries")
-)
+COUNTRY_SHAPEFILE = geopandas.read_file(str(Path(__file__).parent / "country_shapefile"))
 
 
 @dataclass
