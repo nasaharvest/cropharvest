@@ -17,7 +17,7 @@ def test_load_tif_file():
     assert loaded_file.shape[1] == len(DYNAMIC_BANDS) + len(STATIC_BANDS)
 
     # also, check the static bands are actually constant across time
-    static_bands = loaded_file.values[:, len(DYNAMIC_BANDS) :, :, :]
+    static_bands = loaded_file.values[:, len(DYNAMIC_BANDS)]
     for i in range(1, NUM_TIMESTEPS):
         assert np.array_equal(static_bands[0], static_bands[i], equal_nan=True)
 
