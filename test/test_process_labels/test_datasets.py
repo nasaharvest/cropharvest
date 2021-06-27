@@ -13,8 +13,8 @@ def test_update_processed_datasets(monkeypatch, tmp_path):
     monkeypatch.setattr("process_labels.datasets.list_datasets", list_datasets)
 
     # first, write ethiopia to file
-    df = combine_datasets(ignore_datasets="sudan")
-    print(df.columns)
+    df = combine_datasets(datasets=["ethiopia"])
+    assert len(df) > 0
     df.to_file(tmp_path / LABELS_FILENAME, driver="GeoJSON")
 
     update_processed_datasets(tmp_path)
