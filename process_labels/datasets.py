@@ -180,16 +180,17 @@ def list_datasets() -> List[str]:
     return list(DATASETS.keys())
 
 
-def combine_datasets(ignore_datasets: Optional[List[str]] = None) -> geopandas.GeoDataFrame:
+def combine_datasets(datasets: Optional[List[str]] = None) -> geopandas.GeoDataFrame:
     all_datasets: List[geopandas.GeoDataFrame] = []
     all_columns = NullableColumns.tolist() + RequiredColumns.tolist()
 
     # the IS_TEST column is the last one to get added, on the combined data
     all_columns.remove(RequiredColumns.IS_TEST)
 
-    for dataset_name in list_datasets():
-        if (ignore_datasets is not None) and (dataset_name in ignore_datasets):
-            continue
+    if datasets is None:
+        datasets = list_datasets()
+
+    for dataset_name in datasets:
         dataset = load(dataset_name)
         dataset = dataset.assign(dataset=dataset_name)
 
@@ -207,20 +208,23 @@ def update_processed_datasets(
     data_folder: Path = DATAFOLDER_PATH, overwrite: bool = False
 ) -> None:
 
-    original_dataset: Optional[geopandas.GeoDataFrame] = None
-    datasets_to_ignore = None
-    if (not overwrite) and (data_folder / LABELS_FILENAME).exists():
-        original_dataset = geopandas.read_file(data_folder / LABELS_FILENAME)
-        datasets_to_ignore = original_dataset[RequiredColumns.DATASET].unique().tolist()
-    combined_datasets = combine_datasets(ignore_datasets=datasets_to_ignore)
-    if original_dataset is not None:
+    original_labels: Optional[geopandas.GeoDataFrame] = None
+    datasets_to_combine = list_datasets()
 
+    if (not overwrite) and (data_folder / LABELS_FILENAME).exists():
+        original_labels = geopandas.read_file(data_folder / LABELS_FILENAME)
+        existing_datasets = original_labels[RequiredColumns.DATASET].unique().tolist()
+        datasets_to_combine = [x for x in datasets_to_combine if x not in existing_datasets]
+
+    combined_labels = combine_datasets(datasets=datasets_to_combine)
+
+    if original_labels is not None:
         # we save and re-read the file to handle differences in the datetime formats
         # between the original_dataset (timestamps are strings when written) and
         # combined_dataset (timestamps are pd.Datetetime objects until written)
         tmp_file = data_folder / "tmp.geojson"
-        combined_datasets.to_file(tmp_file, driver="GeoJSON")
-        combined_datasets = geopandas.read_file(tmp_file)
+        combined_labels.to_file(tmp_file, driver="GeoJSON")
+        combined_labels = geopandas.read_file(tmp_file)
         tmp_file.unlink()
-        combined_datasets = pd.concat([original_dataset, combined_datasets])
-    combined_datasets.to_file(data_folder / LABELS_FILENAME, driver="GeoJSON")
+        combined_labels = pd.concat([original_labels, combined_labels])
+    combined_labels.to_file(data_folder / LABELS_FILENAME, driver="GeoJSON")
