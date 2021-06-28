@@ -5,7 +5,15 @@ class Columns:
     @classmethod
     def tolist(cls) -> List[str]:
         # we don't want to return the magic functions
-        return [value for name, value in vars(cls).items() if not name.startswith("__")]
+        return [
+            value
+            for name, value in vars(cls).items()
+            if not (name.startswith("__") or name == "date_columns")
+        ]
+
+    @classmethod
+    def date_columns(cls) -> List[str]:
+        raise NotImplementedError
 
 
 class RequiredColumns(Columns):
@@ -20,9 +28,17 @@ class RequiredColumns(Columns):
     GEOMETRY = "geometry"
     IS_TEST = "is_test"
 
+    @classmethod
+    def date_columns(cls) -> List[str]:
+        return [cls.COLLECTION_DATE, cls.EXPORT_END_DATE]
+
 
 class NullableColumns(Columns):
     HARVEST_DATE = "harvest_date"
     PLANTING_DATE = "planting_date"
     LABEL = "label"
     CLASSIFICATION_LABEL = "classification_label"
+
+    @classmethod
+    def date_columns(cls) -> List[str]:
+        return [cls.HARVEST_DATE, cls.PLANTING_DATE]

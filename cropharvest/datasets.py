@@ -21,7 +21,9 @@ class BaseDataset:
                 download_from_url(download_url, str(path_to_data))
 
         if not path_to_data.exists():
-            raise FileNotFoundError(f"{path_to_data} does not exist, it can be downloaded by setting download=True")
+            raise FileNotFoundError(
+                f"{path_to_data} does not exist, it can be downloaded by setting download=True"
+            )
 
     def __getitem__(self, index: int):
         raise NotImplementedError
