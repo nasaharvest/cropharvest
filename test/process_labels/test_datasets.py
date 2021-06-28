@@ -3,7 +3,6 @@ from geopandas import array
 import pandas as pd
 
 from process_labels import datasets
-from process_labels.columns import RequiredColumns
 from cropharvest.config import LABELS_FILENAME, EXPORT_END_DAY, EXPORT_END_MONTH
 from cropharvest.crops import CropClassifications
 
@@ -78,7 +77,7 @@ def test_combination(monkeypatch) -> None:
 
     combined_dataset = datasets.combine_datasets()
 
-    expected_columns = datasets.NON_NULLABLE_COLUMNS + datasets.NULLABLE_COLUMNS
+    expected_columns = datasets.RequiredColumns.tolist() + datasets.NullableColumns.tolist()
 
     for column in expected_columns:
         assert column in combined_dataset
@@ -111,4 +110,4 @@ def test_update_processed_datasets(monkeypatch, tmp_path):
 
     final_geojson = geopandas.read_file(tmp_path / LABELS_FILENAME)
     for expected_dataset in ["ethiopia", "sudan"]:
-        assert expected_dataset in final_geojson[RequiredColumns.DATASET].unique()
+        assert expected_dataset in final_geojson[datasets.RequiredColumns.DATASET].unique()
