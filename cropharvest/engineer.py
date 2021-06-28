@@ -319,7 +319,8 @@ class Engineer:
         final_x = self.fillna(x_np, average_slope)
         if final_x is None:
             raise RuntimeError(
-                "fillna on the test instance returned None; does the test instance contain NaN only bands?"
+                "fillna on the test instance returned None; "
+                "does the test instance contain NaN only bands?"
             )
 
         # finally, we need to calculate the mask

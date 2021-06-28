@@ -2,10 +2,8 @@ import h5py
 from pathlib import Path
 from tqdm import tqdm
 from urllib.request import urlopen, Request
-import h5py
 import numpy as np
 import random
-from pathlib import Path
 from typing import Dict
 
 try:
