@@ -296,8 +296,6 @@ class Engineer:
             # Unreachable code logically but mypy does not see it this way
             raise ValueError(error_message)
 
-
-
     def process_test_file(self, path_to_file: Path, id_in_region: int) -> Tuple[str, TestInstance]:
         id_components = path_to_file.name.split("_")
         crop, end_year = id_components[1], id_components[2]
