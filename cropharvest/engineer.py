@@ -174,7 +174,7 @@ class Engineer:
 
         variance = self.norm_interim["M2"] / (self.norm_interim["n"] - 1)
         std = np.sqrt(variance)
-        return {"mean": self.norm_interim["mean"], "std": std}
+        return {"mean": cast(np.ndarray, self.norm_interim["mean"]), "std": cast(np.ndarray, std)}
 
     @staticmethod
     def adjust_normalizing_dict(
@@ -201,7 +201,7 @@ class Engineer:
             / new_total
         )
 
-        return {"mean": new_mean, "std": np.sqrt(new_variance)}
+        return {"mean": cast(np.ndarray, new_mean), "std": cast(np.ndarray, np.sqrt(new_variance))}
 
     @staticmethod
     def calculate_ndvi(input_array: np.ndarray) -> np.ndarray:
@@ -316,7 +316,12 @@ class Engineer:
         x_np = np.moveaxis(x_np, -1, 0)
         x_np = self.calculate_ndvi(x_np)
         x_np = self.remove_bands(x_np)
-        x_np = self.fillna(x_np, average_slope)
+        final_x = self.fillna(x_np, average_slope)
+        if final_x is None:
+            raise RuntimeError(
+                "fillna on the test instance returned None; "
+                "does the test instance contain NaN only bands?"
+            )
 
         # finally, we need to calculate the mask
         region_bbox = TEST_REGIONS[identifier]
@@ -344,9 +349,9 @@ class Engineer:
         missing = y == 0
         y[negative] = 0
         y[missing] = MISSING_DATA
-        assert len(y) == x_np.shape[0]
+        assert len(y) == final_x.shape[0]
 
-        return identifier_plus_idx, TestInstance(x=x_np, y=y, lats=flat_lat, lons=flat_lon)
+        return identifier_plus_idx, TestInstance(x=final_x, y=y, lats=flat_lat, lons=flat_lon)
 
     def process_single_file(self, path_to_file: Path, row: pd.Series) -> Optional[DataInstance]:
         start_date = row.export_end_date - timedelta(days=NUM_TIMESTEPS * DAYS_PER_TIMESTEP)
