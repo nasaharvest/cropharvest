@@ -2,9 +2,10 @@ import geopandas
 from geopandas import array
 import pandas as pd
 
-from cropharvest.crops import CROP_CLASSIFICATIONS
 from process_labels import datasets
-from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH
+from process_labels.columns import RequiredColumns
+from cropharvest.config import LABELS_FILENAME, EXPORT_END_DAY, EXPORT_END_MONTH
+from cropharvest.crops import CropClassifications
 
 
 def _check_columns_and_types(df: geopandas.GeoDataFrame) -> None:
@@ -47,7 +48,7 @@ def _check_labels(df: geopandas.GeoDataFrame) -> None:
     if "label" in df:
         assert "classification_label" in df
         labelled_rows = df[~pd.isnull(df.label)]
-        expected_vals = list(CROP_CLASSIFICATIONS.keys())
+        expected_vals = [crop.name for crop in CropClassifications]
         assert labelled_rows.classification_label.isin(expected_vals).all()
 
 
@@ -91,3 +92,23 @@ def test_dataset_names() -> None:
     dataset_names = datasets.list_datasets()
     for dataset in dataset_names:
         assert "_" not in dataset
+
+
+def test_update_processed_datasets(monkeypatch, tmp_path):
+    def list_datasets():
+        # these are two relatively small datasets, so
+        # we can run the tests quickly
+        return ["ethiopia", "sudan"]
+
+    monkeypatch.setattr("process_labels.datasets.list_datasets", list_datasets)
+
+    # first, write ethiopia to file
+    df = datasets.combine_datasets(datasets=["ethiopia"])
+    assert len(df) > 0
+    df.to_file(tmp_path / LABELS_FILENAME, driver="GeoJSON")
+
+    datasets.update_processed_datasets(tmp_path)
+
+    final_geojson = geopandas.read_file(tmp_path / LABELS_FILENAME)
+    for expected_dataset in ["ethiopia", "sudan"]:
+        assert expected_dataset in final_geojson[RequiredColumns.DATASET].unique()

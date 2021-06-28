@@ -180,27 +180,49 @@ def list_datasets() -> List[str]:
     return list(DATASETS.keys())
 
 
-def combine_datasets(ignore_datasets: Optional[List[str]] = None) -> geopandas.GeoDataFrame:
+def combine_datasets(datasets: Optional[List[str]] = None) -> geopandas.GeoDataFrame:
     all_datasets: List[geopandas.GeoDataFrame] = []
     all_columns = NullableColumns.tolist() + RequiredColumns.tolist()
 
-    for dataset_name in list_datasets():
-        if (ignore_datasets is not None) and (dataset_name in ignore_datasets):
-            continue
+    # the IS_TEST column is the last one to get added, on the combined data
+    all_columns.remove(RequiredColumns.IS_TEST)
+
+    if datasets is None:
+        datasets = list_datasets()
+
+    for dataset_name in datasets:
         dataset = load(dataset_name)
         dataset = dataset.assign(dataset=dataset_name)
 
         for column in NullableColumns.tolist():
             if column not in dataset:
-                dataset = dataset.assign(**{column: None if "date" not in column else pd.NaT})
+                dataset = dataset.assign(
+                    **{column: None if column not in NullableColumns.date_columns() else pd.NaT}
+                )
         all_datasets.append(dataset[all_columns])
     dataset = pd.concat(all_datasets)
     # finally, some updates to the labels to make them more homogeneous
-    dataset["label"] = dataset.label.str.lower().replace(" ", "_")
+    dataset[NullableColumns.LABEL] = dataset.label.str.lower().replace(" ", "_")
     return add_is_test_column(dataset)
 
 
-def update_processed_datasets(data_folder: Path = DATAFOLDER_PATH) -> None:
+def update_processed_datasets(
+    data_folder: Path = DATAFOLDER_PATH, overwrite: bool = False
+) -> None:
 
-    combined_datasets = combine_datasets()
-    combined_datasets.to_file(data_folder / LABELS_FILENAME, driver="GeoJSON")
+    original_labels: Optional[geopandas.GeoDataFrame] = None
+    datasets_to_combine = list_datasets()
+
+    if (not overwrite) and (data_folder / LABELS_FILENAME).exists():
+        original_labels = geopandas.read_file(data_folder / LABELS_FILENAME)
+        existing_datasets = original_labels[RequiredColumns.DATASET].unique().tolist()
+        datasets_to_combine = [x for x in datasets_to_combine if x not in existing_datasets]
+
+    combined_labels = combine_datasets(datasets=datasets_to_combine)
+
+    if original_labels is not None:
+        date_columns = RequiredColumns.date_columns() + NullableColumns.date_columns()
+        for col in date_columns:
+            combined_labels[col] = combined_labels[col].dt.strftime("%Y-%m-%d")
+        combined_labels = pd.concat([original_labels, combined_labels])
+    combined_labels.to_file(data_folder / LABELS_FILENAME, driver="GeoJSON")
