@@ -196,7 +196,9 @@ def combine_datasets(datasets: Optional[List[str]] = None) -> geopandas.GeoDataF
 
         for column in NullableColumns.tolist():
             if column not in dataset:
-                dataset = dataset.assign(**{column: None if "date" not in column else pd.NaT})
+                dataset = dataset.assign(
+                    **{column: None if column not in NullableColumns.date_columns() else pd.NaT}
+                )
         all_datasets.append(dataset[all_columns])
     dataset = pd.concat(all_datasets)
     # finally, some updates to the labels to make them more homogeneous
@@ -219,12 +221,8 @@ def update_processed_datasets(
     combined_labels = combine_datasets(datasets=datasets_to_combine)
 
     if original_labels is not None:
-        # we save and re-read the file to handle differences in the datetime formats
-        # between the original_dataset (timestamps are strings when written) and
-        # combined_dataset (timestamps are pd.Datetetime objects until written)
-        tmp_file = data_folder / "tmp.geojson"
-        combined_labels.to_file(tmp_file, driver="GeoJSON")
-        combined_labels = geopandas.read_file(tmp_file)
-        tmp_file.unlink()
+        date_columns = RequiredColumns.date_columns() + NullableColumns.date_columns()
+        for col in date_columns:
+            combined_labels[col] = combined_labels[col].dt.strftime("%Y-%m-%d")
         combined_labels = pd.concat([original_labels, combined_labels])
     combined_labels.to_file(data_folder / LABELS_FILENAME, driver="GeoJSON")
