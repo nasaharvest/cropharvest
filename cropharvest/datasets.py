@@ -16,7 +16,7 @@ class BaseDataset:
 
         if download:
             if path_to_data.exists():
-                print(f"Files already downloaded.")
+                print("Files already downloaded.")
             else:
                 download_from_url(download_url, str(path_to_data))
 
