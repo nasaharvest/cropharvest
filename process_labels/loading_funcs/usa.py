@@ -142,7 +142,7 @@ def load_kern_2020():
         elif row.SYMBOL == "FRUIT_TREE":
             return KERN_FRUIT_TREE_TO_CLASSIFICATION[row[NullableColumns.LABEL]]
         elif row.SYMBOL == "FIELD":
-            return KERN_FIELD_TO_CLASSIFICATION[NullableColumns.LABEL]
+            return KERN_FIELD_TO_CLASSIFICATION[row[NullableColumns.LABEL]]
         else:
             return KERN_LABEL_TO_CLASSIFICATION[row.SYMBOL]
 
