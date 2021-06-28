@@ -55,7 +55,7 @@ def test_consistency(monkeypatch) -> None:
     def overlapping(df):
         return df
 
-    monkeypatch.setattr("src.data.labels.loading_funcs.usa._remove_overlapping", overlapping)
+    monkeypatch.setattr("process_labels.loading_funcs.usa._remove_overlapping", overlapping)
 
     all_datasets = datasets.list_datasets()
 
@@ -73,7 +73,7 @@ def test_combination(monkeypatch) -> None:
     def overlapping(df):
         return df
 
-    monkeypatch.setattr("src.data.labels.loading_funcs.usa._remove_overlapping", overlapping)
+    monkeypatch.setattr("process_labels.loading_funcs.usa._remove_overlapping", overlapping)
 
     combined_dataset = datasets.combine_datasets()
 
