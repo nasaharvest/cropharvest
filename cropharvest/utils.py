@@ -1,21 +1,28 @@
+import h5py
 from pathlib import Path
 from tqdm import tqdm
 from urllib.request import urlopen, Request
 import h5py
-import torch
 import numpy as np
 import random
-
+from pathlib import Path
 from typing import Dict
 
+try:
+    import torch
+
+    TORCH_INSTALLED = True
+except ImportError:
+    TORCH_INSTALLED = False
 
 DATAFOLDER_PATH = Path(__file__).parent.parent / "data"
 
 
 def set_seed(seed: int = 42) -> None:
     np.random.seed(seed)
-    torch.manual_seed(seed)
     random.seed(seed)
+    if TORCH_INSTALLED:
+        torch.manual_seed(seed)
 
 
 def download_from_url(url: str, filename: str, chunk_size: int = 1024) -> None:
