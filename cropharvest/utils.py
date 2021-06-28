@@ -27,7 +27,8 @@ def download_from_url(url: str, filename: str, chunk_size: int = 1024) -> None:
                         break
                     pbar.update(chunk_size)
                     fh.write(chunk)
-                    
+
+
 def load_normalizing_dict(path_to_dict: Path) -> Dict[str, np.ndarray]:
 
     hf = h5py.File(path_to_dict, "r")
