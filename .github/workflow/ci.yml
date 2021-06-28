@@ -30,6 +30,6 @@ jobs:
         run: pip install -r requirements-dev.txt
       - name: Run tests
           run: |
-            python -m pytest
             python -m black --check --diff .
             python -m mypy cropharvest process_labels test
+            python -m pytest
