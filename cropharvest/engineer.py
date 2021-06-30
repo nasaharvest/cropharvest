@@ -20,6 +20,7 @@ from .config import (
     DAYS_PER_TIMESTEP,
     NUM_TIMESTEPS,
     TEST_REGIONS,
+    TEST_DATASETS,
 )
 from .utils import DATAFOLDER_PATH, load_normalizing_dict
 
@@ -405,6 +406,39 @@ class Engineer:
                     for key, val in test_instance.datasets.items():
                         hf.create_dataset(key, data=val)
                     hf.close()
+
+        for dataset in TEST_DATASETS:
+            x: List[np.ndarray] = []
+            y: List[int] = []
+            lats: List[float] = []
+            lons: List[float] = []
+            relevant_labels = self.labels[self.labels[RequiredColumns.DATASET] == dataset]
+
+            for _, row in relevant_labels.iterrows():
+                tif_paths = list(
+                    self.eo_files.glob(
+                        f"{row[RequiredColumns.INDEX]}_{row[RequiredColumns.DATASET]}_*.tif"
+                    )
+                )
+                if len(tif_paths) == 0:
+                    continue
+                else:
+                    tif_path = tif_paths[0]
+                instance = self.process_single_file(tif_path, row)
+                if instance is not None:
+                    x.append(instance.array)
+                    y.append(instance.is_crop)
+                    lats.append(instance.label_lat)
+                    lons.append(instance.label_lon)
+
+            # then, combine the instances into a test instance
+            test_instance = TestInstance(
+                np.stack(x), np.concatenate(y), np.concatenate(lats), np.concatenate(lons)
+            )
+            hf = h5py.File(self.test_savedir / f"{dataset}.h5", "w")
+            for key, val in test_instance.datasets.items():
+                hf.create_dataset(key, data=val)
+            hf.close()
 
     def create_h5_dataset(self, checkpoint: bool = True) -> None:
         arrays_dir = self.savedir / "arrays"
