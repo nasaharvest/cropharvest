@@ -414,10 +414,10 @@ class Engineer:
             lons: List[float] = []
             relevant_labels = self.labels[self.labels[RequiredColumns.DATASET] == dataset]
 
-            for _, row in relevant_labels.iterrows():
+            for _, row in tqdm(relevant_labels.iterrows()):
                 tif_paths = list(
                     self.eo_files.glob(
-                        f"{row[RequiredColumns.INDEX]}_{row[RequiredColumns.DATASET]}_*.tif"
+                        f"{row[RequiredColumns.INDEX]}-{row[RequiredColumns.DATASET]}_*.tif"
                     )
                 )
                 if len(tif_paths) == 0:
@@ -432,9 +432,7 @@ class Engineer:
                     lons.append(instance.label_lon)
 
             # then, combine the instances into a test instance
-            test_instance = TestInstance(
-                np.stack(x), np.concatenate(y), np.concatenate(lats), np.concatenate(lons)
-            )
+            test_instance = TestInstance(np.stack(x), np.stack(y), np.stack(lats), np.stack(lons))
             hf = h5py.File(self.test_savedir / f"{dataset}.h5", "w")
             for key, val in test_instance.datasets.items():
                 hf.create_dataset(key, data=val)
