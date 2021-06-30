@@ -4,6 +4,12 @@ from tqdm import tqdm
 from urllib.request import urlopen, Request
 import numpy as np
 import random
+import warnings
+import geopandas
+
+from cropharvest.columns import RequiredColumns
+from cropharvest.countries import BBox
+
 from typing import Dict
 
 try:
@@ -38,3 +44,13 @@ def load_normalizing_dict(path_to_dict: Path) -> Dict[str, np.ndarray]:
 
     hf = h5py.File(path_to_dict, "r")
     return {"mean": hf.get("mean"), "std": hf.get("std")}
+
+
+def filter_geojson(gpdf: geopandas.GeoDataFrame, bounding_box: BBox) -> geopandas.GeoDataFrame:
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        # warning: invalid value encountered in ? (vectorized)
+        in_bounding_box = np.vectorize(bounding_box.contains)(
+            gpdf[RequiredColumns.LAT], gpdf[RequiredColumns.LON]
+        )
+    return gpdf[in_bounding_box]
