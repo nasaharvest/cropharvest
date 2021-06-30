@@ -1,9 +1,12 @@
 from pathlib import Path
+import numpy as np
 
 import geopandas
 
+from cropharvest.countries import BBox
 from cropharvest.utils import download_from_url
 from cropharvest.config import LABELS_FILENAME
+from cropharvest.columns import RequiredColumns
 
 
 class BaseDataset:
@@ -39,7 +42,7 @@ class CropHarvestLabels(BaseDataset):
         super().__init__(root, download, download_url=self.url, filename=LABELS_FILENAME)
         self._labels = geopandas.read_file(str(self.root / LABELS_FILENAME))
 
-    def as_geojson(self):
+    def as_geojson(self) -> geopandas.GeoDataFrame:
         return self._labels
 
     def __getitem__(self, index: int):
@@ -47,6 +50,12 @@ class CropHarvestLabels(BaseDataset):
 
     def __len__(self) -> int:
         return len(self._labels)
+
+    def _filter_geojson(self, bounding_box: BBox) -> geopandas.GeoDataFrame:
+        in_bounding_box = np.vectorize(bounding_box.contains)(
+            self._labels[RequiredColumns.LAT], self._labels[RequiredColumns.LON]
+        )
+        return self._labels[in_bounding_box]
 
 
 class CropHarvestTifs(BaseDataset):
@@ -63,6 +72,7 @@ class CropHarvest(BaseDataset):
 
     def __init__(self, root, download=False):
         super().__init__(root, download, download_url="", filename="")
+        self.labels = CropHarvestLabels(root, download)
 
     @classmethod
     def from_labels_and_tifs(cls, labels: CropHarvestLabels, tifs: CropHarvestTifs):

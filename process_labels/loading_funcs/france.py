@@ -3,10 +3,10 @@ import geopandas
 import numpy as np
 from datetime import datetime
 
-from .utils import LATLON_CRS
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH
-from ..columns import RequiredColumns, NullableColumns
+from cropharvest.columns import RequiredColumns, NullableColumns
 from ..utils import DATASET_PATH
+from .utils import LATLON_CRS
 
 from typing import Dict, Tuple
 

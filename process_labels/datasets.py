@@ -4,8 +4,8 @@ from pathlib import Path
 
 from . import loading_funcs
 from .utils import add_is_test_column
-from .columns import NullableColumns, RequiredColumns
 
+from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.utils import DATAFOLDER_PATH
 from cropharvest.config import LABELS_FILENAME
 

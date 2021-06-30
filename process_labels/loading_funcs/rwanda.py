@@ -8,8 +8,7 @@ from shapely import wkt
 from shapely.geometry import Polygon
 
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
-
-from ..columns import NullableColumns, RequiredColumns
+from cropharvest.columns import NullableColumns, RequiredColumns
 from ..utils import DATASET_PATH, distance_between_latlons
 
 from typing import Tuple, List, Set
