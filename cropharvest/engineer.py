@@ -12,6 +12,7 @@ import warnings
 import h5py
 
 from cropharvest.eo import STATIC_BANDS, DYNAMIC_BANDS
+from cropharvest.columns import RequiredColumns, NullableColumns
 from .config import (
     EXPORT_END_DAY,
     EXPORT_END_MONTH,
@@ -79,6 +80,7 @@ class Engineer:
         self.data_folder = data_folder
         self.eo_files = data_folder / "eo_data"
         self.test_eo_files = data_folder / "test_eo_data"
+
         self.labels = geopandas.read_file(data_folder / LABELS_FILENAME)
         self.labels["export_end_date"] = pd.to_datetime(self.labels.export_end_date)
 
@@ -327,13 +329,18 @@ class Engineer:
         region_bbox = TEST_REGIONS[identifier]
         relevant_indices = self.labels.apply(
             lambda x: (
-                region_bbox.contains(x.lat, x.lon) and (x.export_end_date.year == int(end_year))
+                region_bbox.contains(x[RequiredColumns.LAT], x[RequiredColumns.LON])
+                and (x[RequiredColumns.EXPORT_END_DATE].year == int(end_year))
             ),
             axis=1,
         )
         relevant_rows = self.labels[relevant_indices]
-        positive_geoms = relevant_rows[relevant_rows.label == crop].geometry.tolist()
-        negative_geoms = relevant_rows[relevant_rows.label != crop].geometry.tolist()
+        positive_geoms = relevant_rows[relevant_rows[NullableColumns.LABEL] == crop][
+            RequiredColumns.GEOMETRY
+        ].tolist()
+        negative_geoms = relevant_rows[relevant_rows[NullableColumns.LABEL] != crop][
+            RequiredColumns.GEOMETRY
+        ].tolist()
 
         with rasterio.open(path_to_file) as src:
             # the mask is True outside shapes, and False inside shapes. We want the opposite
@@ -356,8 +363,8 @@ class Engineer:
     def process_single_file(self, path_to_file: Path, row: pd.Series) -> Optional[DataInstance]:
         start_date = row.export_end_date - timedelta(days=NUM_TIMESTEPS * DAYS_PER_TIMESTEP)
         da, average_slope = self.load_tif(path_to_file, start_date=start_date)
-        closest_lon = self.find_nearest(da.x, row.lon)
-        closest_lat = self.find_nearest(da.y, row.lat)
+        closest_lon = self.find_nearest(da.x, row[RequiredColumns.LON])
+        closest_lat = self.find_nearest(da.y, row[RequiredColumns.LAT])
 
         labelled_np = da.sel(x=closest_lon).sel(y=closest_lat).values
 
@@ -367,17 +374,19 @@ class Engineer:
         labelled_array = self.fillna(labelled_np, average_slope)
         if labelled_array is None:
             return None
-        self.update_normalizing_values(labelled_array)
+
+        if not row[RequiredColumns.IS_TEST]:
+            self.update_normalizing_values(labelled_array)
 
         return DataInstance(
-            label_lat=row.lat,
-            label_lon=row.lon,
+            label_lat=row[RequiredColumns.LAT],
+            label_lon=row[RequiredColumns.LON],
             instance_lat=closest_lat,
             instance_lon=closest_lon,
             array=labelled_array,
-            is_crop=row.is_crop,
-            label=row.label,
-            dataset=row.dataset,
+            is_crop=row[RequiredColumns.IS_CROP],
+            label=row[NullableColumns.LABEL],
+            dataset=row[RequiredColumns.DATASET],
         )
 
     def create_h5_test_instances(
@@ -419,7 +428,10 @@ class Engineer:
                 continue
 
             file_row = self.labels[
-                ((self.labels.dataset == dataset) & (self.labels["index"] == file_index))
+                (
+                    (self.labels[RequiredColumns.DATASET] == dataset)
+                    & (self.labels[RequiredColumns.INDEX] == file_index)
+                )
             ].iloc[0]
 
             instance = self.process_single_file(file_path, row=file_row)
