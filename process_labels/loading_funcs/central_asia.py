@@ -3,9 +3,9 @@ import pandas as pd
 from datetime import datetime
 
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
+from cropharvest.columns import RequiredColumns, NullableColumns
 
 from ..utils import DATASET_PATH
-from ..columns import RequiredColumns, NullableColumns
 
 
 LABEL_TO_CLASSIFICATION = {

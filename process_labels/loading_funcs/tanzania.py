@@ -3,9 +3,9 @@ import json
 import geopandas
 from datetime import datetime
 from shapely.geometry import Polygon
+from cropharvest.columns import RequiredColumns, NullableColumns
 
 from .utils import export_date_from_row
-from ..columns import RequiredColumns, NullableColumns
 from ..utils import DATASET_PATH
 
 from typing import Tuple, List

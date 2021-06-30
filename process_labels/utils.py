@@ -4,8 +4,7 @@ from pathlib import Path
 from math import sin, cos, sqrt, radians, atan2
 
 from cropharvest import config
-
-from .columns import RequiredColumns
+from cropharvest.columns import RequiredColumns
 
 
 EARTH_RADIUS = 6373.0

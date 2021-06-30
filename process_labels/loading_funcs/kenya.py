@@ -5,8 +5,7 @@ from datetime import datetime
 
 from .utils import process_crop_non_crop, export_date_from_row, LATLON_CRS
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
-
-from ..columns import RequiredColumns, NullableColumns
+from cropharvest.columns import RequiredColumns, NullableColumns
 from ..utils import DATASET_PATH
 
 from typing import List

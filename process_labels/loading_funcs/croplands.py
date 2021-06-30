@@ -4,8 +4,8 @@ from datetime import datetime
 from shapely.geometry import Point
 
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH
+from cropharvest.columns import RequiredColumns, NullableColumns
 from ..utils import DATASET_PATH
-from ..columns import RequiredColumns, NullableColumns
 
 
 # Mapping copied from

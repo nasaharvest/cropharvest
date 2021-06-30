@@ -4,9 +4,9 @@ from datetime import datetime
 from tqdm import tqdm
 
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH
+from cropharvest.columns import NullableColumns, RequiredColumns
 
 from .utils import LATLON_CRS
-from ..columns import NullableColumns, RequiredColumns
 from ..utils import DATASET_PATH
 
 from typing import Set
