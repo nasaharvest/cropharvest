@@ -73,7 +73,9 @@ class TestInstance:
 
     @classmethod
     def load_from_h5(cls, h5: h5py.File):
-        return cls(x=h5.get("x"), y=h5.get("y"), lats=h5.get("lats"), lons=h5.get("lons"))
+        return cls(
+            x=h5.get("x")[:], y=h5.get("y")[:], lats=h5.get("lats")[:], lons=h5.get("lons")[:]
+        )
 
 
 class Engineer:
