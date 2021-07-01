@@ -61,6 +61,9 @@ class CropHarvestLabels(BaseDataset):
             / f"features/arrays/{row[RequiredColumns.INDEX]}_{row[RequiredColumns.DATASET]}.h5"
         )
 
+    def _dataframe_to_paths(self, df: geopandas.DataFrame) -> List[Path]:
+        return [self._path_from_row(row) for _, row in df.iterrows()]
+
     def construct_positive_and_negative_paths(
         self,
         bounding_box: Optional[BBox],
@@ -74,47 +77,29 @@ class CropHarvestLabels(BaseDataset):
         if bounding_box is not None:
             gpdf = filter_geojson(gpdf, bounding_box)
 
+        is_null = gpdf[NullableColumns.LABEL].isnull()
+        is_crop = gpdf[RequiredColumns.IS_CROP] == True
+
         if target_label is not None:
             positive_labels = gpdf[gpdf[NullableColumns.LABEL] == target_label]
             target_label_is_crop = positive_labels.iloc[0][RequiredColumns.IS_CROP]
+
+            is_target = gpdf[NullableColumns.LABEL] == target_label
 
             if not target_label_is_crop:
                 # if the target label is a non crop class (e.g. pasture),
                 # then we can just collect all classes which either
                 # 1) are crop, or 2) are a different non crop class (e.g. forest)
-                negative_labels = gpdf[
-                    (
-                        (
-                            gpdf[NullableColumns.LABEL].isnull()
-                            & (gpdf[RequiredColumns.IS_CROP] == True)
-                        )
-                        | (
-                            ~gpdf[NullableColumns.LABEL].isnull()
-                            & (gpdf[NullableColumns.LABEL] != target_label)
-                        )
-                    )
-                ]
-                negative_paths = [
-                    self._path_from_row(row) for _, row in negative_labels.iterrows()
-                ]
+                negative_labels = gpdf[((is_null & is_crop) | (~is_null & ~is_target))]
+                negative_paths = self._dataframe_to_paths(negative_labels)
             else:
                 # otherwise, the target label is a crop. If balance_negative_crops is
                 # true, then we want an equal number of (other) crops and non crops in
                 # the negative labels
-                negative_non_crop_labels = gpdf[gpdf[RequiredColumns.IS_CROP] == False]
-                negative_other_crop_labels = gpdf[
-                    (
-                        (gpdf[RequiredColumns.IS_CROP] == True)
-                        & (~gpdf[NullableColumns.LABEL].isnull())
-                        & (gpdf[NullableColumns.LABEL] != target_label)
-                    )
-                ]
-                negative_non_crop_paths = [
-                    self._path_from_row(row) for _, row in negative_non_crop_labels.iterrows()
-                ]
-                negative_paths = [
-                    self._path_from_row(row) for _, row in negative_other_crop_labels.iterrows()
-                ]
+                negative_non_crop_labels = gpdf[~is_crop]
+                negative_other_crop_labels = gpdf[(is_crop & ~is_null & ~is_target)]
+                negative_non_crop_paths = self._dataframe_to_paths(negative_non_crop_labels)
+                negative_paths = self._dataframe_to_paths(negative_other_crop_labels)
 
                 if balance_negative_crops:
                     negative_paths.extend(
@@ -126,11 +111,11 @@ class CropHarvestLabels(BaseDataset):
                     negative_paths.extend(negative_non_crop_paths)
         else:
             # otherwise, we will just filter by crop and non crop
-            positive_labels = gpdf[gpdf[RequiredColumns.IS_CROP] == True]
-            negative_labels = gpdf[gpdf[RequiredColumns.IS_CROP] == False]
-            negative_paths = [self._path_from_row(row) for _, row in negative_labels.iterrows()]
+            positive_labels = gpdf[is_crop]
+            negative_labels = gpdf[~is_crop]
+            negative_paths = self._dataframe_to_paths(negative_labels)
 
-        positive_paths = [self._path_from_row(row) for _, row in positive_labels.iterrows()]
+        positive_paths = self._dataframe_to_paths(positive_labels)
 
         return [x for x in positive_paths if x.exists()], [x for x in negative_paths if x.exists()]
 
