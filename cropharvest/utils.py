@@ -4,13 +4,10 @@ from tqdm import tqdm
 from urllib.request import urlopen, Request
 import numpy as np
 import random
-import warnings
 import geopandas
 import collections
 import functools
 
-from cropharvest.columns import RequiredColumns
-from cropharvest.countries import BBox
 from cropharvest.config import LABELS_FILENAME
 
 from typing import Dict, List

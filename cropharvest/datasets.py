@@ -3,6 +3,7 @@ import geopandas
 import numpy as np
 import h5py
 import warnings
+from dataclasses import dataclass
 
 from cropharvest.countries import BBox
 from cropharvest.utils import download_from_url, deterministic_shuffle, read_labels
@@ -12,6 +13,18 @@ from cropharvest.engineer import TestInstance
 from cropharvest import countries
 
 from typing import List, Optional, Tuple, Generator
+
+
+@dataclass
+class Task:
+    bounding_box: BBox
+    target_label: Optional[str]
+    balance_negative_crops: bool
+    test_identifier: Optional[str] = None
+
+    def __post_init__(self):
+        if self.target_label is None:
+            self.target_label = "crop"
 
 
 class BaseDataset:
@@ -66,36 +79,23 @@ class CropHarvestLabels(BaseDataset):
     def __len__(self) -> int:
         return len(self._labels)
 
-    def _path_from_row(self, row: geopandas.GeoSeries) -> Path:
-        return (
-            self.root
-            / f"features/arrays/{row[RequiredColumns.INDEX]}_{row[RequiredColumns.DATASET]}.h5"
-        )
-
-    def _dataframe_to_paths(self, df: geopandas.GeoDataFrame) -> List[Path]:
-        return [self._path_from_row(row) for _, row in df.iterrows()]
-
-    def construct_positive_and_negative_paths(
-        self,
-        bounding_box: Optional[BBox],
-        target_label: Optional[str],
-        filter_test: bool,
-        balance_negative_crops: bool,
+    def construct_positive_and_negative_labels(
+        self, task: Task, filter_test: bool = True
     ) -> Tuple[List[Path], List[Path]]:
         gpdf = self.as_geojson()
         if filter_test:
             gpdf = gpdf[gpdf[RequiredColumns.IS_TEST] == False]
-        if bounding_box is not None:
-            gpdf = self.filter_geojson(gpdf, bounding_box)
+        if task.bounding_box is not None:
+            gpdf = self.filter_geojson(gpdf, task.bounding_box)
 
         is_null = gpdf[NullableColumns.LABEL].isnull()
         is_crop = gpdf[RequiredColumns.IS_CROP] == True
 
-        if target_label is not None:
-            positive_labels = gpdf[gpdf[NullableColumns.LABEL] == target_label]
+        if task.target_label != "crop":
+            positive_labels = gpdf[gpdf[NullableColumns.LABEL] == task.target_label]
             target_label_is_crop = positive_labels.iloc[0][RequiredColumns.IS_CROP]
 
-            is_target = gpdf[NullableColumns.LABEL] == target_label
+            is_target = gpdf[NullableColumns.LABEL] == task.target_label
 
             if not target_label_is_crop:
                 # if the target label is a non crop class (e.g. pasture),
@@ -112,7 +112,7 @@ class CropHarvestLabels(BaseDataset):
                 negative_non_crop_paths = self._dataframe_to_paths(negative_non_crop_labels)
                 negative_paths = self._dataframe_to_paths(negative_other_crop_labels)
 
-                if balance_negative_crops:
+                if task.balance_negative_crops:
                     negative_paths.extend(
                         deterministic_shuffle(negative_non_crop_paths, DEFAULT_SEED)[
                             : len(negative_paths)
@@ -130,6 +130,15 @@ class CropHarvestLabels(BaseDataset):
 
         return [x for x in positive_paths if x.exists()], [x for x in negative_paths if x.exists()]
 
+    def _path_from_row(self, row: geopandas.GeoSeries) -> Path:
+        return (
+            self.root
+            / f"features/arrays/{row[RequiredColumns.INDEX]}_{row[RequiredColumns.DATASET]}.h5"
+        )
+
+    def _dataframe_to_paths(self, df: geopandas.GeoDataFrame) -> List[Path]:
+        return [self._path_from_row(row) for _, row in df.iterrows()]
+
 
 class CropHarvestTifs(BaseDataset):
     def __init__(self, root, download=False):
@@ -146,30 +155,23 @@ class CropHarvest(BaseDataset):
     def __init__(
         self,
         root,
-        bbox: BBox,
-        target_label: Optional[str] = None,
-        balance_negative_crops: bool = True,
-        test_identifier: Optional[str] = None,
+        task: Task,
         download=False,
     ):
         super().__init__(root, download, download_url="", filename="")
 
         self.labels = CropHarvestLabels(root)
-        self.bbox = bbox
-        self.target_label = target_label if target_label is not None else "crop"
+        self.task = task
 
-        positive_paths, negative_paths = self.labels.construct_positive_and_negative_paths(
-            bbox, target_label, filter_test=True, balance_negative_crops=balance_negative_crops
+        positive_paths, negative_paths = self.labels.construct_positive_and_negative_labels(
+            task, filter_test=True
         )
-
         self.filepaths: List[Path] = positive_paths + negative_paths
         self.positive_indices: List[int] = list(range(len(positive_paths)))
         self.negative_indices: List[int] = list(
             range(len(positive_paths), len(positive_paths) + len(negative_paths))
         )
         self.y_vals: List[int] = [1] * len(positive_paths) + [0] * len(negative_paths)
-
-        self.test_identifier: Optional[str] = test_identifier
 
     def __len__(self) -> int:
         return len(self.filepaths)
@@ -180,10 +182,10 @@ class CropHarvest(BaseDataset):
 
     def test_data(self) -> Generator[Tuple[str, TestInstance], None, None]:
         all_relevant_files = list(
-            (self.root / "test_features").glob(f"{self.test_identifier}*.h5")
+            (self.root / "test_features").glob(f"{self.task.test_identifier}*.h5")
         )
         if len(all_relevant_files) == 0:
-            raise RuntimeError(f"Missing test data {self.test_identifier}*.h5")
+            raise RuntimeError(f"Missing test data {self.task.test_identifier}*.h5")
         for filepath in all_relevant_files:
             hf = h5py.File(filepath, "r")
             test_array = TestInstance.load_from_h5(hf)
@@ -204,10 +206,12 @@ class CropHarvest(BaseDataset):
                         output_datasets.append(
                             cls(
                                 root,
-                                country_bbox,
-                                crop,
-                                balance_negative_crops,
-                                f"{country}_{crop}",
+                                Task(
+                                    country_bbox,
+                                    crop,
+                                    balance_negative_crops,
+                                    f"{country}_{crop}",
+                                ),
                             )
                         )
 
@@ -218,7 +222,7 @@ class CropHarvest(BaseDataset):
             # some points in the test h5py file?)
             country_bbox = countries.get_country_bbox(country)[0]
             output_datasets.append(
-                cls(root, country_bbox, None, balance_negative_crops, test_dataset)
+                cls(root, Task(country_bbox, None, balance_negative_crops, test_dataset))
             )
         return output_datasets
 
@@ -228,9 +232,9 @@ class CropHarvest(BaseDataset):
         pass
 
     def __repr__(self) -> str:
-        class_name = f"CropHarvest{'Eval' if self.test_identifier is not None else ''}"
-        return f"{class_name}({self.bbox.name}, {self.target_label}, {self.test_identifier})"
+        class_name = f"CropHarvest{'Eval' if self.task.test_identifier is not None else ''}"
+        return f"{class_name}({self.id}, {self.task.test_identifier})"
 
     @property
     def id(self) -> str:
-        return f"{self.bbox.name}_{self.target_label}"
+        return f"{self.task.bounding_box.name}_{self.task.target_label}"
