@@ -2,15 +2,16 @@ from pathlib import Path
 import geopandas
 import numpy as np
 import h5py
+import warnings
 
 from cropharvest.countries import BBox
-from cropharvest.utils import download_from_url, filter_geojson, deterministic_shuffle, read_labels
+from cropharvest.utils import download_from_url, deterministic_shuffle, read_labels
 from cropharvest.config import LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
 from cropharvest import countries
 
-from typing import Dict, List, Optional, Tuple, Generator
+from typing import List, Optional, Tuple, Generator
 
 
 class BaseDataset:
@@ -49,6 +50,16 @@ class CropHarvestLabels(BaseDataset):
     def as_geojson(self) -> geopandas.GeoDataFrame:
         return self._labels
 
+    @staticmethod
+    def filter_geojson(gpdf: geopandas.GeoDataFrame, bounding_box: BBox) -> geopandas.GeoDataFrame:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            # warning: invalid value encountered in ? (vectorized)
+            in_bounding_box = np.vectorize(bounding_box.contains)(
+                gpdf[RequiredColumns.LAT], gpdf[RequiredColumns.LON]
+            )
+        return gpdf[in_bounding_box]
+
     def __getitem__(self, index: int):
         return self._labels.iloc[index]
 
@@ -75,7 +86,7 @@ class CropHarvestLabels(BaseDataset):
         if filter_test:
             gpdf = gpdf[gpdf[RequiredColumns.IS_TEST] == False]
         if bounding_box is not None:
-            gpdf = filter_geojson(gpdf, bounding_box)
+            gpdf = self.filter_geojson(gpdf, bounding_box)
 
         is_null = gpdf[NullableColumns.LABEL].isnull()
         is_crop = gpdf[RequiredColumns.IS_CROP] == True
