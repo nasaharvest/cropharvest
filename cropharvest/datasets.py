@@ -4,11 +4,12 @@ import numpy as np
 import h5py
 
 from cropharvest.countries import BBox
-from cropharvest.utils import download_from_url, filter_geojson
-from cropharvest.config import LABELS_FILENAME
+from cropharvest.utils import download_from_url, filter_geojson, deterministic_shuffle
+from cropharvest.config import LABELS_FILENAME, TEST_REGIONS, DEFAULT_SEED, DEFAULT_BALANCE_CROPS
 from cropharvest.columns import NullableColumns, RequiredColumns
+from cropharvest.engineer import TestInstance
 
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Generator
 
 
 class BaseDataset:
@@ -60,7 +61,11 @@ class CropHarvestLabels(BaseDataset):
         )
 
     def construct_positive_and_negative_paths(
-        self, bounding_box: Optional[BBox], target_label: Optional[str], filter_test: bool
+        self,
+        bounding_box: Optional[BBox],
+        target_label: Optional[str],
+        filter_test: bool,
+        balance_negative_crops: bool,
     ) -> Tuple[List[Path], List[Path]]:
         gpdf = self.as_geojson()
         if filter_test:
@@ -70,14 +75,61 @@ class CropHarvestLabels(BaseDataset):
 
         if target_label is not None:
             positive_labels = gpdf[gpdf[NullableColumns.LABEL] == target_label]
-            negative_labels = gpdf[gpdf[NullableColumns.LABEL] != target_label]
+            target_label_is_crop = positive_labels.iloc[0][RequiredColumns.IS_CROP]
+
+            if not target_label_is_crop:
+                # if the target label is a non crop class (e.g. pasture),
+                # then we can just collect all classes which either
+                # 1) are crop, or 2) are a different non crop class (e.g. forest)
+                negative_labels = gpdf[
+                    (
+                        (
+                            gpdf[NullableColumns.LABEL].isnull()
+                            & (gpdf[RequiredColumns.IS_CROP] == True)
+                        )
+                        | (
+                            ~gpdf[NullableColumns.LABEL].isnull()
+                            & (gpdf[NullableColumns.LABEL] != target_label)
+                        )
+                    )
+                ]
+                negative_paths = [
+                    self._path_from_row(row) for _, row in negative_labels.iterrows()
+                ]
+            else:
+                # otherwise, the target label is a crop. If balance_negative_crops is
+                # true, then we want an equal number of (other) crops and non crops in
+                # the negative labels
+                negative_non_crop_labels = gpdf[gpdf[RequiredColumns.IS_CROP] == False]
+                negative_other_crop_labels = gpdf[
+                    (
+                        (gpdf[RequiredColumns.IS_CROP] == True)
+                        & (~gpdf[RequiredColumns.LABEL].isnull())
+                        & (gpdf[RequiredColumns.LABEL] != target_label)
+                    )
+                ]
+                negative_non_crop_paths = [
+                    self._path_from_row(row) for _, row in negative_non_crop_labels.iterrows()
+                ]
+                negative_paths = [
+                    self._path_from_row(row) for _, row in negative_other_crop_labels.iterrows()
+                ]
+
+                if balance_negative_crops:
+                    negative_paths.extend(
+                        deterministic_shuffle(negative_non_crop_paths, DEFAULT_SEED)[
+                            : len(negative_paths)
+                        ]
+                    )
+                else:
+                    negative_paths.extend(negative_non_crop_paths)
         else:
             # otherwise, we will just filter by crop and non crop
             positive_labels = gpdf[gpdf[RequiredColumns.IS_CROP] == True]
             negative_labels = gpdf[gpdf[RequiredColumns.IS_CROP] == False]
+            negative_paths = [self._path_from_row(row) for _, row in negative_labels.iterrows()]
 
         positive_paths = [self._path_from_row(row) for _, row in positive_labels.iterrows()]
-        negative_paths = [self._path_from_row(row) for _, row in negative_labels.iterrows()]
 
         return positive_paths, negative_paths
 
@@ -102,6 +154,8 @@ class CropHarvest(BaseDataset):
         self.negative_indices: List[int] = []
         self.y_vals: List[int] = []
 
+        self.test_identifier: List[str] = []
+
     def initialize_paths(
         self, labels: CropHarvestLabels, bounding_box: Optional[BBox], target_label: Optional[str]
     ) -> None:
@@ -122,12 +176,23 @@ class CropHarvest(BaseDataset):
         hf = h5py.File(self.filepaths[index], "r")
         return hf.get("array")[:], self.y_vals[index]
 
-    def test_data(self) -> Tuple[np.ndarray, np.ndarray]:
-        # return the test data
-        raise NotImplementedError
+    def test_data(self) -> Generator[Tuple[str, TestInstance], None, None]:
+        for task_identifier in self.test_identifier:
+            all_relevant_files = list(
+                (self.root / "test_features").glob(f"{task_identifier}_*.h5")
+            )
+            if len(all_relevant_files) == 0:
+                raise RuntimeError(f"Missing test data {task_identifier}_*.h5")
+            for filepath in all_relevant_files:
+                instance_identifier = filepath.name[:-3]  # remove the ".h5"
+                hf = h5py.File(filepath, "r")
+                test_array = TestInstance.load_from_h5(hf)
+                yield instance_identifier, test_array
 
     @classmethod
-    def create_benchmark_datasets(cls, labels: CropHarvestLabels) -> List:
+    def create_benchmark_datasets(
+        cls, labels: CropHarvestLabels, balance_negative_crops: bool = True
+    ) -> List:
         raise NotImplementedError
 
     @classmethod
