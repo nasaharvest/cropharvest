@@ -49,16 +49,6 @@ def load_normalizing_dict(path_to_dict: Path) -> Dict[str, np.ndarray]:
     return {"mean": hf.get("mean"), "std": hf.get("std")}
 
 
-def filter_geojson(gpdf: geopandas.GeoDataFrame, bounding_box: BBox) -> geopandas.GeoDataFrame:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        # warning: invalid value encountered in ? (vectorized)
-        in_bounding_box = np.vectorize(bounding_box.contains)(
-            gpdf[RequiredColumns.LAT], gpdf[RequiredColumns.LON]
-        )
-    return gpdf[in_bounding_box]
-
-
 def deterministic_shuffle(x: List, seed: int) -> List:
 
     output_list: List = []
