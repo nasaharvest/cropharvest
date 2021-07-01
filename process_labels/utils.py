@@ -38,7 +38,7 @@ def add_is_test_column(labels: geopandas.GeoDataFrame) -> geopandas.GeoDataFrame
         )
         labels.loc[in_region, RequiredColumns.IS_TEST] = True
 
-    for test_dataset in config.TEST_DATASETS:
+    for _, test_dataset in config.TEST_DATASETS.items():
         labels.loc[labels[RequiredColumns.DATASET] == test_dataset, RequiredColumns.IS_TEST] = True
 
     return labels
