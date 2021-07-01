@@ -17,14 +17,23 @@ from typing import List, Optional, Tuple, Generator
 
 @dataclass
 class Task:
-    bounding_box: BBox
+    bounding_box: Optional[BBox]
     target_label: Optional[str]
-    balance_negative_crops: bool
+    balance_negative_crops: bool = False
     test_identifier: Optional[str] = None
 
     def __post_init__(self):
         if self.target_label is None:
             self.target_label = "crop"
+            if self.balance_negative_crops is True:
+                warnings.warn(
+                    "Balance negative crops not meaningful for the crop vs. non crop tasks"
+                )
+
+        if self.bounding_box is None:
+            self.bounding_box = BBox(
+                min_lat=-90, max_lat=90, min_lon=-180, max_lon=180, name="global"
+            )
 
 
 class BaseDataset:
@@ -222,7 +231,7 @@ class CropHarvest(BaseDataset):
             # some points in the test h5py file?)
             country_bbox = countries.get_country_bbox(country)[0]
             output_datasets.append(
-                cls(root, Task(country_bbox, None, balance_negative_crops, test_dataset))
+                cls(root, Task(country_bbox, None, test_identifier=test_dataset))
             )
         return output_datasets
 
