@@ -147,35 +147,24 @@ class CropHarvestTifs(BaseDataset):
 class CropHarvest(BaseDataset):
     "Dataset consisting of satellite data and associated labels"
 
-    def __init__(self, root, download=False):
+    def __init__(
+        self,
+        root,
+        positive_paths: List[Path],
+        negative_paths: List[Path],
+        test_identifier: Optional[str] = None,
+        download=False,
+    ):
         super().__init__(root, download, download_url="", filename="")
 
-        self.filepaths: List[Path] = []
-        self.positive_indices: List[int] = []
-        self.negative_indices: List[int] = []
-        self.y_vals: List[int] = []
-
-        self.test_identifier: str = None
-
-    def initialize_paths(
-        self,
-        labels: CropHarvestLabels,
-        bounding_box: Optional[BBox],
-        target_label: Optional[str],
-        balance_negative_crops: bool = True,
-    ) -> None:
-        positive_paths, negative_paths = labels.construct_positive_and_negative_paths(
-            bounding_box,
-            target_label,
-            filter_test=True,
-            balance_negative_crops=balance_negative_crops,
-        )
-        self.filepaths = positive_paths + negative_paths
-        self.positive_indices = list(range(len(positive_paths)))
-        self.negative_indices = list(
+        self.filepaths: List[Path] = positive_paths + negative_paths
+        self.positive_indices: List[int] = list(range(len(positive_paths)))
+        self.negative_indices: List[int] = list(
             range(len(positive_paths), len(positive_paths) + len(negative_paths))
         )
-        self.y_vals = [1] * len(positive_paths) + [0] * len(negative_paths)
+        self.y_vals: List[int] = [1] * len(positive_paths) + [0] * len(negative_paths)
+
+        self.test_identifier: Optional[str] = test_identifier
 
     def __len__(self) -> int:
         return len(self.filepaths)
@@ -191,10 +180,9 @@ class CropHarvest(BaseDataset):
         if len(all_relevant_files) == 0:
             raise RuntimeError(f"Missing test data {self.test_identifier}*.h5")
         for filepath in all_relevant_files:
-            instance_identifier = filepath.name[:-3]  # remove the ".h5"
             hf = h5py.File(filepath, "r")
             test_array = TestInstance.load_from_h5(hf)
-            yield instance_identifier, test_array
+            yield filepath.stem, test_array
 
     @classmethod
     def create_benchmark_datasets(
@@ -210,15 +198,16 @@ class CropHarvest(BaseDataset):
                 country_bboxes = countries.get_country_bbox(country)
                 for country_bbox in country_bboxes:
                     if country_bbox.contains_bbox(bbox):
-                        dataset = cls(labels.root)
-                        dataset.initialize_paths(
-                            labels,
-                            country_bbox,
-                            target_label=crop,
-                            balance_negative_crops=balance_negative_crops,
+                        dataset = cls(
+                            labels.root,
+                            *labels.construct_positive_and_negative_paths(
+                                country_bbox,
+                                crop,
+                                filter_test=True,
+                                balance_negative_crops=balance_negative_crops,
+                            ),
+                            test_identifier=f"{country}_{crop}",
                         )
-
-                        dataset.test_identifier = f"{country}_{crop}"
                         output_datasets[f"{country}_{crop}"] = dataset
 
         for country, test_dataset in TEST_DATASETS.items():
@@ -227,13 +216,16 @@ class CropHarvest(BaseDataset):
             # be nice to confirm its the right index (maybe by checking against
             # some points in the test h5py file?)
             country_bbox = countries.get_country_bbox(country)[0]
-            dataset = cls(labels.root)
-            dataset.initialize_paths(
-                labels,
-                country_bbox,
-                target_label=None,
+            dataset = cls(
+                labels.root,
+                *labels.construct_positive_and_negative_paths(
+                    country_bbox,
+                    target_label=None,
+                    filter_test=True,
+                    balance_negative_crops=balance_negative_crops,
+                ),
+                test_identifier=test_dataset,
             )
-            dataset.test_identifier = test_dataset
             output_datasets[test_dataset] = dataset
         return output_datasets
 
