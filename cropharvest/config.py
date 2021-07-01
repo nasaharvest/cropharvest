@@ -23,7 +23,6 @@ LABELS_FILENAME = "labels.geojson"
 # so fixing this ensures the evaluation sets consist of the same data no matter
 # how they are run.
 DEFAULT_SEED = 42
-DEFAULT_BALANCE_CROPS = True
 
 
 # test regions should have the naming schema
@@ -46,4 +45,4 @@ TEST_REGIONS: Dict[str, BBox] = {
     ),
 }
 
-TEST_DATASETS = ["togo-eval"]
+TEST_DATASETS = {"Togo": "togo-eval"}
