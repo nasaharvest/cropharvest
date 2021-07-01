@@ -407,7 +407,7 @@ class Engineer:
                         hf.create_dataset(key, data=val)
                     hf.close()
 
-        for dataset in TEST_DATASETS:
+        for _, dataset in TEST_DATASETS.items():
             x: List[np.ndarray] = []
             y: List[int] = []
             lats: List[float] = []

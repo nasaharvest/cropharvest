@@ -5,11 +5,12 @@ import h5py
 
 from cropharvest.countries import BBox
 from cropharvest.utils import download_from_url, filter_geojson, deterministic_shuffle
-from cropharvest.config import LABELS_FILENAME, DEFAULT_SEED
+from cropharvest.config import LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
+from cropharvest import countries
 
-from typing import List, Optional, Tuple, Generator
+from typing import Dict, List, Optional, Tuple, Generator
 
 
 class BaseDataset:
@@ -104,8 +105,8 @@ class CropHarvestLabels(BaseDataset):
                 negative_other_crop_labels = gpdf[
                     (
                         (gpdf[RequiredColumns.IS_CROP] == True)
-                        & (~gpdf[RequiredColumns.LABEL].isnull())
-                        & (gpdf[RequiredColumns.LABEL] != target_label)
+                        & (~gpdf[NullableColumns.LABEL].isnull())
+                        & (gpdf[NullableColumns.LABEL] != target_label)
                     )
                 ]
                 negative_non_crop_paths = [
@@ -154,13 +155,20 @@ class CropHarvest(BaseDataset):
         self.negative_indices: List[int] = []
         self.y_vals: List[int] = []
 
-        self.test_identifier: List[str] = []
+        self.test_identifier: str = None
 
     def initialize_paths(
-        self, labels: CropHarvestLabels, bounding_box: Optional[BBox], target_label: Optional[str]
+        self,
+        labels: CropHarvestLabels,
+        bounding_box: Optional[BBox],
+        target_label: Optional[str],
+        balance_negative_crops: bool = True,
     ) -> None:
         positive_paths, negative_paths = labels.construct_positive_and_negative_paths(
-            bounding_box, target_label, filter_test=True
+            bounding_box,
+            target_label,
+            filter_test=True,
+            balance_negative_crops=balance_negative_crops,
         )
         self.filepaths = positive_paths + negative_paths
         self.positive_indices = list(range(len(positive_paths)))
@@ -177,23 +185,57 @@ class CropHarvest(BaseDataset):
         return hf.get("array")[:], self.y_vals[index]
 
     def test_data(self) -> Generator[Tuple[str, TestInstance], None, None]:
-        for task_identifier in self.test_identifier:
-            all_relevant_files = list(
-                (self.root / "test_features").glob(f"{task_identifier}_*.h5")
-            )
-            if len(all_relevant_files) == 0:
-                raise RuntimeError(f"Missing test data {task_identifier}_*.h5")
-            for filepath in all_relevant_files:
-                instance_identifier = filepath.name[:-3]  # remove the ".h5"
-                hf = h5py.File(filepath, "r")
-                test_array = TestInstance.load_from_h5(hf)
-                yield instance_identifier, test_array
+        all_relevant_files = list(
+            (self.root / "test_features").glob(f"{self.test_identifier}*.h5")
+        )
+        if len(all_relevant_files) == 0:
+            raise RuntimeError(f"Missing test data {self.test_identifier}*.h5")
+        for filepath in all_relevant_files:
+            instance_identifier = filepath.name[:-3]  # remove the ".h5"
+            hf = h5py.File(filepath, "r")
+            test_array = TestInstance.load_from_h5(hf)
+            yield instance_identifier, test_array
 
     @classmethod
     def create_benchmark_datasets(
         cls, labels: CropHarvestLabels, balance_negative_crops: bool = True
-    ) -> List:
-        raise NotImplementedError
+    ) -> Dict:
+
+        output_datasets: Dict = {}
+
+        for identifier, bbox in TEST_REGIONS.items():
+            country, crop, _, _ = identifier.split("_")
+
+            if f"{country}_{crop}" not in output_datasets:
+                country_bboxes = countries.get_country_bbox(country)
+                for country_bbox in country_bboxes:
+                    if country_bbox.contains_bbox(bbox):
+                        dataset = cls(labels.root)
+                        dataset.initialize_paths(
+                            labels,
+                            country_bbox,
+                            target_label=crop,
+                            balance_negative_crops=balance_negative_crops,
+                        )
+
+                        dataset.test_identifier = f"{country}_{crop}"
+                        output_datasets[f"{country}_{crop}"] = dataset
+
+        for country, test_dataset in TEST_DATASETS.items():
+            # TODO; for now, the only country here is Togo, which
+            # only has one bounding box. In the future, it might
+            # be nice to confirm its the right index (maybe by checking against
+            # some points in the test h5py file?)
+            country_bbox = countries.get_country_bbox(country)[0]
+            dataset = cls(labels.root)
+            dataset.initialize_paths(
+                labels,
+                country_bbox,
+                target_label=None,
+            )
+            dataset.test_identifier = test_dataset
+            output_datasets[test_dataset] = dataset
+        return output_datasets
 
     @classmethod
     def from_labels_and_tifs(cls, labels: CropHarvestLabels, tifs: CropHarvestTifs):
