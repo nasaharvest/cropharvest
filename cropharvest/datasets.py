@@ -132,7 +132,7 @@ class CropHarvestLabels(BaseDataset):
 
         positive_paths = [self._path_from_row(row) for _, row in positive_labels.iterrows()]
 
-        return positive_paths, negative_paths
+        return [x for x in positive_paths if x.exists()], [x for x in negative_paths if x.exists()]
 
 
 class CropHarvestTifs(BaseDataset):
