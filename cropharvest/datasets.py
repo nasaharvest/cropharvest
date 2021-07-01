@@ -5,7 +5,7 @@ import h5py
 
 from cropharvest.countries import BBox
 from cropharvest.utils import download_from_url, filter_geojson, deterministic_shuffle
-from cropharvest.config import LABELS_FILENAME, TEST_REGIONS, DEFAULT_SEED, DEFAULT_BALANCE_CROPS
+from cropharvest.config import LABELS_FILENAME, DEFAULT_SEED
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
 
