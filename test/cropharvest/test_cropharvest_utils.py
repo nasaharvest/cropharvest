@@ -1,4 +1,8 @@
-from cropharvest.utils import deterministic_shuffle
+import geopandas
+from shapely.geometry import Point
+
+from cropharvest.config import LABELS_FILENAME
+from cropharvest.utils import deterministic_shuffle, read_labels
 
 
 def test_deterministic_shuffle():
@@ -14,3 +18,15 @@ def test_deterministic_shuffle():
 
     for i in range(1, len(all_outputs)):
         assert all_outputs[0] != all_outputs[i]
+
+
+def test_labels_share_memory(tmpdir):
+
+    geopandas.GeoDataFrame(
+        data={"a": [1, 2, 3]}, geometry=[Point(1, 1), Point(2, 2), Point(3, 3)]
+    ).to_file(tmpdir / LABELS_FILENAME, driver="GeoJSON")
+
+    labels = read_labels(tmpdir)
+    labels_2 = read_labels(tmpdir)
+
+    assert labels is labels_2

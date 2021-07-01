@@ -6,9 +6,12 @@ import numpy as np
 import random
 import warnings
 import geopandas
+import collections
+import functools
 
 from cropharvest.columns import RequiredColumns
 from cropharvest.countries import BBox
+from cropharvest.config import LABELS_FILENAME
 
 from typing import Dict, List
 
@@ -74,3 +77,40 @@ def deterministic_shuffle(x: List, seed: int) -> List:
         output_list.append(x.pop(seed))
         seed *= -1
     return output_list
+
+
+class memoized(object):
+    """Decorator. Caches a function's return value each time it is called.
+    If called later with the same arguments, the cached value is returned
+    (not reevaluated).
+    https://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
+    """
+
+    def __init__(self, func):
+        self.func = func
+        self.cache = {}
+
+    def __call__(self, *args):
+        if not isinstance(args, collections.Hashable):
+            # uncacheable. a list, for instance.
+            # better to not cache than blow up.
+            return self.func(*args)
+        if args in self.cache:
+            return self.cache[args]
+        else:
+            value = self.func(*args)
+            self.cache[args] = value
+            return value
+
+    def __repr__(self):
+        """Return the function's docstring."""
+        return self.func.__doc__
+
+    def __get__(self, obj, objtype):
+        """Support instance methods."""
+        return functools.partial(self.__call__, obj)
+
+
+@memoized
+def read_labels(file_path) -> geopandas.GeoDataFrame:
+    return geopandas.read_file(str(file_path / LABELS_FILENAME))
