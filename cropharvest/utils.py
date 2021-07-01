@@ -10,7 +10,7 @@ import geopandas
 from cropharvest.columns import RequiredColumns
 from cropharvest.countries import BBox
 
-from typing import Dict
+from typing import Dict, List
 
 try:
     import torch
@@ -54,3 +54,23 @@ def filter_geojson(gpdf: geopandas.GeoDataFrame, bounding_box: BBox) -> geopanda
             gpdf[RequiredColumns.LAT], gpdf[RequiredColumns.LON]
         )
     return gpdf[in_bounding_box]
+
+
+def deterministic_shuffle(x: List, seed: int) -> List:
+
+    output_list: List = []
+    x = x.copy()
+
+    if seed % 2 == 0:
+        seed = -seed
+    while len(x) > 0:
+        if abs(seed) >= len(x):
+            is_negative = seed < 0
+            seed = min(seed % len(x), len(x) - 1)
+            if is_negative:
+                # seed will now definitely be positive. This
+                # ensures it will retain its original sign
+                seed *= -1
+        output_list.append(x.pop(seed))
+        seed *= -1
+    return output_list
