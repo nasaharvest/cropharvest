@@ -192,7 +192,23 @@ class CropHarvest(BaseDataset):
         hf = h5py.File(self.filepaths[index], "r")
         return hf.get("array")[:], self.y_vals[index]
 
+    def as_array(self) -> Tuple[np.ndarray, np.ndarray]:
+        r"""
+        Return the training data as a tuple of
+        np.ndarrays
+        """
+        X, Y = [], []
+        for i in range(len(self)):
+            x, y = self[i]
+            X.append(x)
+            Y.append(y)
+        return np.stack(X), np.stack(Y)
+
     def test_data(self) -> Generator[Tuple[str, TestInstance], None, None]:
+        r"""
+        A generator returning TestInstance objects containing the test
+        inputs, ground truths and associated latitudes nad longitudes
+        """
         all_relevant_files = list(
             (self.root / "test_features").glob(f"{self.task.test_identifier}*.h5")
         )
@@ -204,7 +220,23 @@ class CropHarvest(BaseDataset):
             yield filepath.stem, test_array
 
     @classmethod
-    def create_benchmark_datasets(cls, root, balance_negative_crops: bool = True) -> List:
+    def create_benchmark_datasets(
+        cls, root, balance_negative_crops: bool = True, download: bool = True
+    ) -> List:
+        r"""
+        Create the benchmark datasets.
+
+        :param root: The path to the data, where the training data and labels are (or will be)
+            saved
+        :param balance_negative_crops: Whether to ensure the crops are equally represented in
+            a dataset's negative labels. This is only used for datasets where there is a
+            target_label, and that target_label is a crop
+        :param download: Whether to download the labels and training data if they don't
+            already exist
+
+        :returns: A list of evaluation CropHarvest datasets according to the TEST_REGIONS and
+            TEST_DATASETS in the config
+        """
 
         output_datasets: List = []
 
@@ -224,6 +256,7 @@ class CropHarvest(BaseDataset):
                                     balance_negative_crops,
                                     f"{country}_{crop}",
                                 ),
+                                download=download,
                             )
                         )
 
@@ -234,7 +267,9 @@ class CropHarvest(BaseDataset):
             # some points in the test h5py file?)
             country_bbox = countries.get_country_bbox(country)[0]
             output_datasets.append(
-                cls(root, Task(country_bbox, None, test_identifier=test_dataset))
+                cls(
+                    root, Task(country_bbox, None, test_identifier=test_dataset), download=download
+                )
             )
         return output_datasets
 
