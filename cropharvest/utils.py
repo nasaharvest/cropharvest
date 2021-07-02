@@ -8,8 +8,6 @@ import geopandas
 import collections
 import functools
 
-from cropharvest.config import LABELS_FILENAME
-
 from typing import Dict, List
 
 try:
