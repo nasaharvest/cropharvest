@@ -5,3 +5,4 @@ tqdm
 h5py
 rasterio
 openpyxl
+sklearn

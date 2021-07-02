@@ -5,6 +5,8 @@ from math import sin, cos, radians
 from typing import List, Tuple
 from pathlib import Path
 
+from typing import Optional
+
 COUNTRY_SHAPEFILE = geopandas.read_file(str(Path(__file__).parent / "country_shapefile"))
 
 
@@ -15,6 +17,8 @@ class BBox:
     max_lat: float
     min_lon: float
     max_lon: float
+
+    name: Optional[str] = None
 
     def __post_init__(self):
         if self.max_lon < self.min_lon:
@@ -63,9 +67,9 @@ class BBox:
             return lat, lon
 
     @classmethod
-    def polygon_to_bbox(cls, polygon: Polygon):
+    def polygon_to_bbox(cls, polygon: Polygon, name: Optional[str] = None):
         (min_lon, min_lat, max_lon, max_lat) = polygon.bounds
-        return cls(min_lat, max_lat, min_lon, max_lon)
+        return cls(min_lat, max_lat, min_lon, max_lon, name)
 
 
 def get_country_bbox(country_name: str) -> List[BBox]:
@@ -75,9 +79,9 @@ def get_country_bbox(country_name: str) -> List[BBox]:
         raise RuntimeError(f"Unrecognized country {country_name}")
     polygon = country.geometry.iloc[0]
     if isinstance(polygon, Polygon):
-        return [BBox.polygon_to_bbox(polygon)]
+        return [BBox.polygon_to_bbox(polygon, country_name)]
     elif isinstance(polygon, MultiPolygon):
-        bboxes = [BBox.polygon_to_bbox(x) for x in polygon]
+        bboxes = [BBox.polygon_to_bbox(x, country_name) for x in polygon]
         # we want to remove any bounding boxes which are contained within
         # another bounding box
         indices_to_remove = set()

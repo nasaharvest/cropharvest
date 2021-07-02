@@ -8,9 +8,9 @@ from datetime import datetime
 from typing import List, Tuple, Sequence, Optional
 
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
+from cropharvest.columns import RequiredColumns
 
 from .utils import process_crop_non_crop
-from ..columns import RequiredColumns
 from ..utils import DATASET_PATH
 
 

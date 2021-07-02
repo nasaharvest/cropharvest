@@ -4,8 +4,7 @@ from pathlib import Path
 from math import sin, cos, sqrt, radians, atan2
 
 from cropharvest import config
-
-from .columns import RequiredColumns
+from cropharvest.columns import RequiredColumns
 
 
 EARTH_RADIUS = 6373.0
@@ -39,7 +38,7 @@ def add_is_test_column(labels: geopandas.GeoDataFrame) -> geopandas.GeoDataFrame
         )
         labels.loc[in_region, RequiredColumns.IS_TEST] = True
 
-    for test_dataset in config.TEST_DATASETS:
+    for _, test_dataset in config.TEST_DATASETS.items():
         labels.loc[labels[RequiredColumns.DATASET] == test_dataset, RequiredColumns.IS_TEST] = True
 
     return labels
