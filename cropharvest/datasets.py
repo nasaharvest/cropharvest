@@ -169,13 +169,13 @@ class CropHarvest(BaseDataset):
     ):
         super().__init__(root, download, download_url="", filename="")
 
-        self.labels = CropHarvestLabels(root)
+        labels = CropHarvestLabels(root)
         if task is None:
             print("Using the default task; crop vs. non crop globally")
             task = Task()
         self.task = task
 
-        positive_paths, negative_paths = self.labels.construct_positive_and_negative_labels(
+        positive_paths, negative_paths = labels.construct_positive_and_negative_labels(
             task, filter_test=True
         )
         self.filepaths: List[Path] = positive_paths + negative_paths
