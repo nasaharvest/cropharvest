@@ -99,5 +99,5 @@ class memoized(object):
 
 
 @memoized
-def read_labels(file_path) -> geopandas.GeoDataFrame:
-    return geopandas.read_file(str(file_path / LABELS_FILENAME))
+def read_geopandas(file_path) -> geopandas.GeoDataFrame:
+    return geopandas.read_file(str(file_path))

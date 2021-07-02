@@ -6,7 +6,7 @@ import warnings
 from dataclasses import dataclass
 
 from cropharvest.countries import BBox
-from cropharvest.utils import download_from_url, deterministic_shuffle, read_labels
+from cropharvest.utils import download_from_url, deterministic_shuffle, read_geopandas
 from cropharvest.config import LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
@@ -67,7 +67,7 @@ class CropHarvestLabels(BaseDataset):
 
     def __init__(self, root, download=False):
         super().__init__(root, download, download_url=self.url, filename=LABELS_FILENAME)
-        self._labels = read_labels(self.root)
+        self._labels = read_geopandas(self.root / LABELS_FILENAME)
 
     def as_geojson(self) -> geopandas.GeoDataFrame:
         return self._labels
