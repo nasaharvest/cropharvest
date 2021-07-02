@@ -17,8 +17,8 @@ from typing import List, Optional, Tuple, Generator
 
 @dataclass
 class Task:
-    bounding_box: Optional[BBox]
-    target_label: Optional[str]
+    bounding_box: Optional[BBox] = None
+    target_label: Optional[str] = None
     balance_negative_crops: bool = False
     test_identifier: Optional[str] = None
 
@@ -164,12 +164,15 @@ class CropHarvest(BaseDataset):
     def __init__(
         self,
         root,
-        task: Task,
+        task: Optional[Task] = None,
         download=False,
     ):
         super().__init__(root, download, download_url="", filename="")
 
         self.labels = CropHarvestLabels(root)
+        if task is None:
+            print("Using the default task; crop vs. non crop globally")
+            task = Task()
         self.task = task
 
         positive_paths, negative_paths = self.labels.construct_positive_and_negative_labels(
