@@ -4,7 +4,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH, NUM_TIMESTEPS, DAYS_PER_TIMESTEP
-from ..columns import RequiredColumns
+from cropharvest.columns import RequiredColumns
 
 from typing import Optional, Dict
 

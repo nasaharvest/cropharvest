@@ -18,6 +18,12 @@ EXPORT_END_DAY = 1
 
 LABELS_FILENAME = "labels.geojson"
 
+# the default seed is useful because it also seeds the deterministic
+# shuffling algorithm we use (in cropharvest.utils.deterministic_shuffle)
+# so fixing this ensures the evaluation sets consist of the same data no matter
+# how they are run.
+DEFAULT_SEED = 42
+
 
 # test regions should have the naming schema
 # {country}_{test_crop}_{export_end_year}_{identifer}
@@ -39,4 +45,4 @@ TEST_REGIONS: Dict[str, BBox] = {
     ),
 }
 
-TEST_DATASETS = ["togo-eval"]
+TEST_DATASETS = {"Togo": "togo-eval"}

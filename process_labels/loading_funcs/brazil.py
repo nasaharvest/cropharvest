@@ -4,9 +4,9 @@ from datetime import datetime
 import numpy as np
 
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH
+from cropharvest.columns import RequiredColumns, NullableColumns
 from .utils import process_crop_non_crop
 from ..utils import DATASET_PATH
-from ..columns import RequiredColumns, NullableColumns
 
 
 LABEL_TO_CLASSIFICATION = {
