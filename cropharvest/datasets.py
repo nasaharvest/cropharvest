@@ -72,6 +72,9 @@ class CropHarvestLabels(BaseDataset):
 
     def __init__(self, root, download=False):
         super().__init__(root, download, download_url=self.url, filename=LABELS_FILENAME)
+
+        # self._labels will always contain the original dataframe;
+        # the CropHarvestLabels class should not modify it
         self._labels = read_geopandas(self.root / LABELS_FILENAME)
 
     def as_geojson(self) -> geopandas.GeoDataFrame:
