@@ -169,7 +169,7 @@ class CropHarvest(BaseDataset):
     ):
         super().__init__(root, download, download_url="", filename="")
 
-        labels = CropHarvestLabels(root)
+        labels = CropHarvestLabels(root, download=download)
         if task is None:
             print("Using the default task; crop vs. non crop globally")
             task = Task()
