@@ -99,3 +99,7 @@ class memoized(object):
 @memoized
 def read_geopandas(file_path) -> geopandas.GeoDataFrame:
     return geopandas.read_file(str(file_path))
+
+
+def flatten_array(array: np.ndarray) -> np.ndarray:
+    return array.reshape(array.shape[0], -1)

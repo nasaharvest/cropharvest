@@ -6,7 +6,12 @@ import warnings
 from dataclasses import dataclass
 
 from cropharvest.countries import BBox
-from cropharvest.utils import download_from_url, deterministic_shuffle, read_geopandas
+from cropharvest.utils import (
+    download_from_url,
+    deterministic_shuffle,
+    read_geopandas,
+    flatten_array,
+)
 from cropharvest.config import LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
@@ -192,22 +197,33 @@ class CropHarvest(BaseDataset):
         hf = h5py.File(self.filepaths[index], "r")
         return hf.get("array")[:], self.y_vals[index]
 
-    def as_array(self) -> Tuple[np.ndarray, np.ndarray]:
+    def as_array(self, flatten_x: bool = False) -> Tuple[np.ndarray, np.ndarray]:
         r"""
         Return the training data as a tuple of
         np.ndarrays
+
+        :param flatten_x: If True, the X array will have shape [num_samples, timesteps * bands]
+            instead of [num_samples, timesteps, bands]
         """
         X, Y = [], []
         for i in range(len(self)):
             x, y = self[i]
             X.append(x)
             Y.append(y)
-        return np.stack(X), np.stack(Y)
+        X_np, y_np = np.stack(X), np.stack(Y)
+        if flatten_x:
+            X_np = flatten_array(X_np)
+        return X_np, y_np
 
-    def test_data(self) -> Generator[Tuple[str, TestInstance], None, None]:
+    def test_data(
+        self, flatten_x: bool = False
+    ) -> Generator[Tuple[str, TestInstance], None, None]:
         r"""
         A generator returning TestInstance objects containing the test
         inputs, ground truths and associated latitudes nad longitudes
+
+        :param flatten_x: If True, the TestInstance.x will have shape
+            [num_samples, timesteps * bands] instead of [num_samples, timesteps, bands]
         """
         all_relevant_files = list(
             (self.root / "test_features").glob(f"{self.task.test_identifier}*.h5")
@@ -216,7 +232,7 @@ class CropHarvest(BaseDataset):
             raise RuntimeError(f"Missing test data {self.task.test_identifier}*.h5")
         for filepath in all_relevant_files:
             hf = h5py.File(filepath, "r")
-            test_array = TestInstance.load_from_h5(hf)
+            test_array = TestInstance.load_from_h5(hf, flatten_x=flatten_x)
             yield filepath.stem, test_array
 
     @classmethod
