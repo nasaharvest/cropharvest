@@ -40,7 +40,7 @@ def run(data_folder: Path):
                     results = test_instance.evaluate_predictions()
 
                     with Path(results_json).open("r") as f:
-                        json.dump(results)
+                        json.dump(results, f)
 
                     ds = test_instance.to_xarray()
                     ds.to_netcdf(results_nc)
