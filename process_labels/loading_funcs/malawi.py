@@ -26,7 +26,7 @@ def load_malawi_fao():
     df = geopandas.read_file(DATASET_PATH / "malawi/malawi_fao.geojson")
 
     # remove intercropped labels
-    df[df.multiple_crops == "no"]
+    df = df[df.multiple_crops == "no"]
 
     df = df.rename(
         columns={
