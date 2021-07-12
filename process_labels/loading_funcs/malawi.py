@@ -1,4 +1,5 @@
 import geopandas
+import pandas as pd
 from shapely.geometry import Point
 
 from datetime import datetime
@@ -35,6 +36,9 @@ def load_malawi_fao():
             "current_season_current_crop": NullableColumns.LABEL,
         }
     )
+
+    df[RequiredColumns.LAT] = pd.to_numeric(df[RequiredColumns.LAT])
+    df[RequiredColumns.LON] = pd.to_numeric(df[RequiredColumns.LON])
 
     df[RequiredColumns.COLLECTION_DATE] = datetime(2021, 6, 1)
     df[RequiredColumns.IS_CROP] = 1
