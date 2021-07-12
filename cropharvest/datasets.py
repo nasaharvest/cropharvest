@@ -1,3 +1,4 @@
+from operator import neg, pos
 from pathlib import Path
 import geopandas
 import numpy as np
@@ -202,16 +203,35 @@ class CropHarvest(BaseDataset):
         hf = h5py.File(self.filepaths[index], "r")
         return hf.get("array")[:], self.y_vals[index]
 
-    def as_array(self, flatten_x: bool = False) -> Tuple[np.ndarray, np.ndarray]:
+    def as_array(
+        self, flatten_x: bool = False, num_samples: int = -1
+    ) -> Tuple[np.ndarray, np.ndarray]:
         r"""
         Return the training data as a tuple of
         np.ndarrays
 
         :param flatten_x: If True, the X array will have shape [num_samples, timesteps * bands]
             instead of [num_samples, timesteps, bands]
+        :param num_samples: If -1, all data is returned. Otherwise, a balanced dataset of
+            num_samples / 2 positive (& negative) samples will be returned
         """
         X, Y = [], []
-        for i in range(len(self)):
+
+        if num_samples == -1:
+            indices_to_sample = list(range(len(self)))
+        else:
+            k = num_samples // 2
+
+            pos_indices, neg_indices = self._get_positive_and_negative_indices()
+            if (k < len(pos_indices)) or (k < len(neg_indices)):
+                raise ValueError(
+                    f"num_samples // 2 ({k}) is greater than the number of "
+                    f"positive samples ({len(pos_indices)}) "
+                    f"or the number of negative samples ({len(neg_indices)})"
+                )
+            indices_to_sample = pos_indices[:k] + neg_indices[:k]
+
+        for i in indices_to_sample:
             x, y = self[i]
             X.append(x)
             Y.append(y)
@@ -306,3 +326,14 @@ class CropHarvest(BaseDataset):
     @property
     def id(self) -> str:
         return f"{cast(BBox, self.task.bounding_box).name}_{self.task.target_label}"
+
+    def _get_positive_and_negative_indices(self) -> Tuple[List[int], List[int]]:
+
+        positive_indices: List[int] = []
+        negative_indices: List[int] = []
+
+        for i in range(len(self)):
+            if self.y_vals == 1:
+                positive_indices.append(i)
+            else:
+                negative_indices.append(i)
