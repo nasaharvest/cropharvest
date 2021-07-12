@@ -17,7 +17,7 @@ from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
 from cropharvest import countries
 
-from typing import List, Optional, Tuple, Generator
+from typing import cast, List, Optional, Tuple, Generator
 
 
 @dataclass
@@ -187,11 +187,13 @@ class CropHarvest(BaseDataset):
             task, filter_test=True
         )
         self.filepaths: List[Path] = positive_paths + negative_paths
-        self.positive_indices: List[int] = list(range(len(positive_paths)))
-        self.negative_indices: List[int] = list(
-            range(len(positive_paths), len(positive_paths) + len(negative_paths))
-        )
         self.y_vals: List[int] = [1] * len(positive_paths) + [0] * len(negative_paths)
+
+    def shuffle(self, seed: int) -> None:
+        filepaths_and_y_vals = list(zip(self.filepaths, self.y_vals))
+        filepaths_and_y_vals = deterministic_shuffle(filepaths_and_y_vals, seed)
+        filepaths, y_vals = zip(*filepaths_and_y_vals)
+        self.filepaths, self.y_vals = list(filepaths), list(y_vals)
 
     def __len__(self) -> int:
         return len(self.filepaths)
@@ -303,4 +305,4 @@ class CropHarvest(BaseDataset):
 
     @property
     def id(self) -> str:
-        return f"{self.task.bounding_box.name}_{self.task.target_label}"
+        return f"{cast(BBox, self.task.bounding_box).name}_{self.task.target_label}"
