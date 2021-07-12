@@ -11,6 +11,8 @@ from tqdm import tqdm
 import warnings
 import h5py
 
+from sklearn.metrics import roc_auc_score, f1_score
+
 from cropharvest.eo import STATIC_BANDS, DYNAMIC_BANDS
 from cropharvest.columns import RequiredColumns, NullableColumns
 from .config import (
@@ -62,6 +64,7 @@ class TestInstance:
     y: np.ndarray  # 1 is positive, 0 is negative and -1 (MISSING_DATA) is no label
     lats: np.ndarray
     lons: np.ndarray
+    preds: Optional[np.ndarray] = None
 
     @property
     def datasets(self) -> Dict[str, np.ndarray]:
@@ -77,6 +80,28 @@ class TestInstance:
         if flatten_x:
             x = flatten_array(x)
         return cls(x=x, y=h5.get("y")[:], lats=h5.get("lats")[:], lons=h5.get("lons")[:])
+
+    def evaluate_predictions(self) -> Dict[str, float]:
+        assert self.preds is not None, f"Predictions not added to the test instance!"
+        binary_preds = self.preds > 0.5
+
+        intersection = np.logical_and(binary_preds, self.y)
+        union = np.logical_or(binary_preds, self.y)
+
+        return {
+            "auc_roc": roc_auc_score(self.y, self.preds),
+            "f1_score": f1_score(self.y, binary_preds),
+            "iou": np.sum(intersection) / np.sum(union),
+            "num_samples": len(self.y),
+        }
+
+    def to_xarray(self) -> xr.Dataset:
+        data_dict: Dict[str, np.ndarray] = {"lat": self.lats, "lon": self.lons}
+        # the first idx is the y labels
+        data_dict["ground_truth"] = self.y
+        if self.preds is not None:
+            data_dict["preds"] = self.preds
+        return pd.DataFrame(data=data_dict).set_index(["lat", "lon"]).to_xarray()
 
 
 class Engineer:
