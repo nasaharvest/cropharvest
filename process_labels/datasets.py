@@ -166,7 +166,7 @@ DATASETS = {
         "description": "Hand-labelled crop / non crop labels in Rwanda",
     },
     "malawi-fao": {
-        "function": loading_funcs.load_malawi,
+        "function": loading_funcs.load_malawi_fao,
         "description": "Crop type labels in Malawi collected by the FAO in June 2021",
     },
 }
