@@ -82,7 +82,7 @@ class TestInstance:
         return cls(x=x, y=h5.get("y")[:], lats=h5.get("lats")[:], lons=h5.get("lons")[:])
 
     def evaluate_predictions(self) -> Dict[str, float]:
-        assert self.preds is not None, f"Predictions not added to the test instance!"
+        assert self.preds is not None, "Predictions not added to the test instance!"
         binary_preds = self.preds > 0.5
 
         intersection = np.logical_and(binary_preds, self.y)

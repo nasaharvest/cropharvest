@@ -4,6 +4,7 @@ import numpy as np
 import h5py
 import warnings
 from dataclasses import dataclass
+from numpy.lib.npyio import load
 
 from cropharvest.countries import BBox
 from cropharvest.utils import (
@@ -11,6 +12,7 @@ from cropharvest.utils import (
     deterministic_shuffle,
     read_geopandas,
     flatten_array,
+    load_normalizing_dict,
 )
 from cropharvest.config import LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
 from cropharvest.columns import NullableColumns, RequiredColumns
@@ -26,6 +28,7 @@ class Task:
     target_label: Optional[str] = None
     balance_negative_crops: bool = False
     test_identifier: Optional[str] = None
+    normalize: bool = True
 
     def __post_init__(self):
         if self.target_label is None:
@@ -183,6 +186,8 @@ class CropHarvest(BaseDataset):
             task = Task()
         self.task = task
 
+        self.normalizing_dict = load_normalizing_dict(Path(root) / "features/normalizing_dict.h5")
+
         positive_paths, negative_paths = labels.construct_positive_and_negative_labels(
             task, filter_test=True
         )
@@ -200,7 +205,7 @@ class CropHarvest(BaseDataset):
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, int]:
         hf = h5py.File(self.filepaths[index], "r")
-        return hf.get("array")[:], self.y_vals[index]
+        return self._normalize(hf.get("array")[:]), self.y_vals[index]
 
     def as_array(
         self, flatten_x: bool = False, num_samples: int = -1
@@ -336,3 +341,9 @@ class CropHarvest(BaseDataset):
                 positive_indices.append(i)
             else:
                 negative_indices.append(i)
+
+    def _normalize(self, array: np.ndarray) -> np.ndarray:
+        if not self.task.normalize:
+            return array
+        else:
+            return (array - self.normalizing_dict["mean"]) / self.normalizing_dict["std"]
