@@ -4,7 +4,6 @@ import numpy as np
 import h5py
 import warnings
 from dataclasses import dataclass
-from numpy.lib.npyio import load
 
 from cropharvest.countries import BBox
 from cropharvest.utils import (
