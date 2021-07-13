@@ -1,4 +1,3 @@
-from operator import neg, pos
 from pathlib import Path
 import geopandas
 import numpy as np
