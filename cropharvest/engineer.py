@@ -64,7 +64,6 @@ class TestInstance:
     y: np.ndarray  # 1 is positive, 0 is negative and -1 (MISSING_DATA) is no label
     lats: np.ndarray
     lons: np.ndarray
-    preds: Optional[np.ndarray] = None
 
     @property
     def datasets(self) -> Dict[str, np.ndarray]:
@@ -81,11 +80,13 @@ class TestInstance:
             x = flatten_array(x)
         return cls(x=x, y=h5.get("y")[:], lats=h5.get("lats")[:], lons=h5.get("lons")[:])
 
-    def evaluate_predictions(self) -> Dict[str, float]:
-        assert self.preds is not None, "Predictions not added to the test instance!"
+    def evaluate_predictions(self, preds: np.ndarray) -> Dict[str, float]:
+        assert len(preds) == len(
+            self.y
+        ), f"Expected preds to have length {len(self.y)}, got {len(preds)}"
 
         y_no_missing = self.y[self.y != MISSING_DATA]
-        preds_no_missing = self.preds[self.y != MISSING_DATA]
+        preds_no_missing = preds[self.y != MISSING_DATA]
 
         if len(np.unique(y_no_missing)) == 1:
             print(
@@ -107,12 +108,12 @@ class TestInstance:
             "num_samples": len(y_no_missing),
         }
 
-    def to_xarray(self) -> xr.Dataset:
+    def to_xarray(self, preds: Optional[np.ndarray] = None) -> xr.Dataset:
         data_dict: Dict[str, np.ndarray] = {"lat": self.lats, "lon": self.lons}
         # the first idx is the y labels
         data_dict["ground_truth"] = self.y
-        if self.preds is not None:
-            data_dict["preds"] = self.preds
+        if preds is not None:
+            data_dict["preds"] = preds
         return pd.DataFrame(data=data_dict).set_index(["lat", "lon"]).to_xarray()
 
 
