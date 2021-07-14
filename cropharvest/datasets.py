@@ -335,8 +335,8 @@ class CropHarvest(BaseDataset):
         positive_indices: List[int] = []
         negative_indices: List[int] = []
 
-        for i in range(len(self)):
-            if self.y_vals[i] == 1:
+        for i, y_val in enumerate(self.y_vals):
+            if y_val == 1:
                 positive_indices.append(i)
             else:
                 negative_indices.append(i)
