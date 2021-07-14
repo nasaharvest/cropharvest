@@ -207,7 +207,7 @@ class CropHarvest(BaseDataset):
         return self._normalize(hf.get("array")[:]), self.y_vals[index]
 
     def as_array(
-        self, flatten_x: bool = False, num_samples: int = -1
+        self, flatten_x: bool = False, num_samples: Optional[int] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
         r"""
         Return the training data as a tuple of
@@ -220,7 +220,7 @@ class CropHarvest(BaseDataset):
         """
         X, Y = [], []
 
-        if num_samples == -1:
+        if num_samples is None:
             indices_to_sample = list(range(len(self)))
         else:
             k = num_samples // 2
@@ -234,11 +234,9 @@ class CropHarvest(BaseDataset):
                 )
             indices_to_sample = pos_indices[:k] + neg_indices[:k]
 
-        for i in indices_to_sample:
-            x, y = self[i]
-            X.append(x)
-            Y.append(y)
+        X, Y = zip(*[self[i] for i in indices_to_sample])
         X_np, y_np = np.stack(X), np.stack(Y)
+
         if flatten_x:
             X_np = flatten_array(X_np)
         return X_np, y_np
