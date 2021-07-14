@@ -41,7 +41,7 @@ def download_from_url(url: str, filename: str, chunk_size: int = 1024) -> None:
 def load_normalizing_dict(path_to_dict: Path) -> Dict[str, np.ndarray]:
 
     hf = h5py.File(path_to_dict, "r")
-    return {"mean": hf.get("mean"), "std": hf.get("std")}
+    return {"mean": hf.get("mean")[:], "std": hf.get("std")[:]}
 
 
 def deterministic_shuffle(x: List, seed: int) -> List:
