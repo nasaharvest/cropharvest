@@ -25,8 +25,8 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
             for sample_size in sample_sizes:
                 print(f"Running Random Forest for {dataset}, seed: {seed}")
 
-                results_json = results_folder / f"{dataset.id}_{sample_sizes}_{seed}.json"
-                results_nc = results_folder / f"{dataset.id}_{sample_sizes}_{seed}.nc"
+                results_json = results_folder / f"{dataset.id}_{sample_size}_{seed}.json"
+                results_nc = results_folder / f"{dataset.id}_{sample_size}_{seed}.nc"
                 if results_json.exists():
                     print(f"Results already saved for {results_json} - skipping")
 
@@ -41,7 +41,7 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
 
                     results = test_instance.evaluate_predictions()
 
-                    with Path(results_json).open("r") as f:
+                    with Path(results_json).open("w") as f:
                         json.dump(results, f)
 
                     ds = test_instance.to_xarray()
