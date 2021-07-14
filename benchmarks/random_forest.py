@@ -37,14 +37,14 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
                 model.fit(train_x, train_y)
 
                 for _, test_instance in dataset.test_data(flatten_x=True):
-                    test_instance.preds = model.predict_proba(test_instance.x)[:, 1]
+                    preds = model.predict_proba(test_instance.x)[:, 1]
 
-                    results = test_instance.evaluate_predictions()
+                    results = test_instance.evaluate_predictions(preds)
 
                     with Path(results_json).open("w") as f:
                         json.dump(results, f)
 
-                    ds = test_instance.to_xarray()
+                    ds = test_instance.to_xarray(preds)
                     ds.to_netcdf(results_nc)
 
 
