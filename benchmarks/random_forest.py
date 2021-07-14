@@ -23,7 +23,7 @@ def run(data_folder: Path = DATAFOLDER_PATH):
         for seed in SHUFFLE_SEEDS:
             dataset.shuffle(seed)
             for sample_size in sample_sizes:
-                print("Running Random Forest for {dataset}, seed: {seed}")
+                print(f"Running Random Forest for {dataset}, seed: {seed}")
 
                 results_json = results_folder / f"{dataset.id}_{sample_sizes}_{seed}.json"
                 results_nc = results_folder / f"{dataset.id}_{sample_sizes}_{seed}.nc"
