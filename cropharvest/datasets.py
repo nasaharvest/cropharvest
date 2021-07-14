@@ -226,7 +226,7 @@ class CropHarvest(BaseDataset):
             k = num_samples // 2
 
             pos_indices, neg_indices = self._get_positive_and_negative_indices()
-            if (k < len(pos_indices)) or (k < len(neg_indices)):
+            if (k > len(pos_indices)) or (k > len(neg_indices)):
                 raise ValueError(
                     f"num_samples // 2 ({k}) is greater than the number of "
                     f"positive samples ({len(pos_indices)}) "
