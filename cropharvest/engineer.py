@@ -92,8 +92,15 @@ class TestInstance:
         intersection = np.logical_and(binary_preds, y_no_missing)
         union = np.logical_or(binary_preds, y_no_missing)
 
+        try:
+            auc_score = roc_auc_score(y_no_missing, preds_no_missing)
+        except ValueError as e:
+            # TODO; globally calculate AUC ROC from all saved NetCDF files
+            print(f"{e} raised when calculating AUC ROC score. Returning as None")
+            auc_score = None
+
         return {
-            "auc_roc": roc_auc_score(y_no_missing, preds_no_missing),
+            "auc_roc": auc_score,
             "f1_score": f1_score(y_no_missing, binary_preds),
             "iou": np.sum(intersection) / np.sum(union),
             "num_samples": len(y_no_missing),
