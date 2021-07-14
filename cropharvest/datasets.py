@@ -345,5 +345,4 @@ class CropHarvest(BaseDataset):
     def _normalize(self, array: np.ndarray) -> np.ndarray:
         if not self.task.normalize:
             return array
-        else:
-            return (array - self.normalizing_dict["mean"]) / self.normalizing_dict["std"]
+        return (array - self.normalizing_dict["mean"]) / self.normalizing_dict["std"]
