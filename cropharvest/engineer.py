@@ -83,16 +83,20 @@ class TestInstance:
 
     def evaluate_predictions(self) -> Dict[str, float]:
         assert self.preds is not None, "Predictions not added to the test instance!"
-        binary_preds = self.preds > 0.5
 
-        intersection = np.logical_and(binary_preds, self.y)
-        union = np.logical_or(binary_preds, self.y)
+        y_no_missing = self.y[self.y != MISSING_DATA]
+        preds_no_missing = self.preds[self.y != MISSING_DATA]
+
+        binary_preds = preds_no_missing > 0.5
+
+        intersection = np.logical_and(binary_preds, y_no_missing)
+        union = np.logical_or(binary_preds, y_no_missing)
 
         return {
-            "auc_roc": roc_auc_score(self.y, self.preds),
-            "f1_score": f1_score(self.y, binary_preds),
+            "auc_roc": roc_auc_score(y_no_missing, preds_no_missing),
+            "f1_score": f1_score(y_no_missing, binary_preds),
             "iou": np.sum(intersection) / np.sum(union),
-            "num_samples": len(self.y),
+            "num_samples": len(y_no_missing),
         }
 
     def to_xarray(self) -> xr.Dataset:
