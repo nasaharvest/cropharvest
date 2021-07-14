@@ -31,5 +31,5 @@ jobs:
       - name: Run tests
         run: |
           python -m black --check --diff .
-          python -m mypy cropharvest process_labels test
+          python -m mypy cropharvest process_labels test benchmarks
           python -m pytest

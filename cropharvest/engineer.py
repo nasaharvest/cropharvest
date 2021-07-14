@@ -11,6 +11,8 @@ from tqdm import tqdm
 import warnings
 import h5py
 
+from sklearn.metrics import roc_auc_score, f1_score
+
 from cropharvest.eo import STATIC_BANDS, DYNAMIC_BANDS
 from cropharvest.columns import RequiredColumns, NullableColumns
 from .config import (
@@ -77,6 +79,42 @@ class TestInstance:
         if flatten_x:
             x = flatten_array(x)
         return cls(x=x, y=h5.get("y")[:], lats=h5.get("lats")[:], lons=h5.get("lons")[:])
+
+    def evaluate_predictions(self, preds: np.ndarray) -> Dict[str, float]:
+        assert len(preds) == len(
+            self.y
+        ), f"Expected preds to have length {len(self.y)}, got {len(preds)}"
+
+        y_no_missing = self.y[self.y != MISSING_DATA]
+        preds_no_missing = preds[self.y != MISSING_DATA]
+
+        if len(np.unique(y_no_missing)) == 1:
+            print(
+                "This TestInstance only has one class in the ground truth. "
+                "Metrics will be ill-defined, and should be calculated for"
+                "all TestInstances together"
+            )
+            return {"num_samples": len(y_no_missing)}
+
+        binary_preds = preds_no_missing > 0.5
+
+        intersection = np.logical_and(binary_preds, y_no_missing)
+        union = np.logical_or(binary_preds, y_no_missing)
+
+        return {
+            "auc_roc": roc_auc_score(y_no_missing, preds_no_missing),
+            "f1_score": f1_score(y_no_missing, binary_preds),
+            "iou": np.sum(intersection) / np.sum(union),
+            "num_samples": len(y_no_missing),
+        }
+
+    def to_xarray(self, preds: Optional[np.ndarray] = None) -> xr.Dataset:
+        data_dict: Dict[str, np.ndarray] = {"lat": self.lats, "lon": self.lons}
+        # the first idx is the y labels
+        data_dict["ground_truth"] = self.y
+        if preds is not None:
+            data_dict["preds"] = preds
+        return pd.DataFrame(data=data_dict).set_index(["lat", "lon"]).to_xarray()
 
 
 class Engineer:
