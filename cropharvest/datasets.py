@@ -340,6 +340,7 @@ class CropHarvest(BaseDataset):
                 positive_indices.append(i)
             else:
                 negative_indices.append(i)
+        return positive_indices, negative_indices
 
     def _normalize(self, array: np.ndarray) -> np.ndarray:
         if not self.task.normalize:
