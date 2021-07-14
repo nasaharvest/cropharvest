@@ -87,20 +87,21 @@ class TestInstance:
         y_no_missing = self.y[self.y != MISSING_DATA]
         preds_no_missing = self.preds[self.y != MISSING_DATA]
 
+        if len(np.unique(y_no_missing)) == 1:
+            print(
+                "This TestInstance only has one class in the ground truth. "
+                "Metrics will be ill-defined, and should be calculated for"
+                "all TestInstances together"
+            )
+            return {"num_samples": len(y_no_missing)}
+
         binary_preds = preds_no_missing > 0.5
 
         intersection = np.logical_and(binary_preds, y_no_missing)
         union = np.logical_or(binary_preds, y_no_missing)
 
-        try:
-            auc_score = roc_auc_score(y_no_missing, preds_no_missing)
-        except ValueError as e:
-            # TODO; globally calculate AUC ROC from all saved NetCDF files
-            print(f"{e} raised when calculating AUC ROC score. Returning as None")
-            auc_score = None
-
         return {
-            "auc_roc": auc_score,
+            "auc_roc": roc_auc_score(y_no_missing, preds_no_missing),
             "f1_score": f1_score(y_no_missing, binary_preds),
             "iou": np.sum(intersection) / np.sum(union),
             "num_samples": len(y_no_missing),
