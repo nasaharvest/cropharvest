@@ -105,8 +105,8 @@ class TestInstance:
                 preds.append(ds["preds"].values)
 
         return (
-            cls(x=None, y=np.concatenate(y), lats=np.concatenate(lats), lons=np.concatenate(lons)),
-            np.concatenate(preds) if return_preds else None,
+            cls(x=None, y=np.stack(y), lats=np.stack(lats), lons=np.stack(lons)),
+            np.stack(preds) if return_preds else None,
         )
 
     def evaluate_predictions(self, preds: np.ndarray) -> Dict[str, float]:
