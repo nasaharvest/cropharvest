@@ -60,7 +60,7 @@ MISSING_DATA = -1
 
 @dataclass
 class TestInstance:
-    x: np.ndarray
+    x: Optional[np.ndarray]
     y: np.ndarray  # 1 is positive, 0 is negative and -1 (MISSING_DATA) is no label
     lats: np.ndarray
     lons: np.ndarray
@@ -79,6 +79,35 @@ class TestInstance:
         if flatten_x:
             x = flatten_array(x)
         return cls(x=x, y=h5.get("y")[:], lats=h5.get("lats")[:], lons=h5.get("lons")[:])
+
+    @classmethod
+    def load_from_nc(cls, filepaths: Union[Path, List[Path]]) -> Tuple:
+
+        y: List[np.ndarray] = []
+        preds: List[np.ndarray] = []
+        lats: List[np.ndarray] = []
+        lons: List[np.ndarray] = []
+
+        if isinstance(filepaths, Path):
+            filepaths = [filepaths]
+
+        return_preds = True
+        for filepath in filepaths:
+            ds = xr.load_dataset(filepath)
+            if "preds" not in ds:
+                return_preds = False
+
+            lats.append(ds["lat"].values)
+            lons.append(ds["lon"].values)
+            y.append(ds["ground_truth"].values)
+
+            if return_preds:
+                preds.append(ds["preds"].values)
+
+        return (
+            cls(x=None, y=np.concatenate(y), lats=np.concatenate(lats), lons=np.concatenate(lons)),
+            np.concatenate(preds) if return_preds else None,
+        )
 
     def evaluate_predictions(self, preds: np.ndarray) -> Dict[str, float]:
         assert len(preds) == len(
