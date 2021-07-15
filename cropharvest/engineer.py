@@ -97,16 +97,24 @@ class TestInstance:
             if "preds" not in ds:
                 return_preds = False
 
-            lats.append(ds["lat"].values)
-            lons.append(ds["lon"].values)
-            y.append(ds["ground_truth"].values)
+            lons_np, lats_np = np.meshgrid(ds.lon.values, ds.lat.values)
+            flat_lats, flat_lons = lats_np.reshape(-1), lons_np.reshape(-1)
+
+            y_np = ds["ground_truth"].values
+            flat_y = y_np.reshape(y_np.shape[0] * y_np.shape[1])
+
+            lats.append(flat_lats)
+            lons.append(flat_lons)
+            y.append(flat_y)
 
             if return_preds:
-                preds.append(ds["preds"].values)
+                preds_np = ds["preds"].values
+                flat_preds = preds_np.reshape(preds_np.shape[0] * preds_np.shape[1])
+                preds.append(flat_preds)
 
         return (
-            cls(x=None, y=np.stack(y), lats=np.stack(lats), lons=np.stack(lons)),
-            np.stack(preds) if return_preds else None,
+            cls(x=None, y=np.concatenate(y), lats=np.concatenate(lats), lons=np.concatenate(lons)),
+            np.concatenate(preds) if return_preds else None,
         )
 
     def evaluate_predictions(self, preds: np.ndarray) -> Dict[str, float]:
