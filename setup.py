@@ -8,7 +8,8 @@ setup(
     install_requires=[
         "geopandas",
         "xarray",
-        "earthengine-api" "tqdm",
+        "earthengine-api",
+        "tqdm",
         "h5py",
         "rasterio",
         "openpyxl",
