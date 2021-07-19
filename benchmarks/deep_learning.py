@@ -1,13 +1,20 @@
-from deep_learning import Classifier, train
+from dl import Classifier, train
 
+import torch
 
 from pathlib import Path
 import json
 
 from cropharvest.datasets import CropHarvest
-from cropharvest.utils import DATAFOLDER_PATH,
+from cropharvest.utils import DATAFOLDER_PATH
 
-from config import SHUFFLE_SEEDS, DATASET_TO_SIZES, CLASSIFIER_DROPOUT, NUM_CLASSIFICATION_LAYERS, HIDDEN_VECTOR_SIZE
+from config import (
+    SHUFFLE_SEEDS,
+    DATASET_TO_SIZES,
+    CLASSIFIER_DROPOUT,
+    NUM_CLASSIFICATION_LAYERS,
+    HIDDEN_VECTOR_SIZE,
+)
 
 
 def run(data_folder: Path = DATAFOLDER_PATH) -> None:
@@ -34,14 +41,15 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
                     input_size=dataset.num_bands,
                     classifier_base_layers=NUM_CLASSIFICATION_LAYERS,
                     classifier_dropout=CLASSIFIER_DROPOUT,
-                    classifier_vector_size=HIDDEN_VECTOR_SIZE
+                    classifier_vector_size=HIDDEN_VECTOR_SIZE,
                 )
 
                 model = train(model, dataset, sample_size)
 
                 for _, test_instance in dataset.test_data():
-                    preds = model(test_instance.x)
-
+                    test_x = torch.from_numpy(test_instance.x)
+                    with torch.no_grad():
+                        preds = model(test_x).numpy()
                     results = test_instance.evaluate_predictions(preds)
 
                     with Path(results_json).open("w") as f:
