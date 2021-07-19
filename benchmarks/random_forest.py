@@ -35,7 +35,7 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
                 model = RandomForestClassifier()
                 model.fit(train_x, train_y)
 
-                for test_id, test_instance in dataset.test_data(flatten_x=True):
+                for test_id, test_instance in dataset.test_data(flatten_x=True, max_size=10000):
 
                     results_json = results_folder / f"{test_id}_{json_suffix}"
                     results_nc = results_folder / f"{test_id}_{nc_suffix}"
