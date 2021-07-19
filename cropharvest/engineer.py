@@ -101,14 +101,16 @@ class TestInstance:
             y_np = ds["ground_truth"].values
             flat_y = y_np.reshape(y_np.shape[0] * y_np.shape[1])
 
-            lats.append(flat_lats)
-            lons.append(flat_lons)
-            y.append(flat_y)
+            # the Togo dataset is not a meshgrid, so will have plenty of NaN values
+            # so we remove them
+            lats.append(flat_lats[~np.isnan(flat_y)])
+            lons.append(flat_lons[~np.isnan(flat_y)])
+            y.append(flat_y[~np.isnan(flat_y)])
 
             if return_preds:
                 preds_np = ds["preds"].values
                 flat_preds = preds_np.reshape(preds_np.shape[0] * preds_np.shape[1])
-                preds.append(flat_preds)
+                preds.append(flat_preds[~np.isnan(flat_y)])
 
         return (
             cls(x=None, y=np.concatenate(y), lats=np.concatenate(lats), lons=np.concatenate(lons)),
@@ -119,7 +121,6 @@ class TestInstance:
         assert len(preds) == len(
             self.y
         ), f"Expected preds to have length {len(self.y)}, got {len(preds)}"
-
         y_no_missing = self.y[self.y != MISSING_DATA]
         preds_no_missing = preds[self.y != MISSING_DATA]
 
@@ -135,7 +136,6 @@ class TestInstance:
 
         intersection = np.logical_and(binary_preds, y_no_missing)
         union = np.logical_or(binary_preds, y_no_missing)
-
         return {
             "auc_roc": roc_auc_score(y_no_missing, preds_no_missing),
             "f1_score": f1_score(y_no_missing, binary_preds),
