@@ -281,7 +281,7 @@ class CropHarvest(BaseDataset):
             if (max_size is not None) and (len(test_array) > max_size):
                 cur_idx = 0
                 while (cur_idx * max_size) < len(test_array):
-                    sub_array = test_array[cur_idx * max_size : (cur_idx + 1) + max_size]
+                    sub_array = test_array[cur_idx * max_size : (cur_idx + 1) * max_size]
                     if self.task.normalize:
                         sub_array.x = self._normalize(sub_array.x)
                     if flatten_x:
