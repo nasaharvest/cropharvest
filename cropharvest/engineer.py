@@ -124,10 +124,11 @@ class TestInstance:
         y_no_missing = self.y[self.y != MISSING_DATA]
         preds_no_missing = preds[self.y != MISSING_DATA]
 
-        if len(np.unique(y_no_missing)) == 1:
+        if (len(y_no_missing) == 0) or (len(np.unique(y_no_missing)) == 1):
             print(
-                "This TestInstance only has one class in the ground truth. "
-                "Metrics will be ill-defined, and should be calculated for"
+                "This TestInstance only has one class in the ground truth "
+                "or no non-missing values (this may happen if a test-instance is sliced). "
+                "Metrics will be ill-defined, and should be calculated for "
                 "all TestInstances together"
             )
             return {"num_samples": len(y_no_missing)}
