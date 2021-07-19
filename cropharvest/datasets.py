@@ -258,7 +258,11 @@ class CropHarvest(BaseDataset):
             raise RuntimeError(f"Missing test data {self.task.test_identifier}*.h5")
         for filepath in all_relevant_files:
             hf = h5py.File(filepath, "r")
-            test_array = TestInstance.load_from_h5(hf, flatten_x=flatten_x)
+            test_array = TestInstance.load_from_h5(hf)
+            if self.task.normalize:
+                test_array.x = self._normalize(test_array.x)
+            if flatten_x:
+                test_array.x = flatten_array(test_array.x)
             yield filepath.stem, test_array
 
     @classmethod
