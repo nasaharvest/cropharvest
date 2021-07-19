@@ -286,7 +286,9 @@ class CropHarvest(BaseDataset):
                         sub_array.x = self._normalize(sub_array.x)
                     if flatten_x:
                         sub_array.x = flatten_array(sub_array.x)
-                    yield f"{cur_idx}_{filepath.stem}", sub_array
+                    test_id = f"{cur_idx}_{filepath.stem}"
+                    cur_idx += 1
+                    yield test_id, sub_array
             else:
                 if self.task.normalize:
                     test_array.x = self._normalize(test_array.x)
