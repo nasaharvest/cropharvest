@@ -23,6 +23,14 @@ class Classifier(nn.Module):
     ) -> None:
         super().__init__()
 
+        self.input_params = {
+            "input_size": input_size,
+            "classifier_vector_size": classifier_vector_size,
+            "classifier_dropout": classifier_dropout,
+            "classifier_base_layers": classifier_base_layers,
+            "num_classification_layers": num_classification_layers,
+        }
+
         self.base = nn.ModuleList(
             [
                 UnrolledLSTM(
@@ -71,6 +79,15 @@ class Classifier(nn.Module):
         for _, layer in enumerate(self.global_classifier):
             x = layer(x)
         return torch.sigmoid(x)
+
+    def copy(self):
+        r"""
+        Return a new classifier with the same weights
+        """
+        classifier = Classifier(**self.input_params)
+        classifier.load_state_dict(self.state_dict())
+
+        return classifier
 
 
 class UnrolledLSTM(nn.Module):
