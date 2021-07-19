@@ -4,6 +4,7 @@ import numpy as np
 import h5py
 import warnings
 from dataclasses import dataclass
+import random
 
 from cropharvest.countries import BBox
 from cropharvest.utils import (
@@ -12,6 +13,7 @@ from cropharvest.utils import (
     read_geopandas,
     flatten_array,
     load_normalizing_dict,
+    sample_with_memory,
 )
 from cropharvest.config import LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
 from cropharvest.columns import NullableColumns, RequiredColumns
@@ -192,6 +194,15 @@ class CropHarvest(BaseDataset):
         )
         self.filepaths: List[Path] = positive_paths + negative_paths
         self.y_vals: List[int] = [1] * len(positive_paths) + [0] * len(negative_paths)
+        self.positive_indices = list(range(len(positive_paths)))
+        self.negative_indices = list(
+            range(len(positive_paths), len(positive_paths) + len(negative_paths))
+        )
+
+        # used in the sample() function, to ensure filepaths are sampled without
+        # duplication as much as possible
+        self.sampled_positive_indices: List[int] = []
+        self.sampled_negative_indices: List[int] = []
 
     def shuffle(self, seed: int) -> None:
         filepaths_and_y_vals = list(zip(self.filepaths, self.y_vals))
@@ -205,6 +216,15 @@ class CropHarvest(BaseDataset):
     def __getitem__(self, index: int) -> Tuple[np.ndarray, int]:
         hf = h5py.File(self.filepaths[index], "r")
         return self._normalize(hf.get("array")[:]), self.y_vals[index]
+
+    @property
+    def k(self) -> int:
+        return min(len(self.positive_indices), len(self.negative_indices))
+
+    @property
+    def num_bands(self) -> int:
+        # array has shape [timesteps, bands]
+        return self[0][0].shape[-1]
 
     def as_array(
         self, flatten_x: bool = False, num_samples: Optional[int] = None
@@ -314,6 +334,41 @@ class CropHarvest(BaseDataset):
                 )
             )
         return output_datasets
+
+    def sample(self, k: int, deterministic: bool = False) -> Tuple[np.ndarray, np.ndarray]:
+        # we will sample to get half positive and half negative
+        # examples
+        output_x: List[np.ndarray] = []
+        output_y: List[np.ndarray] = []
+
+        k = min(k, self.k)
+
+        if deterministic:
+            pos_indices = self.positive_indices[:k]
+            neg_indices = self.negative_indices[:k]
+        else:
+            pos_indices, self.sampled_positive_indices = sample_with_memory(
+                self.positive_indices, k, self.sampled_negative_indices
+            )
+            neg_indices, self.sampled_negative_indices = sample_with_memory(
+                self.negative_indices, k, self.sampled_negative_indices
+            )
+
+            self.sampled_positive_indices.extend(pos_indices)
+            self.sampled_negative_indices.extend(neg_indices)
+
+        # returns a list of [pos_index, neg_index, pos_index, neg_index, ...]
+        indices = [val for pair in zip(pos_indices, neg_indices) for val in pair]
+        for index in indices:
+            x, y = self[index]
+            output_x.append(x)
+            output_y.append(y)
+
+        x = np.stack(output_x, axis=0)
+        if self.task.normalize:
+            x = self._normalize(x)
+
+        return x, np.array(output_y)
 
     @classmethod
     def from_labels_and_tifs(cls, labels: CropHarvestLabels, tifs: CropHarvestTifs):

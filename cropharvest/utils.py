@@ -8,7 +8,7 @@ import geopandas
 import collections
 import functools
 
-from typing import Dict, List
+from typing import Dict, List, Tuple, Optional
 
 try:
     import torch
@@ -62,6 +62,23 @@ def deterministic_shuffle(x: List, seed: int) -> List:
         output_list.append(x.pop(seed))
         seed *= -1
     return output_list
+
+
+def sample_with_memory(
+    indices: List[int], k: int, state: Optional[List[int]] = None
+) -> Tuple[List[int], List[int]]:
+
+    if state is None:
+        state = []
+
+    indices_to_sample = list(set(indices) - set(state))
+    if len(indices_to_sample) < k:
+        # restart the state
+        state, indices_to_sample = [], indices
+    selected_indices = random.sample(indices_to_sample, k)
+    state.extend(selected_indices)
+
+    return selected_indices, state
 
 
 class memoized(object):
