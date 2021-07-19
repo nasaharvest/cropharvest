@@ -24,7 +24,7 @@ from .config import (
     TEST_REGIONS,
     TEST_DATASETS,
 )
-from .utils import DATAFOLDER_PATH, load_normalizing_dict, flatten_array
+from .utils import DATAFOLDER_PATH, load_normalizing_dict
 
 from typing import cast, Optional, Dict, Union, Tuple, List, Sequence
 
@@ -60,7 +60,7 @@ MISSING_DATA = -1
 
 @dataclass
 class TestInstance:
-    x: np.ndarray
+    x: Optional[np.ndarray]
     y: np.ndarray  # 1 is positive, 0 is negative and -1 (MISSING_DATA) is no label
     lats: np.ndarray
     lons: np.ndarray
@@ -74,11 +74,46 @@ class TestInstance:
         return ds
 
     @classmethod
-    def load_from_h5(cls, h5: h5py.File, flatten_x: bool):
+    def load_from_h5(cls, h5: h5py.File):
         x = h5.get("x")[:]
-        if flatten_x:
-            x = flatten_array(x)
         return cls(x=x, y=h5.get("y")[:], lats=h5.get("lats")[:], lons=h5.get("lons")[:])
+
+    @classmethod
+    def load_from_nc(cls, filepaths: Union[Path, List[Path]]) -> Tuple:
+
+        y: List[np.ndarray] = []
+        preds: List[np.ndarray] = []
+        lats: List[np.ndarray] = []
+        lons: List[np.ndarray] = []
+
+        if isinstance(filepaths, Path):
+            filepaths = [filepaths]
+
+        return_preds = True
+        for filepath in filepaths:
+            ds = xr.load_dataset(filepath)
+            if "preds" not in ds:
+                return_preds = False
+
+            lons_np, lats_np = np.meshgrid(ds.lon.values, ds.lat.values)
+            flat_lats, flat_lons = lats_np.reshape(-1), lons_np.reshape(-1)
+
+            y_np = ds["ground_truth"].values
+            flat_y = y_np.reshape(y_np.shape[0] * y_np.shape[1])
+
+            lats.append(flat_lats)
+            lons.append(flat_lons)
+            y.append(flat_y)
+
+            if return_preds:
+                preds_np = ds["preds"].values
+                flat_preds = preds_np.reshape(preds_np.shape[0] * preds_np.shape[1])
+                preds.append(flat_preds)
+
+        return (
+            cls(x=None, y=np.concatenate(y), lats=np.concatenate(lats), lons=np.concatenate(lons)),
+            np.concatenate(preds) if return_preds else None,
+        )
 
     def evaluate_predictions(self, preds: np.ndarray) -> Dict[str, float]:
         assert len(preds) == len(
