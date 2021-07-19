@@ -24,7 +24,7 @@ from .config import (
     TEST_REGIONS,
     TEST_DATASETS,
 )
-from .utils import DATAFOLDER_PATH, load_normalizing_dict, flatten_array
+from .utils import DATAFOLDER_PATH, load_normalizing_dict
 
 from typing import cast, Optional, Dict, Union, Tuple, List, Sequence
 
@@ -74,10 +74,8 @@ class TestInstance:
         return ds
 
     @classmethod
-    def load_from_h5(cls, h5: h5py.File, flatten_x: bool):
+    def load_from_h5(cls, h5: h5py.File):
         x = h5.get("x")[:]
-        if flatten_x:
-            x = flatten_array(x)
         return cls(x=x, y=h5.get("y")[:], lats=h5.get("lats")[:], lons=h5.get("lons")[:])
 
     @classmethod
