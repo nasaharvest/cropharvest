@@ -261,7 +261,7 @@ class CropHarvest(BaseDataset):
         return X_np, y_np
 
     def test_data(
-        self, flatten_x: bool = False
+        self, flatten_x: bool = False, max_size: Optional[int] = None
     ) -> Generator[Tuple[str, TestInstance], None, None]:
         r"""
         A generator returning TestInstance objects containing the test
@@ -278,11 +278,21 @@ class CropHarvest(BaseDataset):
         for filepath in all_relevant_files:
             hf = h5py.File(filepath, "r")
             test_array = TestInstance.load_from_h5(hf)
-            if self.task.normalize:
-                test_array.x = self._normalize(test_array.x)
-            if flatten_x:
-                test_array.x = flatten_array(test_array.x)
-            yield filepath.stem, test_array
+            if (max_size is not None) and (len(test_array) > max_size):
+                cur_idx = 0
+                while (cur_idx * max_size) < len(test_array):
+                    sub_array = test_array[cur_idx * max_size : (cur_idx + 1) + max_size]
+                    if self.task.normalize:
+                        sub_array.x = self._normalize(sub_array.x)
+                    if flatten_x:
+                        sub_array.x = flatten_array(sub_array.x)
+                    yield f"{cur_idx}_{filepath.stem}", sub_array
+            else:
+                if self.task.normalize:
+                    test_array.x = self._normalize(test_array.x)
+                if flatten_x:
+                    test_array.x = flatten_array(test_array.x)
+                yield filepath.stem, test_array
 
     @classmethod
     def create_benchmark_datasets(

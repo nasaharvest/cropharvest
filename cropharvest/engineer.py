@@ -151,6 +151,17 @@ class TestInstance:
             data_dict["preds"] = preds
         return pd.DataFrame(data=data_dict).set_index(["lat", "lon"]).to_xarray()
 
+    def __getitem__(self, sliced):
+        return TestInstance(
+            x=self.x[sliced] if self.x is not None else None,
+            y=self.y[sliced],
+            lats=self.lats[sliced],
+            lons=self.lons[sliced],
+        )
+
+    def __len__(self) -> int:
+        return self.y.shape[0]
+
 
 class Engineer:
     def __init__(self, data_folder: Path = DATAFOLDER_PATH) -> None:
