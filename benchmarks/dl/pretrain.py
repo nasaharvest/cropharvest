@@ -1,4 +1,3 @@
-from operator import le, neg
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping
 
