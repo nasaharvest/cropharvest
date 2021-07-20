@@ -40,7 +40,6 @@ def train(
             train_x, train_y = train_batch_total[0][indices], train_batch_total[1][indices]
         else:
             train_x, train_y = dataset.sample(k, deterministic=False)
-
         preds = classifier(torch.from_numpy(train_x).float()).squeeze(dim=1)
         loss = loss_fn(preds, torch.from_numpy(train_y).float())
 
