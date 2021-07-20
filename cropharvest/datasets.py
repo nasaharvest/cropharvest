@@ -10,7 +10,6 @@ from cropharvest.utils import (
     download_from_url,
     deterministic_shuffle,
     read_geopandas,
-    flatten_array,
     load_normalizing_dict,
     sample_with_memory,
 )
@@ -257,7 +256,7 @@ class CropHarvest(BaseDataset):
         X_np, y_np = np.stack(X), np.stack(Y)
 
         if flatten_x:
-            X_np = flatten_array(X_np)
+            X_np = self._flatten_array(X_np)
         return X_np, y_np
 
     def test_data(
@@ -285,7 +284,7 @@ class CropHarvest(BaseDataset):
                     if self.task.normalize:
                         sub_array.x = self._normalize(sub_array.x)
                     if flatten_x:
-                        sub_array.x = flatten_array(sub_array.x)
+                        sub_array.x = self._flatten_array(sub_array.x)
                     test_id = f"{cur_idx}_{filepath.stem}"
                     cur_idx += 1
                     yield test_id, sub_array
@@ -293,7 +292,7 @@ class CropHarvest(BaseDataset):
                 if self.task.normalize:
                     test_array.x = self._normalize(test_array.x)
                 if flatten_x:
-                    test_array.x = flatten_array(test_array.x)
+                    test_array.x = self._flatten_array(test_array.x)
                 yield filepath.stem, test_array
 
     @classmethod
@@ -414,3 +413,7 @@ class CropHarvest(BaseDataset):
         if not self.task.normalize:
             return array
         return (array - self.normalizing_dict["mean"]) / self.normalizing_dict["std"]
+
+    @staticmethod
+    def _flatten_array(array: np.ndarray) -> np.ndarray:
+        return array.reshape(array.shape[0], -1)
