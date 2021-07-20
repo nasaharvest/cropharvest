@@ -1,8 +1,0 @@
-geopandas
-xarray
-earthengine-api
-tqdm
-h5py
-rasterio
-openpyxl
-sklearn
