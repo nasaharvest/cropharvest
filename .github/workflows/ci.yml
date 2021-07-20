@@ -27,7 +27,7 @@ jobs:
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
       - name: Install dependencies
-        run: pip install -r requirements-dev.txt
+        run: pip install -r requirements-dev.txt -r requirements-benchmarks.txt
       - name: Run tests
         run: |
           python -m black --check --diff .
