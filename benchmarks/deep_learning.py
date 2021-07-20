@@ -5,12 +5,9 @@ import torch
 from pathlib import Path
 import json
 
-import sys
-
-sys.path.append("..")
-
 from cropharvest.datasets import CropHarvest
 from cropharvest.utils import DATAFOLDER_PATH
+from cropharvest.engineer import TestInstance
 
 from config import (
     SHUFFLE_SEEDS,
@@ -34,12 +31,10 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
         for seed in SHUFFLE_SEEDS:
             dataset.shuffle(seed)
             for sample_size in sample_sizes:
-                print(f"Running Random DL for {dataset}, seed: {seed} with size {sample_size}")
+                print(f"Running Random Forest for {dataset}, seed: {seed} with size {sample_size}")
 
-                results_json = results_folder / f"{dataset.id}_{sample_size}_{seed}.json"
-                results_nc = results_folder / f"{dataset.id}_{sample_size}_{seed}.nc"
-                if results_json.exists():
-                    print(f"Results already saved for {results_json} - skipping")
+                json_suffix = f"{dataset.id}_{sample_size}_{seed}.json"
+                nc_suffix = f"{dataset.id}_{sample_size}_{seed}.nc"
 
                 # train a model
                 model = Classifier(
@@ -52,7 +47,14 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
 
                 model = train(model, dataset, sample_size)
 
-                for _, test_instance in dataset.test_data():
+                for test_id, test_instance in dataset.test_data():
+
+                    results_json = results_folder / f"{test_id}_{json_suffix}"
+                    results_nc = results_folder / f"{test_id}_{nc_suffix}"
+
+                    if results_json.exists():
+                        print(f"Results already saved for {results_json} - skipping")
+
                     test_x = torch.from_numpy(test_instance.x).float()
                     with torch.no_grad():
                         preds = model(test_x).squeeze(dim=1).numpy()
@@ -63,6 +65,15 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
 
                     ds = test_instance.to_xarray(preds)
                     ds.to_netcdf(results_nc)
+                # finally, we want to get results when all the test instances are considered
+                # together
+                all_nc_files = list(results_folder.glob(f"*_{nc_suffix}"))
+                combined_instance, combined_preds = TestInstance.load_from_nc(all_nc_files)
+
+                combined_results = combined_instance.evaluate_predictions(combined_preds)
+
+                with (results_folder / f"combined_{json_suffix}").open("w") as f:
+                    json.dump(combined_results, f)
 
 
 if __name__ == "__main__":
