@@ -1,4 +1,4 @@
--r requirements.txt
+-e .
 black
 mypy
 pytest-flake8
