@@ -6,15 +6,12 @@ from cropharvest.datasets import CropHarvest
 from cropharvest.utils import DATAFOLDER_PATH
 from cropharvest.engineer import TestInstance
 
-from config import SHUFFLE_SEEDS, DATASET_TO_SIZES
-
-
-MODEL_NAME = "RF"
+from config import SHUFFLE_SEEDS, DATASET_TO_SIZES, RANDOM_FOREST
 
 
 def run(data_folder: Path = DATAFOLDER_PATH) -> None:
     evaluation_datasets = CropHarvest.create_benchmark_datasets(data_folder)
-    results_folder = data_folder / MODEL_NAME
+    results_folder = data_folder / RANDOM_FOREST
     results_folder.mkdir(exist_ok=True)
 
     for dataset in evaluation_datasets:

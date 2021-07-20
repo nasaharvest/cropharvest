@@ -1,5 +1,3 @@
-from dl import Classifier, train
-
 import torch
 
 from pathlib import Path
@@ -16,12 +14,26 @@ from config import (
     NUM_CLASSIFICATION_LAYERS,
     HIDDEN_VECTOR_SIZE,
     CLASSIFIER_BASE_LAYERS,
+    PRETRAIN_VAL_RATIO,
+    DL_PRETRAINED,
+    DL_RANDOM,
 )
 
+from dl import Classifier, train, pretrain_model
 
-def run(data_folder: Path = DATAFOLDER_PATH) -> None:
+from typing import Dict, Optional
+
+
+def run(
+    data_folder: Path = DATAFOLDER_PATH,
+    state_dict: Optional[Dict] = None,
+    model_name: str = DL_RANDOM,
+) -> None:
+    if model_name != DL_RANDOM:
+        assert state_dict is not None
+
     evaluation_datasets = CropHarvest.create_benchmark_datasets(data_folder)
-    results_folder = data_folder / "DL_RANDOM"
+    results_folder = data_folder / model_name
     results_folder.mkdir(exist_ok=True)
 
     for dataset in evaluation_datasets[-1:]:
@@ -31,7 +43,7 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
         for seed in SHUFFLE_SEEDS:
             dataset.shuffle(seed)
             for sample_size in sample_sizes:
-                print(f"Running Random Forest for {dataset}, seed: {seed} with size {sample_size}")
+                print(f"Running {model_name} for {dataset}, seed: {seed} with size {sample_size}")
 
                 json_suffix = f"{dataset.id}_{sample_size}_{seed}.json"
                 nc_suffix = f"{dataset.id}_{sample_size}_{seed}.nc"
@@ -44,6 +56,8 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
                     classifier_dropout=CLASSIFIER_DROPOUT,
                     classifier_vector_size=HIDDEN_VECTOR_SIZE,
                 )
+                if state_dict is not None:
+                    model.load_state_dict(state_dict)
 
                 model = train(model, dataset, sample_size)
 
@@ -77,4 +91,24 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
 
 
 if __name__ == "__main__":
-    run()
+
+    data_folder = DATAFOLDER_PATH
+
+    # # we start by making the state_dicts necessary for the pretrained models
+    # pretrain_model(
+    #     data_folder,
+    #     classifier_base_layers=CLASSIFIER_BASE_LAYERS,
+    #     classifier_dropout=CLASSIFIER_DROPOUT,
+    #     classifier_vector_size=HIDDEN_VECTOR_SIZE,
+    #     pretrained_val_ratio=PRETRAIN_VAL_RATIO,
+    #     num_classification_layers=NUM_CLASSIFICATION_LAYERS,
+    #     model_name=DL_PRETRAINED,
+    # )
+
+    for model in [DL_PRETRAINED, DL_RANDOM]:
+        if model != DL_RANDOM:
+            state_dict = torch.load(data_folder / model / "state_dict.pth")
+        else:
+            state_dict = None
+
+        run(data_folder, state_dict, model)
