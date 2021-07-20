@@ -73,7 +73,6 @@ class Classifier(nn.Module):
         for _, lstm in enumerate(self.base):
             x, (hn, _) = lstm(x)
             x = x[:, 0, :, :]
-
         x = self.batchnorm(hn[-1, :, :])
 
         for _, layer in enumerate(self.global_classifier):

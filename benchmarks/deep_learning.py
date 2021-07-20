@@ -5,6 +5,10 @@ import torch
 from pathlib import Path
 import json
 
+import sys
+
+sys.path.append("..")
+
 from cropharvest.datasets import CropHarvest
 from cropharvest.utils import DATAFOLDER_PATH
 
@@ -14,6 +18,7 @@ from config import (
     CLASSIFIER_DROPOUT,
     NUM_CLASSIFICATION_LAYERS,
     HIDDEN_VECTOR_SIZE,
+    CLASSIFIER_BASE_LAYERS,
 )
 
 
@@ -22,7 +27,7 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
     results_folder = data_folder / "DL_RANDOM"
     results_folder.mkdir(exist_ok=True)
 
-    for dataset in evaluation_datasets:
+    for dataset in evaluation_datasets[-1:]:
 
         sample_sizes = DATASET_TO_SIZES[dataset.id]
 
@@ -39,7 +44,8 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
                 # train a model
                 model = Classifier(
                     input_size=dataset.num_bands,
-                    classifier_base_layers=NUM_CLASSIFICATION_LAYERS,
+                    classifier_base_layers=CLASSIFIER_BASE_LAYERS,
+                    num_classification_layers=NUM_CLASSIFICATION_LAYERS,
                     classifier_dropout=CLASSIFIER_DROPOUT,
                     classifier_vector_size=HIDDEN_VECTOR_SIZE,
                 )
@@ -47,9 +53,9 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
                 model = train(model, dataset, sample_size)
 
                 for _, test_instance in dataset.test_data():
-                    test_x = torch.from_numpy(test_instance.x)
+                    test_x = torch.from_numpy(test_instance.x).float()
                     with torch.no_grad():
-                        preds = model(test_x).numpy()
+                        preds = model(test_x).squeeze(dim=1).numpy()
                     results = test_instance.evaluate_predictions(preds)
 
                     with Path(results_json).open("w") as f:
