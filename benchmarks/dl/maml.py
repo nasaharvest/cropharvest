@@ -107,7 +107,7 @@ class Learner:
             classifier_dropout=classifier_dropout,
             classifier_vector_size=classifier_vector_size,
             num_classification_layers=num_classification_layers,
-        ).to(self.device)
+        )
 
         self.loss = nn.BCELoss(reduction="mean")
 
