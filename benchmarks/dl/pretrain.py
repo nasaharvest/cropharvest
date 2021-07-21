@@ -162,7 +162,8 @@ def pretrain_model(
     learning_rate: float = 0.0001,
     max_epochs: int = 1000,
     patience: int = 10,
-) -> pl.LightningModule:
+) -> Classifier:
+    r""""""
 
     model = Pretrainer(
         root,
@@ -186,4 +187,4 @@ def pretrain_model(
     )
     trainer.fit(model)
 
-    return model
+    return model.classifier

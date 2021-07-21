@@ -1,5 +1,5 @@
 from tqdm import tqdm
-from torch.optim import Adam
+from torch.optim import SGD
 import torch
 from torch import nn
 
@@ -19,8 +19,19 @@ def train(
     learning_rate: float = 0.001,
     k: int = 10,
 ) -> Classifier:
+    r"""
+    Train the classifier on the dataset.
 
-    opt = Adam(classifier.parameters(), lr=learning_rate)
+    :param classifier: The classifier to train
+    :param dataset: The dataset to train the classifier on
+    :param sample_size: The number of training samples to use. If None, all training data
+        in the dataset will be used
+    :param num_grad_steps: The number of gradient steps to train for
+    :param learning rate: The learning rate to use with the SGD optimizer
+    :param k: A batch will have size k*2, with k positive and k negative examples
+    """
+
+    opt = SGD(classifier.parameters(), lr=learning_rate)
     loss_fn = nn.BCELoss(reduction="mean")
 
     if sample_size is not None:
