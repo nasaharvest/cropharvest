@@ -1,4 +1,3 @@
-from enum import unique
 from pathlib import Path
 import geopandas
 import numpy as np
