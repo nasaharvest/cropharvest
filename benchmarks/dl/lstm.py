@@ -85,7 +85,6 @@ class Classifier(nn.Module):
         """
         classifier = Classifier(**self.input_params)
         classifier.load_state_dict(self.state_dict())
-
         return classifier
 
 

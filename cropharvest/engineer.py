@@ -103,14 +103,15 @@ class TestInstance:
 
             # the Togo dataset is not a meshgrid, so will have plenty of NaN values
             # so we remove them
-            lats.append(flat_lats[~np.isnan(flat_y)])
-            lons.append(flat_lons[~np.isnan(flat_y)])
-            y.append(flat_y[~np.isnan(flat_y)])
+            not_nan = ~np.isnan(flat_y)
+            lats.append(flat_lats[not_nan])
+            lons.append(flat_lons[not_nan])
+            y.append(flat_y[not_nan])
 
             if return_preds:
                 preds_np = ds["preds"].values
                 flat_preds = preds_np.reshape(preds_np.shape[0] * preds_np.shape[1])
-                preds.append(flat_preds[~np.isnan(flat_y)])
+                preds.append(flat_preds[not_nan])
 
         return (
             cls(x=None, y=np.concatenate(y), lats=np.concatenate(lats), lons=np.concatenate(lons)),
