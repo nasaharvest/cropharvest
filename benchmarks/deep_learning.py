@@ -112,7 +112,6 @@ if __name__ == "__main__":
         classifier_base_layers=CLASSIFIER_BASE_LAYERS,
         classifier_dropout=CLASSIFIER_DROPOUT,
         classifier_vector_size=HIDDEN_VECTOR_SIZE,
-        pretrained_val_ratio=PRETRAIN_VAL_RATIO,
         num_classification_layers=NUM_CLASSIFICATION_LAYERS,
         model_name=DL_PRETRAINED,
     )
