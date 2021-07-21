@@ -451,7 +451,24 @@ def train_maml_model(
     save_best_val: bool = True,
     checkpoint_every: int = 20,
     schedule: bool = True,
-):
+) -> Classifier:
+    r"""
+    Initialize and pretrain a classifier on a global crop vs. non crop task
+
+    :root: The path to the data
+    :param classifier_vector_size: The LSTM hidden vector size to use
+    :param classifier_dropout: The value for variational dropout between LSTM timesteps to us
+    :param classifier_base_layers: The number of LSTM layers to use
+    :param num_classification_layers: The number of linear classification layers to use on top
+        of the LSTM base
+    :param model_name: The model name. The model's weights will be saved at root / model_name.
+    :param pretrained_val_ratio: The ratio of data to use for validation (for early stopping)
+    :param batch_size: The batch size to use when pretraining the model
+    :param learning_rate: The learning rate to use
+    :param max_epochs: The maximum number of epochs to train the model for
+    :param patience: The patience to use for early stopping. If the model trains for
+        `patience` epochs without improvement on the validation set, training ends
+    """
     model = Learner(
         root,
         model_name,
@@ -475,3 +492,5 @@ def train_maml_model(
         checkpoint_every,
         schedule,
     )
+
+    return model.model
