@@ -7,12 +7,12 @@ from dataclasses import dataclass
 
 from cropharvest.countries import BBox
 from cropharvest.utils import (
-    download_from_url,
+    download_and_extract_archive,
     deterministic_shuffle,
     read_geopandas,
     flatten_array,
 )
-from cropharvest.config import LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
+from cropharvest.config import FEATURES_FILENAME, LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
 from cropharvest import countries
@@ -53,7 +53,7 @@ class BaseDataset:
             if path_to_data.exists():
                 print("Files already downloaded.")
             else:
-                download_from_url(download_url, str(path_to_data))
+                download_and_extract_archive(download_url, str(path_to_data))
 
         if not path_to_data.exists():
             raise FileNotFoundError(
@@ -169,13 +169,15 @@ class CropHarvestTifs(BaseDataset):
 class CropHarvest(BaseDataset):
     "Dataset consisting of satellite data and associated labels"
 
+    url = "https://zenodo.org/record/5021762/files/features.tar.gz?download=1"
+
     def __init__(
         self,
         root,
         task: Optional[Task] = None,
         download=False,
     ):
-        super().__init__(root, download, download_url="", filename="")
+        super().__init__(root, download, download_url=self.url, filename=root / FEATURES_FILENAME)
 
         labels = CropHarvestLabels(root, download=download)
         if task is None:

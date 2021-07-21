@@ -17,6 +17,8 @@ EXPORT_END_MONTH = 2
 EXPORT_END_DAY = 1
 
 LABELS_FILENAME = "labels.geojson"
+FEATURES_FILENAME = "features.tar.gz"
+TEST_FEATURES_FILENAME = "test_features.tar.gz"
 
 # the default seed is useful because it also seeds the deterministic
 # shuffling algorithm we use (in cropharvest.utils.deterministic_shuffle)
