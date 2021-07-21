@@ -32,7 +32,6 @@ class TrainDataLoader:
     def task_labels(self) -> List[str]:
         return list(self.label_to_tasks.keys())
 
-    @property
     def task_k(self, label: str) -> int:
         return self.label_to_tasks[label].k
 
@@ -40,27 +39,15 @@ class TrainDataLoader:
     def num_bands(self) -> int:
         return self.label_to_tasks[self.task_labels[0]].num_bands
 
-    def sample_task(self, label: str, k: int) -> Dict[str, Tuple[torch.Tensor, torch.Tensor]]:
+    def sample_task(self, label: str, k: int) -> Tuple[torch.Tensor, torch.Tensor]:
         x, y = self.label_to_tasks[label].sample(k)
         return torch.from_numpy(x).float(), torch.from_numpy(y).float()
 
 
 class Learner:
-    r"""
-    :param data_folder: The path to the data folder, where the features and labels are stores
-    :param k: The positive and negative batch size (so in total, k*2 instances are passed to
-        the model to learn on)
-    :param update_val_size: The positive and negative batch size with which the meta-model is
-        updated (so in total, the meta-model is updated on update_val_size*2 instances)
-    :param val_size: The ratio of tasks to use for validation
-    :balance_crops: Whether or not to balance the number of crops and non-crop instances in
-        the negative task (so that negative labels will consist of an equal number of other crop
-        and non-crop classes)
-    """
-
     def __init__(
         self,
-        root: Path,
+        root,
         model_name: str,
         classifier_vector_size: int,
         classifier_dropout: float,
@@ -88,7 +75,7 @@ class Learner:
             .decode("utf-8"),
         }
 
-        self.root = root
+        self.root = Path(root)
         self.train_tasks, self.val_tasks = {}, {}
 
         train_tasks, val_tasks = self._make_tasks(min_task_k=min_total_k, val_size=val_size)
@@ -121,7 +108,7 @@ class Learner:
         self.train_info: Dict = {}
         self.maml: Optional[l2l.algorithms.MAML] = None
 
-        self.model_folder = self.data_folder / model_name
+        self.model_folder = self.root / model_name
         self.model_folder.mkdir(exist_ok=True)
 
         model_increment = 0
