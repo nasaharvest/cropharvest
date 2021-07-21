@@ -102,7 +102,7 @@ if __name__ == "__main__":
         classifier_dropout=CLASSIFIER_DROPOUT,
         classifier_vector_size=HIDDEN_VECTOR_SIZE,
         num_classification_layers=NUM_CLASSIFICATION_LAYERS,
-        model_name=DL_PRETRAINED,
+        model_name=DL_MAML,
     )
 
     pretrain_model(
