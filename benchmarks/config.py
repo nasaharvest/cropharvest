@@ -29,6 +29,7 @@ DATASET_TO_SIZES: Dict[str, List] = {
 RANDOM_FOREST = "RF"
 DL_RANDOM = "DL_RANDOM"
 DL_PRETRAINED = "DL_PRETRAINED"
+DL_MAML = "DL_MAML"
 
 
 # LSTM model configurations
