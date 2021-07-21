@@ -118,7 +118,7 @@ class Learner:
             model_increment += 1
             version_id = f"version_{model_increment}"
 
-        self.version_folder = self.model_folder / model_name
+        self.version_folder = self.model_folder / version_id
         self.version_folder.mkdir()
 
         self.model_info["version_number"] = model_increment
@@ -453,7 +453,7 @@ def train_maml_model(
     schedule: bool = True,
 ) -> Classifier:
     r"""
-    Initialize and pretrain a classifier on a global crop vs. non crop task
+    Initialize a classifier and pretrain it using model-agnostic meta-learning (MAML)
 
     :root: The path to the data
     :param classifier_vector_size: The LSTM hidden vector size to use
