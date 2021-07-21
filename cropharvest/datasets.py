@@ -1,3 +1,4 @@
+from enum import unique
 from pathlib import Path
 import geopandas
 import numpy as np
@@ -91,6 +92,11 @@ class CropHarvestLabels(BaseDataset):
                 gpdf[RequiredColumns.LAT], gpdf[RequiredColumns.LON]
             )
         return gpdf[in_bounding_box]
+
+    def classes_in_bbox(self, bounding_box: BBox) -> List[str]:
+        bbox_geojson = self.filter_geojson(self.as_geojson(), bounding_box)
+        unique_labels = [x for x in bbox_geojson.label.unique() if x is not None]
+        return unique_labels
 
     def __getitem__(self, index: int):
         return self._labels.iloc[index]

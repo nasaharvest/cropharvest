@@ -17,9 +17,10 @@ from config import (
     PRETRAIN_VAL_RATIO,
     DL_PRETRAINED,
     DL_RANDOM,
+    DL_MAML,
 )
 
-from dl import Classifier, train, pretrain_model
+from dl import Classifier, train, pretrain_model, train_maml_model
 
 from typing import Dict, Optional
 
@@ -95,6 +96,17 @@ if __name__ == "__main__":
     data_folder = DATAFOLDER_PATH
 
     # we start by making the state_dicts necessary for the pretrained models
+
+    train_maml_model(
+        data_folder,
+        classifier_base_layers=CLASSIFIER_BASE_LAYERS,
+        classifier_dropout=CLASSIFIER_DROPOUT,
+        classifier_vector_size=HIDDEN_VECTOR_SIZE,
+        pretrained_val_ratio=PRETRAIN_VAL_RATIO,
+        num_classification_layers=NUM_CLASSIFICATION_LAYERS,
+        model_name=DL_PRETRAINED,
+    )
+
     pretrain_model(
         data_folder,
         classifier_base_layers=CLASSIFIER_BASE_LAYERS,
@@ -105,7 +117,7 @@ if __name__ == "__main__":
         model_name=DL_PRETRAINED,
     )
 
-    for model in [DL_PRETRAINED, DL_RANDOM]:
+    for model in [DL_PRETRAINED, DL_MAML, DL_RANDOM]:
         if model != DL_RANDOM:
             state_dict = torch.load(data_folder / model / "state_dict.pth")
         else:

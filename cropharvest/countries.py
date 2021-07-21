@@ -81,7 +81,9 @@ def get_country_bbox(country_name: str) -> List[BBox]:
     if isinstance(polygon, Polygon):
         return [BBox.polygon_to_bbox(polygon, country_name)]
     elif isinstance(polygon, MultiPolygon):
-        bboxes = [BBox.polygon_to_bbox(x, country_name) for x in polygon]
+        bboxes = [
+            BBox.polygon_to_bbox(x, f"{country_name}_{idx}") for idx, x in enumerate(polygon)
+        ]
         # we want to remove any bounding boxes which are contained within
         # another bounding box
         indices_to_remove = set()
