@@ -7,6 +7,7 @@ import random
 import geopandas
 import collections
 import functools
+import tarfile
 
 from typing import Dict, List
 
@@ -36,6 +37,14 @@ def download_from_url(url: str, filename: str, chunk_size: int = 1024) -> None:
                         break
                     pbar.update(chunk_size)
                     fh.write(chunk)
+
+
+def download_and_extract_archive(url: str, filename: str, remove_finished: bool = False) -> None:
+    download_from_url(url, filename)
+    if tarfile.is_tarfile(filename):
+        with tarfile.open(filename) as f:
+            f.extractall()
+            #Path(f).unlink()
 
 
 def load_normalizing_dict(path_to_dict: Path) -> Dict[str, np.ndarray]:
