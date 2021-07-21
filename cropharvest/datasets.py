@@ -378,10 +378,7 @@ class CropHarvest(BaseDataset):
 
         # returns a list of [pos_index, neg_index, pos_index, neg_index, ...]
         indices = [val for pair in zip(pos_indices, neg_indices) for val in pair]
-        for index in indices:
-            x, y = self[index]
-            output_x.append(x)
-            output_y.append(y)
+        output_x, output_y = zip(*[self[i] for i in indices])
 
         x = np.stack(output_x, axis=0)
         if self.task.normalize:
