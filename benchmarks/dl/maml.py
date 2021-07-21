@@ -405,9 +405,13 @@ class Learner:
             country_bboxes = countries.get_country_bbox(country)
             for _, country_bbox in enumerate(country_bboxes):
 
-                task = CropHarvest(
-                    self.root, Task(bounding_box=country_bbox, target_label=None, normalize=True)
-                )
+                try:
+                    task = CropHarvest(
+                        self.root,
+                        Task(bounding_box=country_bbox, target_label=None, normalize=True),
+                    )
+                except IndexError:
+                    continue
 
                 if task.k >= min_task_k:
                     label_to_task[task.id] = task
@@ -416,15 +420,18 @@ class Learner:
                     if country in test_countries_to_crops:
                         if label in test_countries_to_crops[country]:
                             continue
-                    task = CropHarvest(
-                        self.root,
-                        Task(
-                            bounding_box=country_bbox,
-                            target_label=label,
-                            balance_negative_crops=True,
-                            normalize=True,
-                        ),
-                    )
+                    try:
+                        task = CropHarvest(
+                            self.root,
+                            Task(
+                                bounding_box=country_bbox,
+                                target_label=label,
+                                balance_negative_crops=True,
+                                normalize=True,
+                            ),
+                        )
+                    except IndexError:
+                        continue
                     if task.k >= min_task_k:
                         label_to_task[task.id] = task
 
