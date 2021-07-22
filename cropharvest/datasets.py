@@ -181,6 +181,8 @@ class CropHarvest(BaseDataset):
         root,
         task: Optional[Task] = None,
         download=False,
+        val_ratio: float = 0.0,
+        is_val: bool = False,
     ):
         super().__init__(root, download, download_url="", filename="")
 
@@ -195,6 +197,18 @@ class CropHarvest(BaseDataset):
         positive_paths, negative_paths = labels.construct_positive_and_negative_labels(
             task, filter_test=True
         )
+        if val_ratio > 0.0:
+            # the fixed seed is to ensure the validation set is always
+            # different from the training set
+            positive_paths = deterministic_shuffle(positive_paths, seed=42)
+            negative_paths = deterministic_shuffle(negative_paths, seed=42)
+            if is_val:
+                positive_paths = positive_paths[: int(len(positive_paths) * val_ratio)]
+                negative_paths = negative_paths[: int(len(negative_paths) * val_ratio)]
+            else:
+                positive_paths = positive_paths[int(len(positive_paths) * val_ratio) :]
+                negative_paths = negative_paths[int(len(negative_paths) * val_ratio) :]
+
         self.filepaths: List[Path] = positive_paths + negative_paths
         self.y_vals: List[int] = [1] * len(positive_paths) + [0] * len(negative_paths)
         self.positive_indices = list(range(len(positive_paths)))

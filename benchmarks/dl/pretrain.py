@@ -13,42 +13,8 @@ from sklearn.metrics import roc_auc_score, accuracy_score
 from .lstm import Classifier
 
 from cropharvest.datasets import CropHarvest
-from cropharvest.utils import deterministic_shuffle
 
 from typing import List
-
-
-class PreTrainCropHarvest(CropHarvest):
-    def __init__(self, root, val_ratio: float, download=False, val: bool = False):
-        super().__init__(root, task=None, download=download)
-
-        # retrieve the positive and negative filepaths
-        positive_paths: List[Path] = []
-        negative_paths: List[Path] = []
-        for idx, filepath in enumerate(self.filepaths):
-            if self.y_vals[idx] == 1:
-                positive_paths.append(filepath)
-            else:
-                negative_paths.append(filepath)
-
-        # the fixed seed is to ensure the validation set is always
-        # different from the training set
-        positive_paths = deterministic_shuffle(positive_paths, seed=42)
-        negative_paths = deterministic_shuffle(negative_paths, seed=42)
-
-        if val:
-            positive_paths = positive_paths[: int(len(positive_paths) * val_ratio)]
-            negative_paths = negative_paths[: int(len(negative_paths) * val_ratio)]
-        else:
-            positive_paths = positive_paths[int(len(positive_paths) * val_ratio) :]
-            negative_paths = negative_paths[int(len(negative_paths) * val_ratio) :]
-
-        self.filepaths: List[Path] = positive_paths + negative_paths
-        self.y_vals: List[int] = [1] * len(positive_paths) + [0] * len(negative_paths)
-        self.positive_indices = list(range(len(positive_paths)))
-        self.negative_indices = list(
-            range(len(positive_paths), len(positive_paths) + len(negative_paths))
-        )
 
 
 class Pretrainer(pl.LightningModule):
@@ -89,9 +55,9 @@ class Pretrainer(pl.LightningModule):
     def configure_optimizers(self):
         return torch.optim.Adam(self.classifier.parameters(), lr=self.learning_rate)
 
-    def get_dataset(self, is_val: bool) -> PreTrainCropHarvest:
-        return PreTrainCropHarvest(
-            self.root, download=True, val=is_val, val_ratio=self.pretrained_val_ratio
+    def get_dataset(self, is_val: bool) -> CropHarvest:
+        return CropHarvest(
+            self.root, download=True, is_val=is_val, val_ratio=self.pretrained_val_ratio
         )
 
     def train_dataloader(self):
@@ -163,7 +129,23 @@ def pretrain_model(
     max_epochs: int = 1000,
     patience: int = 10,
 ) -> Classifier:
-    r""""""
+    r"""
+    Initialize and pretrain a classifier on a global crop vs. non crop task
+
+    :root: The path to the data
+    :param classifier_vector_size: The LSTM hidden vector size to use
+    :param classifier_dropout: The value for variational dropout between LSTM timesteps to us
+    :param classifier_base_layers: The number of LSTM layers to use
+    :param num_classification_layers: The number of linear classification layers to use on top
+        of the LSTM base
+    :param model_name: The model name. The model's weights will be saved at root / model_name.
+    :param pretrained_val_ratio: The ratio of data to use for validation (for early stopping)
+    :param batch_size: The batch size to use when pretraining the model
+    :param learning_rate: The learning rate to use
+    :param max_epochs: The maximum number of epochs to train the model for
+    :param patience: The patience to use for early stopping. If the model trains for
+        `patience` epochs without improvement on the validation set, training ends
+    """
 
     model = Pretrainer(
         root,
