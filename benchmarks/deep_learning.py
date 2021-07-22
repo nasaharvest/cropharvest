@@ -29,8 +29,8 @@ def run(
     state_dict: Optional[Dict] = None,
     model_name: str = DL_RANDOM,
 ) -> None:
-    if model_name != DL_RANDOM:
-        assert state_dict is not None
+    if (model_name != DL_RANDOM) and (state_dict is None):
+        raise ValueError(f"state_dict can't be None if model_name is not {DL_RANDOM}")
 
     evaluation_datasets = CropHarvest.create_benchmark_datasets(data_folder)
     results_folder = data_folder / model_name
