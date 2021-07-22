@@ -20,6 +20,7 @@ from .lstm import Classifier
 from cropharvest.datasets import CropHarvest, CropHarvestLabels, Task
 from cropharvest import countries
 from cropharvest.config import TEST_DATASETS, TEST_REGIONS
+from cropharvest.utils import NoDataForBoundingBoxError
 
 from typing import Dict, Tuple, Optional, List, DefaultDict
 
@@ -397,7 +398,7 @@ class Learner:
                         self.root,
                         Task(bounding_box=country_bbox, target_label=None, normalize=True),
                     )
-                except IndexError:
+                except NoDataForBoundingBoxError:
                     continue
 
                 if task.k >= min_task_k:
@@ -417,7 +418,7 @@ class Learner:
                                 normalize=True,
                             ),
                         )
-                    except IndexError:
+                    except NoDataForBoundingBoxError:
                         continue
                     if task.k >= min_task_k:
                         label_to_task[task.id] = task
