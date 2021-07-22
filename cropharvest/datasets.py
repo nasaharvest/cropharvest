@@ -119,42 +119,43 @@ class CropHarvestLabels(BaseDataset):
         is_null = gpdf[NullableColumns.LABEL].isnull()
         is_crop = gpdf[RequiredColumns.IS_CROP] == True
 
-        if task.target_label != "crop":
-            positive_labels = gpdf[gpdf[NullableColumns.LABEL] == task.target_label]
-            if len(positive_labels) == 0:
-                raise NoDataForBoundingBoxError
-            target_label_is_crop = positive_labels.iloc[0][RequiredColumns.IS_CROP]
+        try:
+            if task.target_label != "crop":
+                positive_labels = gpdf[gpdf[NullableColumns.LABEL] == task.target_label]
+                target_label_is_crop = positive_labels.iloc[0][RequiredColumns.IS_CROP]
 
-            is_target = gpdf[NullableColumns.LABEL] == task.target_label
+                is_target = gpdf[NullableColumns.LABEL] == task.target_label
 
-            if not target_label_is_crop:
-                # if the target label is a non crop class (e.g. pasture),
-                # then we can just collect all classes which either
-                # 1) are crop, or 2) are a different non crop class (e.g. forest)
-                negative_labels = gpdf[((is_null & is_crop) | (~is_null & ~is_target))]
-                negative_paths = self._dataframe_to_paths(negative_labels)
-            else:
-                # otherwise, the target label is a crop. If balance_negative_crops is
-                # true, then we want an equal number of (other) crops and non crops in
-                # the negative labels
-                negative_non_crop_labels = gpdf[~is_crop]
-                negative_other_crop_labels = gpdf[(is_crop & ~is_null & ~is_target)]
-                negative_non_crop_paths = self._dataframe_to_paths(negative_non_crop_labels)
-                negative_paths = self._dataframe_to_paths(negative_other_crop_labels)
-
-                if task.balance_negative_crops:
-                    negative_paths.extend(
-                        deterministic_shuffle(negative_non_crop_paths, DEFAULT_SEED)[
-                            : len(negative_paths)
-                        ]
-                    )
+                if not target_label_is_crop:
+                    # if the target label is a non crop class (e.g. pasture),
+                    # then we can just collect all classes which either
+                    # 1) are crop, or 2) are a different non crop class (e.g. forest)
+                    negative_labels = gpdf[((is_null & is_crop) | (~is_null & ~is_target))]
+                    negative_paths = self._dataframe_to_paths(negative_labels)
                 else:
-                    negative_paths.extend(negative_non_crop_paths)
-        else:
-            # otherwise, we will just filter by crop and non crop
-            positive_labels = gpdf[is_crop]
-            negative_labels = gpdf[~is_crop]
-            negative_paths = self._dataframe_to_paths(negative_labels)
+                    # otherwise, the target label is a crop. If balance_negative_crops is
+                    # true, then we want an equal number of (other) crops and non crops in
+                    # the negative labels
+                    negative_non_crop_labels = gpdf[~is_crop]
+                    negative_other_crop_labels = gpdf[(is_crop & ~is_null & ~is_target)]
+                    negative_non_crop_paths = self._dataframe_to_paths(negative_non_crop_labels)
+                    negative_paths = self._dataframe_to_paths(negative_other_crop_labels)
+
+                    if task.balance_negative_crops:
+                        negative_paths.extend(
+                            deterministic_shuffle(negative_non_crop_paths, DEFAULT_SEED)[
+                                : len(negative_paths)
+                            ]
+                        )
+                    else:
+                        negative_paths.extend(negative_non_crop_paths)
+            else:
+                # otherwise, we will just filter by crop and non crop
+                positive_labels = gpdf[is_crop]
+                negative_labels = gpdf[~is_crop]
+                negative_paths = self._dataframe_to_paths(negative_labels)
+        except IndexError:
+            raise NoDataForBoundingBoxError
 
         positive_paths = self._dataframe_to_paths(positive_labels)
 
