@@ -101,14 +101,17 @@ class TestInstance:
             y_np = ds["ground_truth"].values
             flat_y = y_np.reshape(y_np.shape[0] * y_np.shape[1])
 
-            lats.append(flat_lats)
-            lons.append(flat_lons)
-            y.append(flat_y)
+            # the Togo dataset is not a meshgrid, so will have plenty of NaN values
+            # so we remove them
+            not_nan = ~np.isnan(flat_y)
+            lats.append(flat_lats[not_nan])
+            lons.append(flat_lons[not_nan])
+            y.append(flat_y[not_nan])
 
             if return_preds:
                 preds_np = ds["preds"].values
                 flat_preds = preds_np.reshape(preds_np.shape[0] * preds_np.shape[1])
-                preds.append(flat_preds)
+                preds.append(flat_preds[not_nan])
 
         return (
             cls(x=None, y=np.concatenate(y), lats=np.concatenate(lats), lons=np.concatenate(lons)),
@@ -119,14 +122,14 @@ class TestInstance:
         assert len(preds) == len(
             self.y
         ), f"Expected preds to have length {len(self.y)}, got {len(preds)}"
-
         y_no_missing = self.y[self.y != MISSING_DATA]
         preds_no_missing = preds[self.y != MISSING_DATA]
 
-        if len(np.unique(y_no_missing)) == 1:
+        if (len(y_no_missing) == 0) or (len(np.unique(y_no_missing)) == 1):
             print(
-                "This TestInstance only has one class in the ground truth. "
-                "Metrics will be ill-defined, and should be calculated for"
+                "This TestInstance only has one class in the ground truth "
+                "or no non-missing values (this may happen if a test-instance is sliced). "
+                "Metrics will be ill-defined, and should be calculated for "
                 "all TestInstances together"
             )
             return {"num_samples": len(y_no_missing)}
@@ -135,7 +138,6 @@ class TestInstance:
 
         intersection = np.logical_and(binary_preds, y_no_missing)
         union = np.logical_or(binary_preds, y_no_missing)
-
         return {
             "auc_roc": roc_auc_score(y_no_missing, preds_no_missing),
             "f1_score": f1_score(y_no_missing, binary_preds),
@@ -150,6 +152,17 @@ class TestInstance:
         if preds is not None:
             data_dict["preds"] = preds
         return pd.DataFrame(data=data_dict).set_index(["lat", "lon"]).to_xarray()
+
+    def __getitem__(self, sliced):
+        return TestInstance(
+            x=self.x[sliced] if self.x is not None else None,
+            y=self.y[sliced],
+            lats=self.lats[sliced],
+            lons=self.lons[sliced],
+        )
+
+    def __len__(self) -> int:
+        return self.y.shape[0]
 
 
 class Engineer:

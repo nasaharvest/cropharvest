@@ -8,7 +8,7 @@ import geopandas
 import collections
 import functools
 
-from typing import Dict, List
+from typing import Dict, List, Tuple, Optional
 
 try:
     import torch
@@ -64,6 +64,23 @@ def deterministic_shuffle(x: List, seed: int) -> List:
     return output_list
 
 
+def sample_with_memory(
+    indices: List[int], k: int, state: Optional[List[int]] = None
+) -> Tuple[List[int], List[int]]:
+
+    if state is None:
+        state = []
+
+    indices_to_sample = list(set(indices) - set(state))
+    if len(indices_to_sample) < k:
+        # restart the state
+        state, indices_to_sample = [], indices
+    selected_indices = random.sample(indices_to_sample, k)
+    state.extend(selected_indices)
+
+    return selected_indices, state
+
+
 class memoized(object):
     """Decorator. Caches a function's return value each time it is called.
     If called later with the same arguments, the cached value is returned
@@ -101,5 +118,5 @@ def read_geopandas(file_path) -> geopandas.GeoDataFrame:
     return geopandas.read_file(str(file_path))
 
 
-def flatten_array(array: np.ndarray) -> np.ndarray:
-    return array.reshape(array.shape[0], -1)
+class NoDataForBoundingBoxError(Exception):
+    pass
