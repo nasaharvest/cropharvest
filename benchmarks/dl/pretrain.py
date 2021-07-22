@@ -14,8 +14,6 @@ from .lstm import Classifier
 
 from cropharvest.datasets import CropHarvest
 
-from typing import List
-
 
 class Pretrainer(pl.LightningModule):
     def __init__(
