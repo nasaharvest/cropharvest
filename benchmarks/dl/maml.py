@@ -462,12 +462,29 @@ def train_maml_model(
     :param num_classification_layers: The number of linear classification layers to use on top
         of the LSTM base
     :param model_name: The model name. The model's weights will be saved at root / model_name.
-    :param pretrained_val_ratio: The ratio of data to use for validation (for early stopping)
-    :param batch_size: The batch size to use when pretraining the model
-    :param learning_rate: The learning rate to use
-    :param max_epochs: The maximum number of epochs to train the model for
-    :param patience: The patience to use for early stopping. If the model trains for
-        `patience` epochs without improvement on the validation set, training ends
+    :param k: The number of positive and negative examples to use during inner loop training
+    :param val_size: The number of positive and negative examples to use during outer loop training
+    :param update_lr: The learning rate to use when learning a specific task
+        (inner loop learning rate)
+    :param meta_lr: The learning rate to use when updating the MAML model
+        (outer loop learning rate)
+    :param min_meta_lr: The minimum meta learning rate to use for the cosine
+        annealing scheduler. Only used if `schedule == True`
+    :param max_adaptation_steps: The maximum number of adaptation steps to be used
+        per task. Each task will do as many adaptation steps as possible (up to this
+        upper bound) given the number of unique positive and negative data instances
+        it has
+    :param task_batch_size: The number of tasks to batch before each outer loop update
+    :param num_iterations: The number of iterations to train the meta-model for. One
+        iteration is a complete pass over all the tasks
+    :param save_best_val: Whether to save the model with the best validation score,
+        as well as the final model
+    :param checkpoint_every: The model prints out training statistics every
+        `checkpoint_every` iteration
+    :param save_train_tasks_results: Whether to save the results for the training
+        tasks to a json object
+    :param schedule: Whether to use cosine annealing on the meta learning rate during
+        training
     """
     model = Learner(
         root,
