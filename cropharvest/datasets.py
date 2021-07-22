@@ -12,6 +12,7 @@ from cropharvest.utils import (
     read_geopandas,
     load_normalizing_dict,
     sample_with_memory,
+    NoDataForBoundingBoxError,
 )
 from cropharvest.config import LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
 from cropharvest.columns import NullableColumns, RequiredColumns
@@ -112,11 +113,16 @@ class CropHarvestLabels(BaseDataset):
         if task.bounding_box is not None:
             gpdf = self.filter_geojson(gpdf, task.bounding_box)
 
+        if len(gpdf) == 0:
+            raise NoDataForBoundingBoxError
+
         is_null = gpdf[NullableColumns.LABEL].isnull()
         is_crop = gpdf[RequiredColumns.IS_CROP] == True
 
         if task.target_label != "crop":
             positive_labels = gpdf[gpdf[NullableColumns.LABEL] == task.target_label]
+            if len(positive_labels) == 0:
+                raise NoDataForBoundingBoxError
             target_label_is_crop = positive_labels.iloc[0][RequiredColumns.IS_CROP]
 
             is_target = gpdf[NullableColumns.LABEL] == task.target_label
@@ -151,6 +157,9 @@ class CropHarvestLabels(BaseDataset):
             negative_paths = self._dataframe_to_paths(negative_labels)
 
         positive_paths = self._dataframe_to_paths(positive_labels)
+
+        if (len(positive_paths) == 0) or (len(negative_paths) == 0):
+            raise NoDataForBoundingBoxError
 
         return [x for x in positive_paths if x.exists()], [x for x in negative_paths if x.exists()]
 
