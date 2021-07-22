@@ -1,0 +1,5 @@
+-e .
+torch
+pytorch-lightning==0.7.1
+learn2learn==0.1.3
+dill
