@@ -48,7 +48,7 @@ def extract_archive(file_path: Path, remove_tar: bool = True):
         file_path.unlink()
 
 
-def download_and_extract_archive(root, filename) -> None:
+def download_and_extract_archive(root: str, filename: str) -> None:
     file_path_str = f"{root}/{filename}"
     file_path = Path(file_path_str)
 
