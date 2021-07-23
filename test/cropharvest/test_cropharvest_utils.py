@@ -1,8 +1,10 @@
 import geopandas
+import shutil
+import tarfile
 from shapely.geometry import Point
 
-from cropharvest.config import LABELS_FILENAME
-from cropharvest.utils import deterministic_shuffle, read_geopandas
+from cropharvest.config import LABELS_FILENAME, DATASET_URL
+from cropharvest.utils import deterministic_shuffle, read_geopandas, download_and_extract_archive
 
 
 def test_deterministic_shuffle():
@@ -30,3 +32,34 @@ def test_labels_share_memory(tmpdir):
     labels_2 = read_geopandas(tmpdir / LABELS_FILENAME)
 
     assert labels is labels_2
+
+
+def test_download(mocker):
+    mocked_download_from_url = mocker.patch("cropharvest.utils.download_from_url")
+    download_and_extract_archive(root="", filename="test.geojson")
+    url = f"{DATASET_URL}/files/test.geojson?download=1"
+    mocked_download_from_url.assert_called_with(url, "/test.geojson")
+
+
+def test_extract_archive(tmp_path):
+    test_dir_path = tmp_path / "test"
+    test_dir_path.mkdir()
+    assert test_dir_path.exists()
+
+    txt_path = test_dir_path / "hello.txt"
+    txt_path.write_text("hi there")
+    assert txt_path.exists()
+
+    tarfile_path = tmp_path / "test.tar.gz"
+    tar = tarfile.open(str(tarfile_path), "w:gz")
+    tar.add(str(txt_path), arcname="test/hello.txt")
+    tar.close()
+    assert tarfile_path.exists()
+
+    shutil.rmtree(test_dir_path)
+    assert not test_dir_path.exists()
+
+    download_and_extract_archive(root=tmp_path, filename="test")
+    assert not tarfile_path.exists()
+    assert test_dir_path.exists()
+    assert txt_path.exists()
