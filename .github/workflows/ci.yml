@@ -27,9 +27,10 @@ jobs:
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
       - name: Install dependencies
-        run: pip install -r requirements-dev.txt
+        run: pip install -r requirements-dev.txt -r requirements-benchmarks.txt
       - name: Run tests
         run: |
           python -m black --check --diff .
-          python -m mypy cropharvest process_labels test
+          python -m mypy cropharvest process_labels test benchmarks
+          python -m mypy benchmarks/dl
           python -m pytest

@@ -18,7 +18,11 @@ def load_geowiki_landcover_2017():
         data[["location_id", "sumcrop", "loc_cent_X", "loc_cent_Y"]].groupby("location_id").mean()
     )
     data = data.rename(
-        {"loc_cent_X": "lon", "loc_cent_Y": "lat", "sumcrop": "mean_sumcrop"},
+        {
+            "loc_cent_X": RequiredColumns.LON,
+            "loc_cent_Y": RequiredColumns.LAT,
+            "sumcrop": "mean_sumcrop",
+        },
         axis="columns",
         errors="raise",
     )
@@ -30,7 +34,9 @@ def load_geowiki_landcover_2017():
     data[RequiredColumns.EXPORT_END_DATE] = datetime(2017, EXPORT_END_MONTH, EXPORT_END_DAY)
     data = data.reset_index(drop=True)
     data[RequiredColumns.INDEX] = data.index
-    data[RequiredColumns.GEOMETRY] = data.apply(lambda x: Point(x.lon, x.lat), axis=1)
+    data[RequiredColumns.GEOMETRY] = data.apply(
+        lambda x: Point(x[RequiredColumns.LON], x[RequiredColumns.LAT]), axis=1
+    )
 
     geodata = geopandas.GeoDataFrame(data, geometry=RequiredColumns.GEOMETRY)
     return geodata

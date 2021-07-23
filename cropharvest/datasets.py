@@ -10,14 +10,16 @@ from cropharvest.utils import (
     download_and_extract_archive,
     deterministic_shuffle,
     read_geopandas,
-    flatten_array,
+    load_normalizing_dict,
+    sample_with_memory,
+    NoDataForBoundingBoxError,
 )
 from cropharvest.config import FEATURES_FILENAME, LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
 from cropharvest import countries
 
-from typing import List, Optional, Tuple, Generator
+from typing import cast, List, Optional, Tuple, Generator
 
 
 @dataclass
@@ -26,6 +28,7 @@ class Task:
     target_label: Optional[str] = None
     balance_negative_crops: bool = False
     test_identifier: Optional[str] = None
+    normalize: bool = True
 
     def __post_init__(self):
         if self.target_label is None:
@@ -90,6 +93,11 @@ class CropHarvestLabels(BaseDataset):
             )
         return gpdf[in_bounding_box]
 
+    def classes_in_bbox(self, bounding_box: BBox) -> List[str]:
+        bbox_geojson = self.filter_geojson(self.as_geojson(), bounding_box)
+        unique_labels = [x for x in bbox_geojson.label.unique() if x is not None]
+        return unique_labels
+
     def __getitem__(self, index: int):
         return self._labels.iloc[index]
 
@@ -105,45 +113,54 @@ class CropHarvestLabels(BaseDataset):
         if task.bounding_box is not None:
             gpdf = self.filter_geojson(gpdf, task.bounding_box)
 
+        if len(gpdf) == 0:
+            raise NoDataForBoundingBoxError
+
         is_null = gpdf[NullableColumns.LABEL].isnull()
         is_crop = gpdf[RequiredColumns.IS_CROP] == True
 
-        if task.target_label != "crop":
-            positive_labels = gpdf[gpdf[NullableColumns.LABEL] == task.target_label]
-            target_label_is_crop = positive_labels.iloc[0][RequiredColumns.IS_CROP]
+        try:
+            if task.target_label != "crop":
+                positive_labels = gpdf[gpdf[NullableColumns.LABEL] == task.target_label]
+                target_label_is_crop = positive_labels.iloc[0][RequiredColumns.IS_CROP]
 
-            is_target = gpdf[NullableColumns.LABEL] == task.target_label
+                is_target = gpdf[NullableColumns.LABEL] == task.target_label
 
-            if not target_label_is_crop:
-                # if the target label is a non crop class (e.g. pasture),
-                # then we can just collect all classes which either
-                # 1) are crop, or 2) are a different non crop class (e.g. forest)
-                negative_labels = gpdf[((is_null & is_crop) | (~is_null & ~is_target))]
-                negative_paths = self._dataframe_to_paths(negative_labels)
-            else:
-                # otherwise, the target label is a crop. If balance_negative_crops is
-                # true, then we want an equal number of (other) crops and non crops in
-                # the negative labels
-                negative_non_crop_labels = gpdf[~is_crop]
-                negative_other_crop_labels = gpdf[(is_crop & ~is_null & ~is_target)]
-                negative_non_crop_paths = self._dataframe_to_paths(negative_non_crop_labels)
-                negative_paths = self._dataframe_to_paths(negative_other_crop_labels)
-
-                if task.balance_negative_crops:
-                    negative_paths.extend(
-                        deterministic_shuffle(negative_non_crop_paths, DEFAULT_SEED)[
-                            : len(negative_paths)
-                        ]
-                    )
+                if not target_label_is_crop:
+                    # if the target label is a non crop class (e.g. pasture),
+                    # then we can just collect all classes which either
+                    # 1) are crop, or 2) are a different non crop class (e.g. forest)
+                    negative_labels = gpdf[((is_null & is_crop) | (~is_null & ~is_target))]
+                    negative_paths = self._dataframe_to_paths(negative_labels)
                 else:
-                    negative_paths.extend(negative_non_crop_paths)
-        else:
-            # otherwise, we will just filter by crop and non crop
-            positive_labels = gpdf[is_crop]
-            negative_labels = gpdf[~is_crop]
-            negative_paths = self._dataframe_to_paths(negative_labels)
+                    # otherwise, the target label is a crop. If balance_negative_crops is
+                    # true, then we want an equal number of (other) crops and non crops in
+                    # the negative labels
+                    negative_non_crop_labels = gpdf[~is_crop]
+                    negative_other_crop_labels = gpdf[(is_crop & ~is_null & ~is_target)]
+                    negative_non_crop_paths = self._dataframe_to_paths(negative_non_crop_labels)
+                    negative_paths = self._dataframe_to_paths(negative_other_crop_labels)
+
+                    if task.balance_negative_crops:
+                        negative_paths.extend(
+                            deterministic_shuffle(negative_non_crop_paths, DEFAULT_SEED)[
+                                : len(negative_paths)
+                            ]
+                        )
+                    else:
+                        negative_paths.extend(negative_non_crop_paths)
+            else:
+                # otherwise, we will just filter by crop and non crop
+                positive_labels = gpdf[is_crop]
+                negative_labels = gpdf[~is_crop]
+                negative_paths = self._dataframe_to_paths(negative_labels)
+        except IndexError:
+            raise NoDataForBoundingBoxError
 
         positive_paths = self._dataframe_to_paths(positive_labels)
+
+        if (len(positive_paths) == 0) or (len(negative_paths) == 0):
+            raise NoDataForBoundingBoxError
 
         return [x for x in positive_paths if x.exists()], [x for x in negative_paths if x.exists()]
 
@@ -176,6 +193,8 @@ class CropHarvest(BaseDataset):
         root,
         task: Optional[Task] = None,
         download=False,
+        val_ratio: float = 0.0,
+        is_val: bool = False,
     ):
         super().__init__(root, download, download_url=self.url, filename=root / FEATURES_FILENAME)
 
@@ -185,43 +204,94 @@ class CropHarvest(BaseDataset):
             task = Task()
         self.task = task
 
+        self.normalizing_dict = load_normalizing_dict(Path(root) / "features/normalizing_dict.h5")
+
         positive_paths, negative_paths = labels.construct_positive_and_negative_labels(
             task, filter_test=True
         )
+        if val_ratio > 0.0:
+            # the fixed seed is to ensure the validation set is always
+            # different from the training set
+            positive_paths = deterministic_shuffle(positive_paths, seed=42)
+            negative_paths = deterministic_shuffle(negative_paths, seed=42)
+            if is_val:
+                positive_paths = positive_paths[: int(len(positive_paths) * val_ratio)]
+                negative_paths = negative_paths[: int(len(negative_paths) * val_ratio)]
+            else:
+                positive_paths = positive_paths[int(len(positive_paths) * val_ratio) :]
+                negative_paths = negative_paths[int(len(negative_paths) * val_ratio) :]
+
         self.filepaths: List[Path] = positive_paths + negative_paths
-        self.positive_indices: List[int] = list(range(len(positive_paths)))
-        self.negative_indices: List[int] = list(
+        self.y_vals: List[int] = [1] * len(positive_paths) + [0] * len(negative_paths)
+        self.positive_indices = list(range(len(positive_paths)))
+        self.negative_indices = list(
             range(len(positive_paths), len(positive_paths) + len(negative_paths))
         )
-        self.y_vals: List[int] = [1] * len(positive_paths) + [0] * len(negative_paths)
+
+        # used in the sample() function, to ensure filepaths are sampled without
+        # duplication as much as possible
+        self.sampled_positive_indices: List[int] = []
+        self.sampled_negative_indices: List[int] = []
+
+    def shuffle(self, seed: int) -> None:
+        filepaths_and_y_vals = list(zip(self.filepaths, self.y_vals))
+        filepaths_and_y_vals = deterministic_shuffle(filepaths_and_y_vals, seed)
+        filepaths, y_vals = zip(*filepaths_and_y_vals)
+        self.filepaths, self.y_vals = list(filepaths), list(y_vals)
 
     def __len__(self) -> int:
         return len(self.filepaths)
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, int]:
         hf = h5py.File(self.filepaths[index], "r")
-        return hf.get("array")[:], self.y_vals[index]
+        return self._normalize(hf.get("array")[:]), self.y_vals[index]
 
-    def as_array(self, flatten_x: bool = False) -> Tuple[np.ndarray, np.ndarray]:
+    @property
+    def k(self) -> int:
+        return min(len(self.positive_indices), len(self.negative_indices))
+
+    @property
+    def num_bands(self) -> int:
+        # array has shape [timesteps, bands]
+        return self[0][0].shape[-1]
+
+    def as_array(
+        self, flatten_x: bool = False, num_samples: Optional[int] = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
         r"""
         Return the training data as a tuple of
         np.ndarrays
 
         :param flatten_x: If True, the X array will have shape [num_samples, timesteps * bands]
             instead of [num_samples, timesteps, bands]
+        :param num_samples: If -1, all data is returned. Otherwise, a balanced dataset of
+            num_samples / 2 positive (& negative) samples will be returned
         """
         X, Y = [], []
-        for i in range(len(self)):
-            x, y = self[i]
-            X.append(x)
-            Y.append(y)
+
+        if num_samples is None:
+            indices_to_sample = list(range(len(self)))
+        else:
+            k = num_samples // 2
+
+            pos_indices, neg_indices = self._get_positive_and_negative_indices()
+            if (k > len(pos_indices)) or (k > len(neg_indices)):
+                raise ValueError(
+                    f"num_samples // 2 ({k}) is greater than the number of "
+                    f"positive samples ({len(pos_indices)}) "
+                    f"or the number of negative samples ({len(neg_indices)})"
+                )
+            indices_to_sample = pos_indices[:k] + neg_indices[:k]
+
+        X, Y = zip(*[self[i] for i in indices_to_sample])
         X_np, y_np = np.stack(X), np.stack(Y)
+
         if flatten_x:
-            X_np = flatten_array(X_np)
+            X_np = self._flatten_array(X_np)
         return X_np, y_np
 
     def test_data(
-        self, flatten_x: bool = False
+        self, flatten_x: bool = False, max_size: Optional[int] = None
     ) -> Generator[Tuple[str, TestInstance], None, None]:
         r"""
         A generator returning TestInstance objects containing the test
@@ -237,8 +307,24 @@ class CropHarvest(BaseDataset):
             raise RuntimeError(f"Missing test data {self.task.test_identifier}*.h5")
         for filepath in all_relevant_files:
             hf = h5py.File(filepath, "r")
-            test_array = TestInstance.load_from_h5(hf, flatten_x=flatten_x)
-            yield filepath.stem, test_array
+            test_array = TestInstance.load_from_h5(hf)
+            if (max_size is not None) and (len(test_array) > max_size):
+                cur_idx = 0
+                while (cur_idx * max_size) < len(test_array):
+                    sub_array = test_array[cur_idx * max_size : (cur_idx + 1) * max_size]
+                    if self.task.normalize:
+                        sub_array.x = self._normalize(sub_array.x)
+                    if flatten_x:
+                        sub_array.x = self._flatten_array(sub_array.x)
+                    test_id = f"{cur_idx}_{filepath.stem}"
+                    cur_idx += 1
+                    yield test_id, sub_array
+            else:
+                if self.task.normalize:
+                    test_array.x = self._normalize(test_array.x)
+                if flatten_x:
+                    test_array.x = self._flatten_array(test_array.x)
+                yield filepath.stem, test_array
 
     @classmethod
     def create_benchmark_datasets(
@@ -294,6 +380,38 @@ class CropHarvest(BaseDataset):
             )
         return output_datasets
 
+    def sample(self, k: int, deterministic: bool = False) -> Tuple[np.ndarray, np.ndarray]:
+        # we will sample to get half positive and half negative
+        # examples
+        output_x: List[np.ndarray] = []
+        output_y: List[np.ndarray] = []
+
+        k = min(k, self.k)
+
+        if deterministic:
+            pos_indices = self.positive_indices[:k]
+            neg_indices = self.negative_indices[:k]
+        else:
+            pos_indices, self.sampled_positive_indices = sample_with_memory(
+                self.positive_indices, k, self.sampled_negative_indices
+            )
+            neg_indices, self.sampled_negative_indices = sample_with_memory(
+                self.negative_indices, k, self.sampled_negative_indices
+            )
+
+            self.sampled_positive_indices.extend(pos_indices)
+            self.sampled_negative_indices.extend(neg_indices)
+
+        # returns a list of [pos_index, neg_index, pos_index, neg_index, ...]
+        indices = [val for pair in zip(pos_indices, neg_indices) for val in pair]
+        output_x, output_y = zip(*[self[i] for i in indices])
+
+        x = np.stack(output_x, axis=0)
+        if self.task.normalize:
+            x = self._normalize(x)
+
+        return x, np.array(output_y)
+
     @classmethod
     def from_labels_and_tifs(cls, labels: CropHarvestLabels, tifs: CropHarvestTifs):
         "Creates CropHarvest dataset from CropHarvestLabels and CropHarvestTifs"
@@ -305,4 +423,25 @@ class CropHarvest(BaseDataset):
 
     @property
     def id(self) -> str:
-        return f"{self.task.bounding_box.name}_{self.task.target_label}"
+        return f"{cast(BBox, self.task.bounding_box).name}_{self.task.target_label}"
+
+    def _get_positive_and_negative_indices(self) -> Tuple[List[int], List[int]]:
+
+        positive_indices: List[int] = []
+        negative_indices: List[int] = []
+
+        for i, y_val in enumerate(self.y_vals):
+            if y_val == 1:
+                positive_indices.append(i)
+            else:
+                negative_indices.append(i)
+        return positive_indices, negative_indices
+
+    def _normalize(self, array: np.ndarray) -> np.ndarray:
+        if not self.task.normalize:
+            return array
+        return (array - self.normalizing_dict["mean"]) / self.normalizing_dict["std"]
+
+    @staticmethod
+    def _flatten_array(array: np.ndarray) -> np.ndarray:
+        return array.reshape(array.shape[0], -1)

@@ -9,7 +9,7 @@ import collections
 import functools
 import tarfile
 
-from typing import Dict, List
+from typing import Dict, List, Tuple, Optional
 
 try:
     import torch
@@ -50,7 +50,7 @@ def download_and_extract_archive(url: str, filename: str, remove_finished: bool 
 def load_normalizing_dict(path_to_dict: Path) -> Dict[str, np.ndarray]:
 
     hf = h5py.File(path_to_dict, "r")
-    return {"mean": hf.get("mean"), "std": hf.get("std")}
+    return {"mean": hf.get("mean")[:], "std": hf.get("std")[:]}
 
 
 def deterministic_shuffle(x: List, seed: int) -> List:
@@ -71,6 +71,23 @@ def deterministic_shuffle(x: List, seed: int) -> List:
         output_list.append(x.pop(seed))
         seed *= -1
     return output_list
+
+
+def sample_with_memory(
+    indices: List[int], k: int, state: Optional[List[int]] = None
+) -> Tuple[List[int], List[int]]:
+
+    if state is None:
+        state = []
+
+    indices_to_sample = list(set(indices) - set(state))
+    if len(indices_to_sample) < k:
+        # restart the state
+        state, indices_to_sample = [], indices
+    selected_indices = random.sample(indices_to_sample, k)
+    state.extend(selected_indices)
+
+    return selected_indices, state
 
 
 class memoized(object):
@@ -110,5 +127,5 @@ def read_geopandas(file_path) -> geopandas.GeoDataFrame:
     return geopandas.read_file(str(file_path))
 
 
-def flatten_array(array: np.ndarray) -> np.ndarray:
-    return array.reshape(array.shape[0], -1)
+class NoDataForBoundingBoxError(Exception):
+    pass
