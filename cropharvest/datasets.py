@@ -9,7 +9,6 @@ from cropharvest.countries import BBox
 from cropharvest.utils import (
     download_and_extract_archive,
     deterministic_shuffle,
-    extract_archive,
     read_geopandas,
     load_normalizing_dict,
     sample_with_memory,
@@ -77,7 +76,6 @@ class BaseDataset:
 
 
 class CropHarvestLabels(BaseDataset):
-
     def __init__(self, root, download=False):
         super().__init__(root, download, filenames=(LABELS_FILENAME,))
 
