@@ -43,6 +43,10 @@ class Task:
                 min_lat=-90, max_lat=90, min_lon=-180, max_lon=180, name="global"
             )
 
+    @property
+    def id(self) -> str:
+        return f"{cast(BBox, self.bounding_box).name}_{self.target_label}"
+
 
 class BaseDataset:
     def __init__(self, root, download: bool, download_url: str, filename: str):
@@ -350,17 +354,18 @@ class CropHarvest(BaseDataset):
 
             country_bboxes = countries.get_country_bbox(country)
             for country_bbox in country_bboxes:
-                if f"{country_bbox.name}_{crop}" not in [x.id for x in output_datasets]:
+                task = Task(
+                    country_bbox,
+                    crop,
+                    balance_negative_crops,
+                    f"{country}_{crop}",
+                )
+                if task.id not in [x.id for x in output_datasets]:
                     if country_bbox.contains_bbox(bbox):
                         output_datasets.append(
                             cls(
                                 root,
-                                Task(
-                                    country_bbox,
-                                    crop,
-                                    balance_negative_crops,
-                                    f"{country}_{crop}",
-                                ),
+                                task,
                                 download=download,
                             )
                         )
@@ -421,7 +426,7 @@ class CropHarvest(BaseDataset):
 
     @property
     def id(self) -> str:
-        return f"{cast(BBox, self.task.bounding_box).name}_{self.task.target_label}"
+        return self.task.id
 
     def _get_positive_and_negative_indices(self) -> Tuple[List[int], List[int]]:
 
