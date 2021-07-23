@@ -4,9 +4,9 @@ from typing import Dict, List
 SHUFFLE_SEEDS = list(range(10))
 
 DATASET_TO_SIZES: Dict[str, List] = {
-    "Kenya_maize": [None],
-    "Brazil_coffee": [None],
-    "United States of America_almond": [
+    "Kenya__1_maize": [None],
+    "Brazil_0_coffee": [None],
+    "United States of America_75_almond": [
         20,
         50,
         126,
