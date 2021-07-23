@@ -21,8 +21,7 @@ from cropharvest.config import (
     LABELS_FILENAME,
     DEFAULT_SEED,
     TEST_REGIONS,
-    TEST_DATASETS,
-    DATASET_URL,
+    TEST_DATASETS
 )
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
@@ -65,7 +64,8 @@ class BaseDataset:
 
             if not (self.root / filename).exists():
                 raise FileNotFoundError(
-                    f"{filename} does not exist in {root}, it can be downloaded by setting download=True"
+                    f"{filename} does not exist in {root}, "
+                    f"it can be downloaded by setting download=True"
                 )
 
     def __getitem__(self, index: int):
