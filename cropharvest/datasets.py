@@ -9,12 +9,22 @@ from cropharvest.countries import BBox
 from cropharvest.utils import (
     download_and_extract_archive,
     deterministic_shuffle,
+    extract_archive,
     read_geopandas,
     load_normalizing_dict,
     sample_with_memory,
     NoDataForBoundingBoxError,
 )
-from cropharvest.config import FEATURES_FILENAME, LABELS_FILENAME, DEFAULT_SEED, TEST_REGIONS, TEST_DATASETS
+from cropharvest.config import (
+    FEATURES_DIR,
+    TEST_FEATURES_MINI_DIR,
+    TEST_FEATURES_DIR,
+    LABELS_FILENAME,
+    DEFAULT_SEED,
+    TEST_REGIONS,
+    TEST_DATASETS,
+    DATASET_URL,
+)
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
 from cropharvest import countries
@@ -45,23 +55,19 @@ class Task:
 
 
 class BaseDataset:
-    def __init__(self, root, download: bool, download_url: str, filename: str):
+    def __init__(self, root, download: bool, filenames: Tuple[str, ...]):
         self.root = Path(root)
         if not self.root.is_dir():
             raise NotADirectoryError(f"{root} should be a directory.")
 
-        path_to_data = self.root / filename
+        for filename in filenames:
+            if download:
+                download_and_extract_archive(root, filename)
 
-        if download:
-            if path_to_data.exists():
-                print("Files already downloaded.")
-            else:
-                download_and_extract_archive(download_url, str(path_to_data))
-
-        if not path_to_data.exists():
-            raise FileNotFoundError(
-                f"{path_to_data} does not exist, it can be downloaded by setting download=True"
-            )
+            if not (self.root / filename).exists():
+                raise FileNotFoundError(
+                    f"{filename} does not exist in {root}, it can be downloaded by setting download=True"
+                )
 
     def __getitem__(self, index: int):
         raise NotImplementedError
@@ -71,10 +77,9 @@ class BaseDataset:
 
 
 class CropHarvestLabels(BaseDataset):
-    url = "https://zenodo.org/record/5021762/files/labels.geojson?download=1"
 
     def __init__(self, root, download=False):
-        super().__init__(root, download, download_url=self.url, filename=LABELS_FILENAME)
+        super().__init__(root, download, filenames=(LABELS_FILENAME,))
 
         # self._labels will always contain the original dataframe;
         # the CropHarvestLabels class should not modify it
@@ -176,7 +181,7 @@ class CropHarvestLabels(BaseDataset):
 
 class CropHarvestTifs(BaseDataset):
     def __init__(self, root, download=False):
-        super().__init__(root, download, download_url="", filename="")
+        super().__init__(root, download, filenames=())
 
     @classmethod
     def from_labels(cls):
@@ -184,9 +189,7 @@ class CropHarvestTifs(BaseDataset):
 
 
 class CropHarvest(BaseDataset):
-    "Dataset consisting of satellite data and associated labels"
-
-    url = "https://zenodo.org/record/5021762/files/features.tar.gz?download=1"
+    """Dataset consisting of satellite data and associated labels"""
 
     def __init__(
         self,
@@ -195,8 +198,14 @@ class CropHarvest(BaseDataset):
         download=False,
         val_ratio: float = 0.0,
         is_val: bool = False,
+        is_mini_test: bool = True,
     ):
-        super().__init__(root, download, download_url=self.url, filename=root / FEATURES_FILENAME)
+        if is_mini_test:
+            self.test_features_dir = TEST_FEATURES_MINI_DIR
+        else:
+            self.test_features_dir = TEST_FEATURES_DIR
+
+        super().__init__(root, download, filenames=(FEATURES_DIR, self.test_features_dir))
 
         labels = CropHarvestLabels(root, download=download)
         if task is None:
@@ -204,7 +213,9 @@ class CropHarvest(BaseDataset):
             task = Task()
         self.task = task
 
-        self.normalizing_dict = load_normalizing_dict(Path(root) / "features/normalizing_dict.h5")
+        self.normalizing_dict = load_normalizing_dict(
+            Path(root) / f"{FEATURES_DIR}/normalizing_dict.h5"
+        )
 
         positive_paths, negative_paths = labels.construct_positive_and_negative_labels(
             task, filter_test=True
@@ -301,7 +312,7 @@ class CropHarvest(BaseDataset):
             [num_samples, timesteps * bands] instead of [num_samples, timesteps, bands]
         """
         all_relevant_files = list(
-            (self.root / "test_features").glob(f"{self.task.test_identifier}*.h5")
+            (self.root / self.test_features_dir).glob(f"{self.task.test_identifier}*.h5")
         )
         if len(all_relevant_files) == 0:
             raise RuntimeError(f"Missing test data {self.task.test_identifier}*.h5")
