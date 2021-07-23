@@ -348,9 +348,9 @@ class CropHarvest(BaseDataset):
         for identifier, bbox in TEST_REGIONS.items():
             country, crop, _, _ = identifier.split("_")
 
-            if f"{country}_{crop}" not in [x.id for x in output_datasets]:
-                country_bboxes = countries.get_country_bbox(country)
-                for country_bbox in country_bboxes:
+            country_bboxes = countries.get_country_bbox(country)
+            for country_bbox in country_bboxes:
+                if f"{country_bbox.name}_{crop}" not in [x.id for x in output_datasets]:
                     if country_bbox.contains_bbox(bbox):
                         output_datasets.append(
                             cls(
