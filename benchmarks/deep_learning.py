@@ -93,26 +93,32 @@ def run(
 if __name__ == "__main__":
 
     data_folder = DATAFOLDER_PATH
+    checkpoint = True
 
     # we start by making the state_dicts necessary for the pretrained models
+    if checkpoint and (data_folder / DL_MAML / "state_dict.pth").exists():
+        pass
+    else:
+        train_maml_model(
+            data_folder,
+            classifier_base_layers=CLASSIFIER_BASE_LAYERS,
+            classifier_dropout=CLASSIFIER_DROPOUT,
+            classifier_vector_size=HIDDEN_VECTOR_SIZE,
+            num_classification_layers=NUM_CLASSIFICATION_LAYERS,
+            model_name=DL_MAML,
+        )
 
-    train_maml_model(
-        data_folder,
-        classifier_base_layers=CLASSIFIER_BASE_LAYERS,
-        classifier_dropout=CLASSIFIER_DROPOUT,
-        classifier_vector_size=HIDDEN_VECTOR_SIZE,
-        num_classification_layers=NUM_CLASSIFICATION_LAYERS,
-        model_name=DL_MAML,
-    )
-
-    pretrain_model(
-        data_folder,
-        classifier_base_layers=CLASSIFIER_BASE_LAYERS,
-        classifier_dropout=CLASSIFIER_DROPOUT,
-        classifier_vector_size=HIDDEN_VECTOR_SIZE,
-        num_classification_layers=NUM_CLASSIFICATION_LAYERS,
-        model_name=DL_PRETRAINED,
-    )
+    if checkpoint and (data_folder / DL_PRETRAINED / "state_dict.pth").exists():
+        pass
+    else:
+        pretrain_model(
+            data_folder,
+            classifier_base_layers=CLASSIFIER_BASE_LAYERS,
+            classifier_dropout=CLASSIFIER_DROPOUT,
+            classifier_vector_size=HIDDEN_VECTOR_SIZE,
+            num_classification_layers=NUM_CLASSIFICATION_LAYERS,
+            model_name=DL_PRETRAINED,
+        )
 
     for model in [DL_PRETRAINED, DL_MAML, DL_RANDOM]:
         if model != DL_RANDOM:
