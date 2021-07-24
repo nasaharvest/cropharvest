@@ -61,7 +61,7 @@ def run(
 
                 model = train(model, dataset, sample_size)
 
-                for test_id, test_instance in dataset.test_data():
+                for test_id, test_instance in dataset.test_data(max_size=10000):
 
                     results_json = results_folder / f"{test_id}_{json_suffix}"
                     results_nc = results_folder / f"{test_id}_{nc_suffix}"
