@@ -53,7 +53,7 @@ def download_and_extract_archive(root: str, filename: str) -> None:
     file_path = Path(file_path_str)
 
     if file_path.exists():
-        print(f"{filename} already downloaded at {root}")
+        return
     elif file_path.suffix == "":
         targz_path_str = f"{file_path_str}.tar.gz"
         targz_path = Path(targz_path_str)
