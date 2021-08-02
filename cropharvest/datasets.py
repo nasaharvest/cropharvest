@@ -276,7 +276,6 @@ class CropHarvest(BaseDataset):
         :param num_samples: If -1, all data is returned. Otherwise, a balanced dataset of
             num_samples / 2 positive (& negative) samples will be returned
         """
-        X, Y = [], []
 
         if num_samples is None:
             indices_to_sample = list(range(len(self)))
@@ -358,8 +357,8 @@ class CropHarvest(BaseDataset):
 
         for identifier, bbox in TEST_REGIONS.items():
             country, crop, _, _ = identifier.split("_")
-
-            if f"{country}_{crop}" not in [x.id for x in output_datasets]:
+            dataset_id = f"{country}_{crop}"
+            if dataset_id not in [x.task.test_identifier for x in output_datasets]:
                 country_bboxes = countries.get_country_bbox(country)
                 for country_bbox in country_bboxes:
                     if country_bbox.contains_bbox(bbox):
@@ -370,7 +369,7 @@ class CropHarvest(BaseDataset):
                                     country_bbox,
                                     crop,
                                     balance_negative_crops,
-                                    f"{country}_{crop}",
+                                    dataset_id,
                                 ),
                                 download=download,
                             )
