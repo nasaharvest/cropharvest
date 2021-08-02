@@ -21,7 +21,7 @@ from cropharvest.config import (
     LABELS_FILENAME,
     DEFAULT_SEED,
     TEST_REGIONS,
-    TEST_DATASETS
+    TEST_DATASETS,
 )
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
