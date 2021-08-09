@@ -406,7 +406,7 @@ class CropHarvest(BaseDataset):
             neg_indices = self.negative_indices[:k]
         else:
             pos_indices, self.sampled_positive_indices = sample_with_memory(
-                self.positive_indices, k, self.sampled_negative_indices
+                self.positive_indices, k, self.sampled_positive_indices
             )
             neg_indices, self.sampled_negative_indices = sample_with_memory(
                 self.negative_indices, k, self.sampled_negative_indices
