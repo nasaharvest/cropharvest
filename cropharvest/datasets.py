@@ -246,11 +246,19 @@ class CropHarvest(BaseDataset):
         self.sampled_positive_indices: List[int] = []
         self.sampled_negative_indices: List[int] = []
 
+    def reset_sampled_indices(self) -> None:
+        self.sampled_positive_indices = []
+        self.sampled_negative_indices = []
+
     def shuffle(self, seed: int) -> None:
+        self.reset_sampled_indices()
         filepaths_and_y_vals = list(zip(self.filepaths, self.y_vals))
         filepaths_and_y_vals = deterministic_shuffle(filepaths_and_y_vals, seed)
         filepaths, y_vals = zip(*filepaths_and_y_vals)
         self.filepaths, self.y_vals = list(filepaths), list(y_vals)
+
+        self.positive_indices = [idx for idx, i in self.y_vals if i == 1]
+        self.negative_indices = [idx for idx, i in self.y_vals if i == 0]
 
     def __len__(self) -> int:
         return len(self.filepaths)
@@ -411,9 +419,6 @@ class CropHarvest(BaseDataset):
             neg_indices, self.sampled_negative_indices = sample_with_memory(
                 self.negative_indices, k, self.sampled_negative_indices
             )
-
-            self.sampled_positive_indices.extend(pos_indices)
-            self.sampled_negative_indices.extend(neg_indices)
 
         # returns a list of [pos_index, neg_index, pos_index, neg_index, ...]
         indices = [val for pair in zip(pos_indices, neg_indices) for val in pair]
