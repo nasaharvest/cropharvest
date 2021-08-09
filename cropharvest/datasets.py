@@ -327,20 +327,17 @@ class CropHarvest(BaseDataset):
         for filepath in all_relevant_files:
             hf = h5py.File(filepath, "r")
             test_array = TestInstance.load_from_h5(hf)
+            test_array.x = self._normalize(test_array.x)
             if (max_size is not None) and (len(test_array) > max_size):
                 cur_idx = 0
                 while (cur_idx * max_size) < len(test_array):
                     sub_array = test_array[cur_idx * max_size : (cur_idx + 1) * max_size]
-                    if self.task.normalize:
-                        sub_array.x = self._normalize(sub_array.x)
                     if flatten_x:
                         sub_array.x = self._flatten_array(sub_array.x)
                     test_id = f"{cur_idx}_{filepath.stem}"
                     cur_idx += 1
                     yield test_id, sub_array
             else:
-                if self.task.normalize:
-                    test_array.x = self._normalize(test_array.x)
                 if flatten_x:
                     test_array.x = self._flatten_array(test_array.x)
                 yield filepath.stem, test_array
@@ -424,9 +421,6 @@ class CropHarvest(BaseDataset):
         output_x, output_y = zip(*[self[i] for i in indices])
 
         x = np.stack(output_x, axis=0)
-        if self.task.normalize:
-            x = self._normalize(x)
-
         return x, np.array(output_y)
 
     @classmethod
