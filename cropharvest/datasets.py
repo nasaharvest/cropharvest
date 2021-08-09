@@ -344,7 +344,11 @@ class CropHarvest(BaseDataset):
 
     @classmethod
     def create_benchmark_datasets(
-        cls, root, balance_negative_crops: bool = True, download: bool = True
+        cls,
+        root,
+        balance_negative_crops: bool = True,
+        download: bool = True,
+        is_mini_test: bool = False,
     ) -> List:
         r"""
         Create the benchmark datasets.
@@ -356,6 +360,7 @@ class CropHarvest(BaseDataset):
             target_label, and that target_label is a crop
         :param download: Whether to download the labels and training data if they don't
             already exist
+        :param is_mini_test: Whether to download the mini or complete test data
 
         :returns: A list of evaluation CropHarvest datasets according to the TEST_REGIONS and
             TEST_DATASETS in the config
@@ -377,11 +382,7 @@ class CropHarvest(BaseDataset):
                 if task.id not in [x.id for x in output_datasets]:
                     if country_bbox.contains_bbox(bbox):
                         output_datasets.append(
-                            cls(
-                                root,
-                                task,
-                                download=download,
-                            )
+                            cls(root, task, download=download, is_mini_test=is_mini_test)
                         )
 
         for country, test_dataset in TEST_DATASETS.items():
@@ -392,7 +393,10 @@ class CropHarvest(BaseDataset):
             country_bbox = countries.get_country_bbox(country)[0]
             output_datasets.append(
                 cls(
-                    root, Task(country_bbox, None, test_identifier=test_dataset), download=download
+                    root,
+                    Task(country_bbox, None, test_identifier=test_dataset),
+                    download=download,
+                    is_mini_test=is_mini_test,
                 )
             )
         return output_datasets
