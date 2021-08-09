@@ -123,7 +123,7 @@ def pretrain_model(
     model_name: str,
     pretrained_val_ratio: float = 0.1,
     batch_size: int = 64,
-    learning_rate: float = 0.0001,
+    learning_rate: float = 0.001,
     max_epochs: int = 1000,
     patience: int = 10,
 ) -> Classifier:
