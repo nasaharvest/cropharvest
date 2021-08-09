@@ -257,8 +257,8 @@ class CropHarvest(BaseDataset):
         filepaths, y_vals = zip(*filepaths_and_y_vals)
         self.filepaths, self.y_vals = list(filepaths), list(y_vals)
 
-        self.positive_indices = [idx for idx, i in self.y_vals if i == 1]
-        self.negative_indices = [idx for idx, i in self.y_vals if i == 0]
+        self.positive_indices = [idx for idx, i in enumerate(self.y_vals) if i == 1]
+        self.negative_indices = [idx for idx, i in enumerate(self.y_vals) if i == 0]
 
     def __len__(self) -> int:
         return len(self.filepaths)
