@@ -62,6 +62,8 @@ def run(
                 dataset.reset_sampled_indices()
                 model = train(model, dataset, sample_size)
 
+                model.eval()
+
                 for test_id, test_instance in dataset.test_data(max_size=10000):
 
                     results_json = results_folder / f"{test_id}_{json_suffix}"
