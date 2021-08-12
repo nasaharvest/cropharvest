@@ -246,11 +246,18 @@ class CropHarvest(BaseDataset):
         self.sampled_positive_indices: List[int] = []
         self.sampled_negative_indices: List[int] = []
 
+    def reset_sampled_indices(self) -> None:
+        self.sampled_positive_indices = []
+        self.sampled_negative_indices = []
+
     def shuffle(self, seed: int) -> None:
+        self.reset_sampled_indices()
         filepaths_and_y_vals = list(zip(self.filepaths, self.y_vals))
         filepaths_and_y_vals = deterministic_shuffle(filepaths_and_y_vals, seed)
         filepaths, y_vals = zip(*filepaths_and_y_vals)
         self.filepaths, self.y_vals = list(filepaths), list(y_vals)
+
+        self.positive_indices, self.negative_indices = self._get_positive_and_negative_indices()
 
     def __len__(self) -> int:
         return len(self.filepaths)
@@ -324,23 +331,25 @@ class CropHarvest(BaseDataset):
                 cur_idx = 0
                 while (cur_idx * max_size) < len(test_array):
                     sub_array = test_array[cur_idx * max_size : (cur_idx + 1) * max_size]
-                    if self.task.normalize:
-                        sub_array.x = self._normalize(sub_array.x)
+                    sub_array.x = self._normalize(sub_array.x)
                     if flatten_x:
                         sub_array.x = self._flatten_array(sub_array.x)
                     test_id = f"{cur_idx}_{filepath.stem}"
                     cur_idx += 1
                     yield test_id, sub_array
             else:
-                if self.task.normalize:
-                    test_array.x = self._normalize(test_array.x)
+                test_array.x = self._normalize(test_array.x)
                 if flatten_x:
                     test_array.x = self._flatten_array(test_array.x)
                 yield filepath.stem, test_array
 
     @classmethod
     def create_benchmark_datasets(
-        cls, root, balance_negative_crops: bool = True, download: bool = True
+        cls,
+        root,
+        balance_negative_crops: bool = True,
+        download: bool = True,
+        is_mini_test: bool = False,
     ) -> List:
         r"""
         Create the benchmark datasets.
@@ -352,6 +361,7 @@ class CropHarvest(BaseDataset):
             target_label, and that target_label is a crop
         :param download: Whether to download the labels and training data if they don't
             already exist
+        :param is_mini_test: Whether to download the mini or complete test data
 
         :returns: A list of evaluation CropHarvest datasets according to the TEST_REGIONS and
             TEST_DATASETS in the config
@@ -373,11 +383,7 @@ class CropHarvest(BaseDataset):
                 if task.id not in [x.id for x in output_datasets]:
                     if country_bbox.contains_bbox(bbox):
                         output_datasets.append(
-                            cls(
-                                root,
-                                task,
-                                download=download,
-                            )
+                            cls(root, task, download=download, is_mini_test=is_mini_test)
                         )
 
         for country, test_dataset in TEST_DATASETS.items():
@@ -388,7 +394,10 @@ class CropHarvest(BaseDataset):
             country_bbox = countries.get_country_bbox(country)[0]
             output_datasets.append(
                 cls(
-                    root, Task(country_bbox, None, test_identifier=test_dataset), download=download
+                    root,
+                    Task(country_bbox, None, test_identifier=test_dataset),
+                    download=download,
+                    is_mini_test=is_mini_test,
                 )
             )
         return output_datasets
@@ -406,23 +415,17 @@ class CropHarvest(BaseDataset):
             neg_indices = self.negative_indices[:k]
         else:
             pos_indices, self.sampled_positive_indices = sample_with_memory(
-                self.positive_indices, k, self.sampled_negative_indices
+                self.positive_indices, k, self.sampled_positive_indices
             )
             neg_indices, self.sampled_negative_indices = sample_with_memory(
                 self.negative_indices, k, self.sampled_negative_indices
             )
-
-            self.sampled_positive_indices.extend(pos_indices)
-            self.sampled_negative_indices.extend(neg_indices)
 
         # returns a list of [pos_index, neg_index, pos_index, neg_index, ...]
         indices = [val for pair in zip(pos_indices, neg_indices) for val in pair]
         output_x, output_y = zip(*[self[i] for i in indices])
 
         x = np.stack(output_x, axis=0)
-        if self.task.normalize:
-            x = self._normalize(x)
-
         return x, np.array(output_y)
 
     @classmethod

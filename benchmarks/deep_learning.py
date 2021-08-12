@@ -59,7 +59,10 @@ def run(
                 if state_dict is not None:
                     model.load_state_dict(state_dict)
 
+                dataset.reset_sampled_indices()
                 model = train(model, dataset, sample_size)
+
+                model.eval()
 
                 for test_id, test_instance in dataset.test_data(max_size=10000):
 
