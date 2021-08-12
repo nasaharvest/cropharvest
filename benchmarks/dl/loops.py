@@ -35,7 +35,7 @@ def train(
     loss_fn = nn.BCELoss(reduction="mean")
 
     if sample_size is not None:
-        train_batch_total = dataset.sample(sample_size // 2)
+        train_batch_total = dataset.sample(sample_size // 2, deterministic=True)
         state: List[int] = []
 
     for i in tqdm(range(num_grad_steps)):
