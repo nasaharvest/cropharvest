@@ -28,7 +28,7 @@ from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
 from cropharvest import countries
 
-from typing import cast, List, Optional, Tuple, Generator
+from typing import cast, List, Optional, Tuple, Generator, Union
 
 
 @dataclass
@@ -107,10 +107,21 @@ class CropHarvestLabels(BaseDataset):
             )
         return gpdf[in_bounding_box]
 
-    def classes_in_bbox(self, bounding_box: BBox) -> List[str]:
+    def classes_in_bbox(
+        self, bounding_box: BBox, return_classifications: bool = False
+    ) -> Union[List[str], List[Tuple[str, str]]]:
         bbox_geojson = self.filter_geojson(self.as_geojson(), bounding_box)
         unique_labels = [x for x in bbox_geojson.label.unique() if x is not None]
-        return unique_labels
+        if not return_classifications:
+            return unique_labels
+        else:
+            label_classification_pairs: List[Tuple[str, str]] = []
+            for unique_label in unique_labels:
+                classification = bbox_geojson[
+                    bbox_geojson.label == unique_label
+                ].classification_label.iloc[0]
+                label_classification_pairs.append((unique_label, classification))
+            return label_classification_pairs
 
     def __getitem__(self, index: int):
         return self._labels.iloc[index]
