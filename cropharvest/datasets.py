@@ -43,7 +43,7 @@ class Task:
     def __post_init__(self):
         if self.target_label is None:
             self.target_label = "crop"
-            self.task_classification = "crop"
+            self.classification_label = "crop"
             if self.balance_negative_crops is True:
                 warnings.warn(
                     "Balance negative crops not meaningful for the crop vs. non crop tasks"
