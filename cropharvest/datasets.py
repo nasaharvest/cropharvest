@@ -22,6 +22,7 @@ from cropharvest.config import (
     DEFAULT_SEED,
     TEST_REGIONS,
     TEST_DATASETS,
+    TEST_CROP_TO_CLASSIFICATION,
 )
 from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
@@ -37,14 +38,20 @@ class Task:
     balance_negative_crops: bool = False
     test_identifier: Optional[str] = None
     normalize: bool = True
+    classification_label: Optional[str] = None
 
     def __post_init__(self):
         if self.target_label is None:
             self.target_label = "crop"
+            self.task_classification = "crop"
             if self.balance_negative_crops is True:
                 warnings.warn(
                     "Balance negative crops not meaningful for the crop vs. non crop tasks"
                 )
+        else:
+            assert (
+                self.classification_label is not None
+            ), "Higher level classsification must be provided if a target label is provided"
 
         if self.bounding_box is None:
             self.bounding_box = BBox(
@@ -379,6 +386,7 @@ class CropHarvest(BaseDataset):
                     crop,
                     balance_negative_crops,
                     f"{country}_{crop}",
+                    classification_label=TEST_CROP_TO_CLASSIFICATION[crop].name,
                 )
                 if task.id not in [x.id for x in output_datasets]:
                     if country_bbox.contains_bbox(bbox):
