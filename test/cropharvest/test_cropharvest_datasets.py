@@ -1,7 +1,6 @@
 import numpy as np
 
 from cropharvest.datasets import CropHarvest
-from cropharvest.config import FEATURES_DIR, TEST_FEATURES_MINI_DIR
 
 
 def test_combination(monkeypatch, tmpdir) -> None:
@@ -92,17 +91,3 @@ def test_sample(monkeypatch, tmpdir) -> None:
         assert y.sum() == k
         for idx, y_val in enumerate(y):
             assert (x[idx] == y_val).all()
-
-
-def test_crop_harvest_mini(mocker, tmp_path):
-    mocked_download_and_extract = mocker.patch("cropharvest.datasets.download_and_extract_archive")
-    mocker.patch("cropharvest.datasets.load_normalizing_dict")
-    mock_labels = mocker.patch("cropharvest.datasets.CropHarvestLabels")
-    mock_labels().construct_positive_and_negative_labels.return_value = [], []
-
-    (tmp_path / FEATURES_DIR).mkdir()
-    (tmp_path / TEST_FEATURES_MINI_DIR).mkdir()
-
-    CropHarvest(root=str(tmp_path), is_mini_test=True, download=True)
-
-    mocked_download_and_extract.assert_called_with(str(tmp_path), TEST_FEATURES_MINI_DIR)
