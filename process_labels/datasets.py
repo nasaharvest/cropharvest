@@ -91,15 +91,6 @@ DATASETS = {
             "https://doi.org/10.34911/rdnt.5vx40r"
         ),
     },
-    "usa-kern": {
-        "function": loading_funcs.load_kern_2020,
-        "description": (
-            "Open source crop type labels submitted by farmers "
-            "in Kern, California for 2020. For more information "
-            "please refer to "
-            "http://www.kernag.com/gis/gis-data.asp#datumused"
-        ),
-    },
     "croplands": {
         "function": loading_funcs.load_croplands,
         "description": (
