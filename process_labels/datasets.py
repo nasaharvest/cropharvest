@@ -55,14 +55,6 @@ DATASETS = {
             "https://www.nature.com/articles/s41597-020-00591-2.pdf"
         ),
     },
-    "rwanda": {
-        "function": loading_funcs.load_rwanda,
-        "description": (
-            "Open source crop type labels in Rwanda. For more "
-            "information, please refer to "
-            "https://doi.org/10.34911/rdnt.r4p1fr"
-        ),
-    },
     "kenya": {
         "function": loading_funcs.load_kenya,
         "description": (

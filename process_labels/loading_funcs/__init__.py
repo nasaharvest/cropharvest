@@ -4,7 +4,7 @@ from .togo import load_togo, load_togo_eval
 from .brazil import load_lem_brazil, load_brazil_noncrop
 from .geowiki_landcover_2017 import load_geowiki_landcover_2017
 from .central_asia import load_central_asia
-from .rwanda import load_rwanda, load_rwanda_ceo
+from .rwanda import load_rwanda_ceo
 from .kenya import load_kenya, load_kenya_non_crop
 from .uganda import load_uganda
 from .tanzania import load_tanzania
@@ -23,7 +23,6 @@ __all__ = [
     "load_lem_brazil",
     "load_geowiki_landcover_2017",
     "load_central_asia",
-    "load_rwanda",
     "load_rwanda_ceo",
     "load_kenya",
     "load_kenya_non_crop",
