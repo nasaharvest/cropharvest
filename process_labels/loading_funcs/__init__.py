@@ -8,7 +8,6 @@ from .rwanda import load_rwanda, load_rwanda_ceo
 from .kenya import load_kenya, load_kenya_non_crop
 from .uganda import load_uganda
 from .tanzania import load_tanzania
-from .usa import load_kern_2020
 from .croplands import load_croplands
 from .zimbabwe import load_zimbabwe
 from .mali import load_mali, load_mali_crop_noncrop
@@ -30,7 +29,6 @@ __all__ = [
     "load_kenya_non_crop",
     "load_uganda",
     "load_tanzania",
-    "load_kern_2020",
     "load_croplands",
     "load_zimbabwe",
     "load_mali",
