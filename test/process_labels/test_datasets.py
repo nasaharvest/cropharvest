@@ -51,11 +51,7 @@ def _check_labels(df: geopandas.GeoDataFrame) -> None:
         assert labelled_rows.classification_label.isin(expected_vals).all()
 
 
-def test_consistency(monkeypatch) -> None:
-    def overlapping(df):
-        return df
-
-    monkeypatch.setattr("process_labels.loading_funcs.usa._remove_overlapping", overlapping)
+def test_consistency() -> None:
 
     all_datasets = datasets.list_datasets()
 
@@ -69,11 +65,7 @@ def test_consistency(monkeypatch) -> None:
         _check_labels(loaded_dataset)
 
 
-def test_combination(monkeypatch) -> None:
-    def overlapping(df):
-        return df
-
-    monkeypatch.setattr("process_labels.loading_funcs.usa._remove_overlapping", overlapping)
+def test_combination() -> None:
 
     combined_dataset = datasets.combine_datasets()
 
