@@ -45,9 +45,6 @@ TEST_REGIONS: Dict[str, BBox] = {
     "Brazil_coffee_2021_0": BBox(
         min_lat=-12.1995, max_lat=-12.1226, min_lon=-45.8238, max_lon=-45.7579
     ),
-    "United States of America_almond_2021_0": BBox(
-        min_lon=-119.35901, max_lon=-118.7524, min_lat=34.9329, max_lat=35.34763
-    ),
 }
 
 TEST_DATASETS = {"Togo": "togo-eval"}
