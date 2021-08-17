@@ -16,7 +16,6 @@ from cropharvest.utils import (
 )
 from cropharvest.config import (
     FEATURES_DIR,
-    TEST_FEATURES_MINI_DIR,
     TEST_FEATURES_DIR,
     LABELS_FILENAME,
     DEFAULT_SEED,
@@ -218,14 +217,8 @@ class CropHarvest(BaseDataset):
         download=False,
         val_ratio: float = 0.0,
         is_val: bool = False,
-        is_mini_test: bool = True,
     ):
-        if is_mini_test:
-            self.test_features_dir = TEST_FEATURES_MINI_DIR
-        else:
-            self.test_features_dir = TEST_FEATURES_DIR
-
-        super().__init__(root, download, filenames=(FEATURES_DIR, self.test_features_dir))
+        super().__init__(root, download, filenames=(FEATURES_DIR, TEST_FEATURES_DIR))
 
         labels = CropHarvestLabels(root, download=download)
         if task is None:
@@ -338,7 +331,7 @@ class CropHarvest(BaseDataset):
             [num_samples, timesteps * bands] instead of [num_samples, timesteps, bands]
         """
         all_relevant_files = list(
-            (self.root / self.test_features_dir).glob(f"{self.task.test_identifier}*.h5")
+            (self.root / TEST_FEATURES_DIR).glob(f"{self.task.test_identifier}*.h5")
         )
         if len(all_relevant_files) == 0:
             raise RuntimeError(f"Missing test data {self.task.test_identifier}*.h5")
@@ -367,7 +360,6 @@ class CropHarvest(BaseDataset):
         root,
         balance_negative_crops: bool = True,
         download: bool = True,
-        is_mini_test: bool = False,
     ) -> List:
         r"""
         Create the benchmark datasets.
@@ -379,7 +371,6 @@ class CropHarvest(BaseDataset):
             target_label, and that target_label is a crop
         :param download: Whether to download the labels and training data if they don't
             already exist
-        :param is_mini_test: Whether to download the mini or complete test data
 
         :returns: A list of evaluation CropHarvest datasets according to the TEST_REGIONS and
             TEST_DATASETS in the config
@@ -401,9 +392,7 @@ class CropHarvest(BaseDataset):
                 )
                 if task.id not in [x.id for x in output_datasets]:
                     if country_bbox.contains_bbox(bbox):
-                        output_datasets.append(
-                            cls(root, task, download=download, is_mini_test=is_mini_test)
-                        )
+                        output_datasets.append(cls(root, task, download=download))
 
         for country, test_dataset in TEST_DATASETS.items():
             # TODO; for now, the only country here is Togo, which
@@ -416,7 +405,6 @@ class CropHarvest(BaseDataset):
                     root,
                     Task(country_bbox, None, test_identifier=test_dataset),
                     download=download,
-                    is_mini_test=is_mini_test,
                 )
             )
         return output_datasets

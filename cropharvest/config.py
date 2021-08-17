@@ -17,12 +17,11 @@ NUM_TIMESTEPS = 12
 EXPORT_END_MONTH = 2
 EXPORT_END_DAY = 1
 
-DATASET_VERSION_ID = 5106542
+DATASET_VERSION_ID = 5153470
 DATASET_URL = f"https://zenodo.org/record/{DATASET_VERSION_ID}"
 LABELS_FILENAME = "labels.geojson"
 FEATURES_DIR = "features"
 TEST_FEATURES_DIR = "test_features"
-TEST_FEATURES_MINI_DIR = "test_features_mini"
 
 # the default seed is useful because it also seeds the deterministic
 # shuffling algorithm we use (in cropharvest.utils.deterministic_shuffle)
@@ -45,9 +44,6 @@ TEST_REGIONS: Dict[str, BBox] = {
     ),
     "Brazil_coffee_2021_0": BBox(
         min_lat=-12.1995, max_lat=-12.1226, min_lon=-45.8238, max_lon=-45.7579
-    ),
-    "United States of America_almond_2021_0": BBox(
-        min_lon=-119.35901, max_lon=-118.7524, min_lat=34.9329, max_lat=35.34763
     ),
 }
 

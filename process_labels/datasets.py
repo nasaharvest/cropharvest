@@ -55,14 +55,6 @@ DATASETS = {
             "https://www.nature.com/articles/s41597-020-00591-2.pdf"
         ),
     },
-    "rwanda": {
-        "function": loading_funcs.load_rwanda,
-        "description": (
-            "Open source crop type labels in Rwanda. For more "
-            "information, please refer to "
-            "https://doi.org/10.34911/rdnt.r4p1fr"
-        ),
-    },
     "kenya": {
         "function": loading_funcs.load_kenya,
         "description": (
@@ -89,15 +81,6 @@ DATASETS = {
             "Open source crop type labels in Tanzania, For "
             "more information, please refer to "
             "https://doi.org/10.34911/rdnt.5vx40r"
-        ),
-    },
-    "usa-kern": {
-        "function": loading_funcs.load_kern_2020,
-        "description": (
-            "Open source crop type labels submitted by farmers "
-            "in Kern, California for 2020. For more information "
-            "please refer to "
-            "http://www.kernag.com/gis/gis-data.asp#datumused"
         ),
     },
     "croplands": {
