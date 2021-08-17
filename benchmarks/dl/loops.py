@@ -15,7 +15,7 @@ def train(
     classifier: Classifier,
     dataset: CropHarvest,
     sample_size: Optional[int],
-    num_grad_steps: int = 100,
+    num_grad_steps: int = 250,
     learning_rate: float = 0.001,
     k: int = 10,
 ) -> Classifier:
