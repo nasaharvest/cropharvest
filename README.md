@@ -19,5 +19,10 @@ pip install -r requirements-dev.txt
 ### Getting started
 See the [`demo.ipynb`](demo.ipynb) notebook for an example on how to download the data from [Zenodo](https://zenodo.org/record/5153470) and train a random forest against this data.
 
+For more examples of models trained against this dataset, see the [benchmarks](benchmarks).
+
 ### Contributing
 If you would like to contribute a dataset, please see the [contributing readme](contributing.md).
+
+### License
+CropHarvest has a [Creative Commons Attribution-ShareAlike 4.0 International](LICENSE.txt) license.
