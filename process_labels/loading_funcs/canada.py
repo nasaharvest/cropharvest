@@ -68,7 +68,9 @@ def load_canada():
 
     df[RequiredColumns.LON] = df.geometry.centroid.x
     df[RequiredColumns.LAT] = df.geometry.centroid.y
-    df[RequiredColumns.IS_CROP] = df[NullableColumns.CLASSIFICATION_LABEL] != "non_crop"
+    df[RequiredColumns.IS_CROP] = (df[NullableColumns.CLASSIFICATION_LABEL] != "non_crop").astype(
+        int
+    )
 
     df = df.reset_index(drop=True)
     df[RequiredColumns.INDEX] = df.index
