@@ -46,7 +46,7 @@ def load_canada():
     zipped_file = DATASET_PATH / "canada" / "annual_crop_inventory_ground_truth_data_geoJSON.zip"
     if not unzipped_file.exists():
         with zipfile.ZipFile(zipped_file) as z:
-            z.extractall()
+            z.extractall(DATASET_PATH / "canada")
 
     df = geopandas.read_file(unzipped_file)
     df[RequiredColumns.COLLECTION_DATE] = np.vectorize(ms_to_timestamp)(df.DATE_COLL)
