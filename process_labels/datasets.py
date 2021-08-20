@@ -92,10 +92,6 @@ DATASETS = {
             "https://croplands.org/app/data/search?page=1&page_size=200 "
         ),
     },
-    "zimbabwe": {
-        "function": loading_funcs.load_zimbabwe,
-        "description": "Maize labels collected by the FEWS NET",
-    },
     "mali": {
         "function": loading_funcs.load_mali,
         "description": (
@@ -151,6 +147,15 @@ DATASETS = {
     "malawi-fao": {
         "function": loading_funcs.load_malawi_fao,
         "description": "Crop type labels in Malawi collected by the FAO in June 2021",
+    },
+    "canada": {
+        "function": loading_funcs.load_canada,
+        "description": (
+            "Annual Crop Inventory Ground Truth Data from Canada. "
+            "For more information, please visit "
+            "https://open.canada.ca/data/en/dataset/503a3113-e435-49f4-850c-d70056788632. "
+            "Contains information licensed under the Open Government Licence – Canada."
+        ),
     },
 }
 

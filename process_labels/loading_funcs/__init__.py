@@ -9,10 +9,10 @@ from .kenya import load_kenya, load_kenya_non_crop
 from .uganda import load_uganda
 from .tanzania import load_tanzania
 from .croplands import load_croplands
-from .zimbabwe import load_zimbabwe
 from .mali import load_mali, load_mali_crop_noncrop
 from .france import load_ile_de_france, load_reunion, load_martinique
 from .malawi import load_malawi_fao
+from .canada import load_canada
 
 
 __all__ = [
@@ -29,7 +29,6 @@ __all__ = [
     "load_uganda",
     "load_tanzania",
     "load_croplands",
-    "load_zimbabwe",
     "load_mali",
     "load_mali_crop_noncrop",
     "load_ile_de_france",
@@ -37,4 +36,5 @@ __all__ = [
     "load_reunion",
     "load_martinique",
     "load_malawi_fao",
+    "load_canada",
 ]
