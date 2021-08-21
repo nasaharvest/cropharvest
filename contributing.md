@@ -1,5 +1,13 @@
 # Contributing
 
+For code and dataset contribution, please setup a virtual environment and install the requirements using the following commands:
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements-dev.txt
+```
+
 If you would like to contribute a dataset, thank you! Please complete the following steps to do so:
 
 ### 1. Add the dataset to [process_labels](process_labels)
