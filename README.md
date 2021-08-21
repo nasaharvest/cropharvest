@@ -1,6 +1,6 @@
 # CropHarvest
 
-CropHarvest is an open source remote sensing dataset for agriculture with benchmarks. It collects data a variety of agricultural land use datasets and remote sensing products.
+CropHarvest is an open source remote sensing dataset for agriculture with benchmarks. It collects data from a variety of agricultural land use datasets and remote sensing products.
 
 <img src="diagrams/labels_spatial_distribution.png" alt="Spatial distribution of labels" height="400px"/>
 
