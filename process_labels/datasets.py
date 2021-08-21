@@ -92,6 +92,10 @@ DATASETS = {
             "https://croplands.org/app/data/search?page=1&page_size=200 "
         ),
     },
+    "zimbabwe": {
+        "function": loading_funcs.load_zimbabwe,
+        "description": "Maize labels collected by the FEWS NET",
+    },
     "mali": {
         "function": loading_funcs.load_mali,
         "description": (
