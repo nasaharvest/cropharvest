@@ -1,9 +1,7 @@
 from setuptools import setup, find_packages
 
-long_description = """
-CropHarvest is an open source remote sensing dataset for agriculture with benchmarks. 
-It collects data a variety of agricultural land use datasets and remote sensing products.
-"""
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
 
 setup(
     name="cropharvest",
