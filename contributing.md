@@ -1,5 +1,24 @@
 # Contributing
 
+### Environment Setup
+For code and dataset contribution, please setup a virtual environment and install the requirements using the following commands:
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements-dev.txt
+```
+
+### Tests
+To run style checkers and tests, run the following command:
+```bash
+python -m black --check --diff .
+python -m mypy cropharvest process_labels test benchmarks
+python -m mypy benchmarks/dl
+python -m pytest
+```
+
+### Dataset Contribution
 If you would like to contribute a dataset, thank you! Please complete the following steps to do so:
 
 ### 1. Add the dataset to [process_labels](process_labels)
