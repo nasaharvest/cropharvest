@@ -152,6 +152,15 @@ DATASETS = {
         "function": loading_funcs.load_malawi_fao,
         "description": "Crop type labels in Malawi collected by the FAO in June 2021",
     },
+    "canada": {
+        "function": loading_funcs.load_canada,
+        "description": (
+            "Annual Crop Inventory Ground Truth Data from Canada. "
+            "For more information, please visit "
+            "https://open.canada.ca/data/en/dataset/503a3113-e435-49f4-850c-d70056788632. "
+            "Contains information licensed under the Open Government Licence – Canada."
+        ),
+    },
 }
 
 
