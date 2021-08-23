@@ -183,7 +183,7 @@ class Learner:
         num_iterations: int = 1000,
         save_best_val: bool = True,
         checkpoint_every: int = 20,
-        schedule: bool = True,
+        schedule: bool = False,
     ) -> None:
 
         self.train_info = {
@@ -270,12 +270,12 @@ class Learner:
                         p.grad.data.mul_(1.0 / num_instances_in_batch)
                     opt.step()
 
-                    if schedule:
-                        assert scheduler is not None
-                        scheduler.step()
-
                     opt.zero_grad()
                     num_instances_in_batch = 0
+
+            if schedule:
+                assert scheduler is not None
+                scheduler.step()
 
             for val_label in val_labels:
                 with warnings.catch_warnings():
