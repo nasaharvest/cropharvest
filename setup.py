@@ -3,17 +3,22 @@ from setuptools import setup, find_packages
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+long_description = "\n".join(
+    [line for line in long_description.split("\n") if not line.startswith("<img")]
+)
+
 setup(
     name="cropharvest",
     description="Open source remote sensing dataset with benchmarks",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     author="Gabriel Tseng",
     author_email="gabrieltseng95@gmail.com",
     url="https://github.com/nasaharvest/cropharvest",
-    version="0.0.9",
+    version="0.0.11",
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: Other/Proprietary License",
         "Operating System :: OS Independent",
     ],
     packages=["cropharvest"] + [f"cropharvest.{f}" for f in find_packages("cropharvest")],
