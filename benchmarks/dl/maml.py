@@ -177,13 +177,11 @@ class Learner:
         self,
         update_lr: float = 0.001,
         meta_lr: float = 0.001,
-        min_meta_lr: float = 0.00001,
         max_adaptation_steps: int = 1,
         task_batch_size: int = 32,
         num_iterations: int = 1000,
         save_best_val: bool = True,
         checkpoint_every: int = 20,
-        schedule: bool = True,
     ) -> None:
 
         self.train_info = {
@@ -203,11 +201,6 @@ class Learner:
 
         self.maml = l2l.algorithms.MAML(self.model, lr=update_lr, first_order=False)
         opt = optim.Adam(self.maml.parameters(), meta_lr)
-        scheduler = None
-        if schedule:
-            scheduler = optim.lr_scheduler.CosineAnnealingLR(
-                opt, T_max=num_iterations, eta_min=min_meta_lr
-            )
         best_val_score = np.inf
 
         val_labels = self.val_dl.task_labels
@@ -269,10 +262,6 @@ class Learner:
                     for p in self.maml.parameters():
                         p.grad.data.mul_(1.0 / num_instances_in_batch)
                     opt.step()
-
-                    if schedule:
-                        assert scheduler is not None
-                        scheduler.step()
 
                     opt.zero_grad()
                     num_instances_in_batch = 0
@@ -448,13 +437,11 @@ def train_maml_model(
     val_size: float = 0.1,
     update_lr: float = 0.001,
     meta_lr: float = 0.001,
-    min_meta_lr: float = 0.00001,
     max_adaptation_steps: int = 1,
     task_batch_size: int = 32,
     num_iterations: int = 1000,
     save_best_val: bool = True,
     checkpoint_every: int = 20,
-    schedule: bool = True,
 ) -> Classifier:
     r"""
     Initialize a classifier and pretrain it using model-agnostic meta-learning (MAML)
@@ -472,8 +459,6 @@ def train_maml_model(
         (inner loop learning rate)
     :param meta_lr: The learning rate to use when updating the MAML model
         (outer loop learning rate)
-    :param min_meta_lr: The minimum meta learning rate to use for the cosine
-        annealing scheduler. Only used if `schedule == True`
     :param max_adaptation_steps: The maximum number of adaptation steps to be used
         per task. Each task will do as many adaptation steps as possible (up to this
         upper bound) given the number of unique positive and negative data instances
@@ -487,8 +472,6 @@ def train_maml_model(
         `checkpoint_every` iteration
     :param save_train_tasks_results: Whether to save the results for the training
         tasks to a json object
-    :param schedule: Whether to use cosine annealing on the meta learning rate during
-        training
     """
     model = Learner(
         root,
@@ -505,13 +488,11 @@ def train_maml_model(
     model.train(
         update_lr,
         meta_lr,
-        min_meta_lr,
         max_adaptation_steps,
         task_batch_size,
         num_iterations,
         save_best_val,
         checkpoint_every,
-        schedule,
     )
 
     return model.model
