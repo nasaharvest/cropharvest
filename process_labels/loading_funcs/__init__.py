@@ -12,7 +12,6 @@ from .croplands import load_croplands
 from .zimbabwe import load_zimbabwe
 from .mali import load_mali, load_mali_crop_noncrop
 from .france import load_ile_de_france, load_reunion, load_martinique
-from .malawi import load_malawi_fao
 from .canada import load_canada
 
 
@@ -37,6 +36,5 @@ __all__ = [
     "load_brazil_noncrop",
     "load_reunion",
     "load_martinique",
-    "load_malawi_fao",
     "load_canada",
 ]
