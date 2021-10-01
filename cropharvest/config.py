@@ -17,7 +17,11 @@ NUM_TIMESTEPS = 12
 EXPORT_END_MONTH = 2
 EXPORT_END_DAY = 1
 
+<<<<<<< HEAD
 DATASET_VERSION_ID = 5233530
+=======
+DATASET_VERSION_ID = 5533193
+>>>>>>> main
 DATASET_URL = f"https://zenodo.org/record/{DATASET_VERSION_ID}"
 LABELS_FILENAME = "labels.geojson"
 FEATURES_DIR = "features"
@@ -48,9 +52,12 @@ TEST_REGIONS: Dict[str, BBox] = {
 }
 
 TEST_DATASETS = {"Togo": "togo-eval"}
+<<<<<<< HEAD
 
 TEST_CROP_TO_CLASSIFICATION: Dict[str, CropClassifications] = {
     "maize": CropClassifications.cereals,
     "coffee": CropClassifications.beverage_spice,
     "almond": CropClassifications.fruits_nuts,
 }
+=======
+>>>>>>> main

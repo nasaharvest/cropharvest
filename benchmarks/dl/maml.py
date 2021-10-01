@@ -408,10 +408,7 @@ class Learner:
                                 balance_negative_crops=True,
                                 normalize=True,
                                 classification_label=classification,
-                            ),
                         )
-                    except NoDataForBoundingBoxError:
-                        continue
                     if task.k >= min_task_k:
                         label_to_task[task.id] = task
 
