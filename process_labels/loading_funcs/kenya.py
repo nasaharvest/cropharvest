@@ -98,7 +98,7 @@ def load_kenya_non_crop():
             # there are multipoints, but they all contain single points,
             # so this is safe to do
             output_df = output_df.explode()
-        dfs.append()
+        dfs.append(output_df)
 
     df = pd.concat(dfs)
     df = df.reset_index(drop=True)
