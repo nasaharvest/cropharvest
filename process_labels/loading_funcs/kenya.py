@@ -99,4 +99,7 @@ def load_kenya_non_crop():
     df[RequiredColumns.COLLECTION_DATE] = datetime(2020, 4, 16)
     df[RequiredColumns.EXPORT_END_DATE] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
 
+    # there are multipoints, but they all contain single points,
+    # so this is safe to do
+    df = df.explode()
     return df
