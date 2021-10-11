@@ -22,7 +22,7 @@ def _check_columns_and_types(df: geopandas.GeoDataFrame) -> None:
 
     assert "geometry" in df
     assert type(df["geometry"].dtype) == array.GeometryDtype
-    assert "MultiPoint" not in df["geometry"].type.unique()
+    assert "MultiPoint" not in geopandas.GeoSeries(df["geometry"]).type.unique()
 
 
 def _check_lat_lon(df: geopandas.GeoDataFrame) -> None:
