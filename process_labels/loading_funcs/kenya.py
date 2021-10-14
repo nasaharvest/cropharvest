@@ -91,7 +91,14 @@ def load_kenya_non_crop():
         ("kenya_non_crop_test_polygons", "EPSG:4326"),
     ]
     for folder, crs in folders_with_crs:
-        dfs.append(process_crop_non_crop(base / folder, org_crs=crs))
+        output_df = process_crop_non_crop(base / folder, org_crs=crs)
+        if (len(output_df.geometry.type.unique()) == 1) & (
+            output_df.geometry.type.unique()[0] == "MultiPoint"
+        ):
+            # there are multipoints, but they all contain single points,
+            # so this is safe to do
+            output_df = output_df.explode()
+        dfs.append(output_df)
 
     df = pd.concat(dfs)
     df = df.reset_index(drop=True)

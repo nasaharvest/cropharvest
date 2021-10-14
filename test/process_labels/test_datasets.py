@@ -22,6 +22,9 @@ def _check_columns_and_types(df: geopandas.GeoDataFrame) -> None:
 
     assert "geometry" in df
     assert type(df["geometry"].dtype) == array.GeometryDtype
+    for geometry_name in geopandas.GeoSeries(df["geometry"]).type.unique():
+        if geometry_name is not None:
+            assert "Multi" not in geometry_name
 
 
 def _check_lat_lon(df: geopandas.GeoDataFrame) -> None:

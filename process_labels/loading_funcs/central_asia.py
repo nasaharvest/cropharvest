@@ -61,4 +61,11 @@ def load_central_asia():
 
     df = df.reset_index(drop=True)
     df[RequiredColumns.INDEX] = df.index
+
+    # two manual changes to replace multipolygons with polygons.
+    # the first polygon is 10^5 times smaller than the second, so
+    # we use the second
+    df.loc[df["index"] == 5162, "geometry"] = df.iloc[5162].geometry[1]
+    df.loc[df["index"] == 4049, "geometry"] = df.iloc[4049].geometry[1]
+
     return df
