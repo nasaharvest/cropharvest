@@ -27,6 +27,8 @@ def load_germany():
     df = geopandas.read_file(DATASET_PATH / "germany/labels.geojson")
     df.to_crs(LATLON_CRS)
 
+    df = df.explode()
+
     # these are the training labels from
     # https://github.com/AI4EO/tum-planet-radearth-ai4food-challenge,
     # which consist of data from 2018
