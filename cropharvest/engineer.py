@@ -431,16 +431,23 @@ class Engineer:
         negative_geoms = relevant_rows[relevant_rows[NullableColumns.LABEL] != crop][
             RequiredColumns.GEOMETRY
         ].tolist()
-
         with rasterio.open(path_to_file) as src:
             # the mask is True outside shapes, and False inside shapes. We want the opposite
-            positive, _, _ = mask.raster_geometry_mask(src, positive_geoms, crop=False)
+            if len(positive_geoms) > 0:
+                positive, _, _ = mask.raster_geometry_mask(src, positive_geoms, crop=False)
+            else:
+                positive = None
+            # right now, all bounding boxes have negative geometries, so no need to worry
+            # about this use case
             negative, _, _ = mask.raster_geometry_mask(src, negative_geoms, crop=False)
         # reverse the booleans so that 1 = in the
-        positive = (~positive.reshape(positive.shape[0] * positive.shape[1])).astype(int)
+        if positive is not None:
+            positive = (~positive.reshape(positive.shape[0] * positive.shape[1])).astype(int)
         negative = (~negative.reshape(negative.shape[0] * negative.shape[1])).astype(int) * -1
-        y = positive + negative
-
+        if positive is not None:
+            y = positive + negative
+        else:
+            y = negative
         # swap missing and negative values, since this will be easier to use in the future
         negative = y == -1
         missing = y == 0
