@@ -25,7 +25,7 @@ LABEL_TO_CLASSIFICATION = {
 def load_germany():
 
     df = geopandas.read_file(DATASET_PATH / "germany/labels.geojson")
-    df.to_crs(LATLON_CRS)
+    df = df.to_crs(LATLON_CRS)
 
     df = df.explode()
 
