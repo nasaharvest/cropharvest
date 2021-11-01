@@ -33,16 +33,18 @@ from typing import cast, List, Optional, Tuple, Generator
 class Task:
     bounding_box: Optional[BBox] = None
     target_label: Optional[str] = None
-    balance_negative_crops: bool = False
+    negative_crop_filter: Optional[str] = None
     test_identifier: Optional[str] = None
     normalize: bool = True
 
     def __post_init__(self):
+        if self.negative_crop_filter is not None:
+            assert self.negative_crop_filter in ["balance", "remove"]
         if self.target_label is None:
             self.target_label = "crop"
-            if self.balance_negative_crops is True:
+            if self.negative_crop_filter is not None:
                 warnings.warn(
-                    "Balance negative crops not meaningful for the crop vs. non crop tasks"
+                    "Negative crop filter not meaningful for the crop vs. non crop tasks"
                 )
 
         if self.bounding_box is None:
@@ -139,21 +141,21 @@ class CropHarvestLabels(BaseDataset):
                     negative_labels = gpdf[((is_null & is_crop) | (~is_null & ~is_target))]
                     negative_paths = self._dataframe_to_paths(negative_labels)
                 else:
-                    # otherwise, the target label is a crop. If balance_negative_crops is
-                    # true, then we want an equal number of (other) crops and non crops in
+                    # otherwise, the target label is a crop. If negative_crop_filter is
+                    # "balance", then we want an equal number of (other) crops and non crops in
                     # the negative labels
                     negative_non_crop_labels = gpdf[~is_crop]
                     negative_other_crop_labels = gpdf[(is_crop & ~is_null & ~is_target)]
                     negative_non_crop_paths = self._dataframe_to_paths(negative_non_crop_labels)
                     negative_paths = self._dataframe_to_paths(negative_other_crop_labels)
 
-                    if task.balance_negative_crops:
+                    if task.negative_crop_filter == "balance":
                         negative_paths.extend(
                             deterministic_shuffle(negative_non_crop_paths, DEFAULT_SEED)[
                                 : len(negative_paths)
                             ]
                         )
-                    else:
+                    elif task.negative_crop_filter is None:
                         negative_paths.extend(negative_non_crop_paths)
             else:
                 # otherwise, we will just filter by crop and non crop
@@ -340,7 +342,7 @@ class CropHarvest(BaseDataset):
     def create_benchmark_datasets(
         cls,
         root,
-        balance_negative_crops: bool = True,
+        negative_crop_filter: str = "balance",
         download: bool = True,
     ) -> List:
         r"""
@@ -348,8 +350,9 @@ class CropHarvest(BaseDataset):
 
         :param root: The path to the data, where the training data and labels are (or will be)
             saved
-        :param balance_negative_crops: Whether to ensure the crops are equally represented in
-            a dataset's negative labels. This is only used for datasets where there is a
+        :param negative_crop_filter: Whether to ensure the crops are equally represented in
+            a dataset's negative labels (or whether non crop instances should be removed
+            entirely). This is only used for datasets where there is a
             target_label, and that target_label is a crop
         :param download: Whether to download the labels and training data if they don't
             already exist
@@ -368,7 +371,7 @@ class CropHarvest(BaseDataset):
                 task = Task(
                     country_bbox,
                     crop,
-                    balance_negative_crops,
+                    negative_crop_filter,
                     f"{country}_{crop}",
                 )
                 if task.id not in [x.id for x in output_datasets]:
