@@ -64,25 +64,25 @@ def load_lem_brazil():
                 year + 1, EXPORT_END_MONTH, EXPORT_END_DAY
             )
 
-        year_dfs.append(year_df)
+        year_dfs.append(year_df.explode())
 
-    df = pd.concat(year_dfs)
+    concat_df = pd.concat(year_dfs)
 
-    x = df.geometry.centroid.x.values
-    y = df.geometry.centroid.y.values
+    x = concat_df.geometry.centroid.x.values
+    y = concat_df.geometry.centroid.y.values
 
-    df[RequiredColumns.LAT] = y
-    df[RequiredColumns.LON] = x
-    df = df.reset_index(drop=True)
-    df[RequiredColumns.INDEX] = df.index
-    df[NullableColumns.CLASSIFICATION_LABEL] = df.apply(
+    concat_df[RequiredColumns.LAT] = y
+    concat_df[RequiredColumns.LON] = x
+    concat_df = concat_df.reset_index(drop=True)
+    concat_df[RequiredColumns.INDEX] = concat_df.index
+    concat_df[NullableColumns.CLASSIFICATION_LABEL] = concat_df.apply(
         lambda x: LABEL_TO_CLASSIFICATION[x[NullableColumns.LABEL]], axis=1
     )
-    df[RequiredColumns.IS_CROP] = np.where(
-        (df[NullableColumns.CLASSIFICATION_LABEL] == "non_crop"), 0, 1
+    concat_df[RequiredColumns.IS_CROP] = np.where(
+        (concat_df[NullableColumns.CLASSIFICATION_LABEL] == "non_crop"), 0, 1
     )
 
-    return df
+    return concat_df
 
 
 def load_brazil_noncrop() -> geopandas.GeoDataFrame:
