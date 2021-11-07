@@ -13,6 +13,7 @@ from .zimbabwe import load_zimbabwe
 from .mali import load_mali, load_mali_crop_noncrop
 from .france import load_ile_de_france, load_reunion, load_martinique
 from .canada import load_canada
+from .germany import load_germany
 
 
 __all__ = [
@@ -37,4 +38,5 @@ __all__ = [
     "load_reunion",
     "load_martinique",
     "load_canada",
+    "load_germany",
 ]

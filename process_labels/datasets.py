@@ -157,6 +157,14 @@ DATASETS = {
             "Contains information licensed under the Open Government Licence – Canada."
         ),
     },
+    "germany": {
+        "function": loading_funcs.load_germany,
+        "description": (
+            "2018 data collected as part of the Common Agricultural Policy "
+            " of the European Union, and processed in "
+            "https://github.com/lukaskondmann/DENETHOR"
+        ),
+    },
 }
 
 
