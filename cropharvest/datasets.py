@@ -342,6 +342,7 @@ class CropHarvest(BaseDataset):
         root,
         balance_negative_crops: bool = True,
         download: bool = True,
+        normalize: bool = True,
     ) -> List:
         r"""
         Create the benchmark datasets.
@@ -353,6 +354,7 @@ class CropHarvest(BaseDataset):
             target_label, and that target_label is a crop
         :param download: Whether to download the labels and training data if they don't
             already exist
+        :param normalize: Whether to normalize the data
 
         :returns: A list of evaluation CropHarvest datasets according to the TEST_REGIONS and
             TEST_DATASETS in the config
@@ -370,6 +372,7 @@ class CropHarvest(BaseDataset):
                     crop,
                     balance_negative_crops,
                     f"{country}_{crop}",
+                    normalize,
                 )
                 if task.id not in [x.id for x in output_datasets]:
                     if country_bbox.contains_bbox(bbox):
@@ -384,7 +387,7 @@ class CropHarvest(BaseDataset):
             output_datasets.append(
                 cls(
                     root,
-                    Task(country_bbox, None, test_identifier=test_dataset),
+                    Task(country_bbox, None, test_identifier=test_dataset, normalize=normalize),
                     download=download,
                 )
             )
