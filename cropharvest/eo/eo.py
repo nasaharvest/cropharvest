@@ -59,8 +59,10 @@ class EarthEngineExporter:
 
         self.labels = self.default_labels if labels is None else labels
         self.using_default = labels is None
-        for expected_column in ["start_date", "end_date", "export_identifier", "lat", "lon"]:
+        for expected_column in ["start_date", "end_date", "lat", "lon"]:
             assert expected_column in self.labels
+        if "export_identifier" not in self.labels:
+            print("No explicit export_identifier in labels. One will be constructed during export")
 
     @property
     def default_labels(self) -> geopandas.GeoDataFrame:
@@ -231,7 +233,7 @@ class EarthEngineExporter:
     @classmethod
     def _bounding_box_from_centre(
         cls, mid_lat: float, mid_lon: float, surrounding_metres: Union[int, Tuple[int, int]]
-    ) -> ee.Geometry.Polygon:
+    ) -> Tuple[Tuple[float, float, float, float], ee.Geometry.Polygon]:
 
         m_per_deg_lat, m_per_deg_lon = cls.metre_per_degree(mid_lat)
 
@@ -246,12 +248,13 @@ class EarthEngineExporter:
         max_lat, min_lat = mid_lat + deg_lat, mid_lat - deg_lat
         max_lon, min_lon = mid_lon + deg_lon, mid_lon - deg_lon
 
-        return ee.Geometry.Polygon(
+        return (min_lon, min_lat, max_lon, max_lat), ee.Geometry.Polygon(
             [[[min_lon, min_lat], [min_lon, max_lat], [max_lon, max_lat], [max_lon, min_lat]]]
         )
 
+    @classmethod
     def _labels_to_polygons_and_years(
-        self, labels: geopandas.GeoDataFrame, surrounding_metres: int
+        cls, labels: geopandas.GeoDataFrame, surrounding_metres: int
     ) -> List[Tuple[ee.Geometry.Polygon, str, date, date]]:
 
         output: List[ee.Geometry.Polygon] = []
@@ -259,21 +262,35 @@ class EarthEngineExporter:
         print(f"Exporting {len(labels)} labels")
 
         for _, row in tqdm(labels.iterrows()):
+            latlons, bounding_box = cls._bounding_box_from_centre(
+                mid_lat=row["lat"], mid_lon=row["lon"], surrounding_metres=surrounding_metres
+            )
+
+            try:
+                export_identifer = row["export_identifier"]
+            except KeyError:
+                export_identifier = cls.make_identifier(
+                    latlons, row["start_date"], row["end_date"]
+                )
 
             output.append(
                 (
-                    self._bounding_box_from_centre(
-                        mid_lat=row["lat"],
-                        mid_lon=row["lon"],
-                        surrounding_metres=surrounding_metres,
-                    ),
-                    row["export_identifier"],
+                    bounding_box,
+                    export_identifier,
                     row["start_date"],
                     row["end_date"],
                 )
             )
 
         return output
+
+    @staticmethod
+    def make_identifier(latlons: Tuple[float, float, float, float], start_date, end_date) -> str:
+        min_lon, min_lat, max_lon, max_lat = latlons
+        return (
+            f"min_lat={min_lat}_min_lon={min_lon}_max_lat={max_lat}_max_lon={max_lon}_"
+            f"dates={start_date}_{end_date}_all"
+        )
 
     @classmethod
     def _bbox_to_ee_bounding_box(
