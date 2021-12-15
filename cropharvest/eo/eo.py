@@ -38,7 +38,9 @@ STATIC_IMAGE_FUNCTIONS = [get_single_srtm_image]
 
 
 class EarthEngineExporter:
-    def __init__(self, data_folder: Path = DATAFOLDER_PATH) -> None:
+    def __init__(
+        self, data_folder: Path = DATAFOLDER_PATH, labels: Optional[geopandas.GeoDataFrame] = None
+    ) -> None:
         self.data_folder = data_folder
         self.output_folder_name = "eo_data"
         self.output_folder = self.data_folder / self.output_folder_name
@@ -55,8 +57,21 @@ class EarthEngineExporter:
         # allows for easy checkpointing
         self.cur_output_folder = f"{self.output_folder_name}_{str(date.today()).replace('-', '')}"
 
-        self.labels = geopandas.read_file(data_folder / LABELS_FILENAME)
-        self.labels["export_end_date"] = pd.to_datetime(self.labels["export_end_date"])
+        self.labels = self.default_labels if labels is None else labels
+        self.using_default = labels is None
+        for expected_column in ["start_date", "end_date", "export_identifier", "lat", "lon"]:
+            assert expected_column in self.labels
+
+    @property
+    def default_labels(self) -> geopandas.GeoDataFrame:
+        labels = geopandas.read_file(self.data_folder / LABELS_FILENAME)
+        export_end_year = pd.to_datetime(self.labels["export_end_date"]).dt.year
+        labels["end_date"] = export_end_year.apply(lambda x: date(x, 12, 12))
+        labels = labels.assign(
+            start_date=lambda x: x["end_date"] - timedelta(days=DAYS_PER_TIMESTEP * NUM_TIMESTEPS)
+        )
+        labels = labels.assign(export_identifier=lambda x: f"{x['index']}-{x['dataset']}")
+        return labels
 
     def _filter_labels(self, labels: geopandas.GeoDataFrame) -> geopandas.GeoDataFrame:
 
@@ -237,7 +252,7 @@ class EarthEngineExporter:
 
     def _labels_to_polygons_and_years(
         self, labels: geopandas.GeoDataFrame, surrounding_metres: int
-    ) -> List[Tuple[ee.Geometry.Polygon, str, int]]:
+    ) -> List[Tuple[ee.Geometry.Polygon, str, date, date]]:
 
         output: List[ee.Geometry.Polygon] = []
 
@@ -252,8 +267,9 @@ class EarthEngineExporter:
                         mid_lon=row["lon"],
                         surrounding_metres=surrounding_metres,
                     ),
-                    f"{row['index']}-{row['dataset']}",
-                    int(row["export_end_date"].year),
+                    row["export_identifier"],
+                    row["start_date"],
+                    row["end_date"],
                 )
             )
 
@@ -310,12 +326,18 @@ class EarthEngineExporter:
     ) -> None:
 
         if dataset is not None:
-            labels = self.labels[self.labels.dataset == dataset]
+            if self.using_default:
+                labels = self.labels[self.labels.dataset == dataset]
+            else:
+                print("No dataset can be specified if passing a different set of labels")
         else:
             labels = self.labels
 
         if start_from_last:
-            labels = self._filter_labels(labels)
+            if self.using_default:
+                labels = self._filter_labels(labels)
+            else:
+                print("start_from_last cannot be used if passing a different set of labels")
 
         polygons_to_download = self._labels_to_polygons_and_years(
             labels=labels,
@@ -323,9 +345,7 @@ class EarthEngineExporter:
         )
 
         exports_started = 0
-        for polygon, identifier, year in polygons_to_download:
-            end_date = date(year, EXPORT_END_MONTH, EXPORT_END_DAY)
-            start_date = end_date - timedelta(days=DAYS_PER_TIMESTEP * NUM_TIMESTEPS)
+        for polygon, identifier, start_date, end_date in polygons_to_download:
             export_started = self._export_for_polygon(
                 polygon=polygon,
                 polygon_identifier=identifier,
