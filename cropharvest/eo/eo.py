@@ -267,7 +267,7 @@ class EarthEngineExporter:
             )
 
             try:
-                export_identifer = row["export_identifier"]
+                export_identifier = row["export_identifier"]
             except KeyError:
                 export_identifier = cls.make_identifier(
                     latlons, row["start_date"], row["end_date"]
