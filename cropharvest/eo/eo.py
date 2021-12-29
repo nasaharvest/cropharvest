@@ -89,7 +89,9 @@ class EarthEngineExporter:
         labels = labels.assign(
             start_date=lambda x: x["end_date"] - timedelta(days=DAYS_PER_TIMESTEP * NUM_TIMESTEPS)
         )
-        labels = labels.assign(export_identifier=lambda x: f"{x['index']}-{x['dataset']}")
+        labels = labels.assign(
+            export_identifier=lambda x: f"{x['index']}-{x[RequiredColumns.DATASET]}"
+        )
         return labels
 
     def _filter_labels(self, labels: geopandas.GeoDataFrame) -> geopandas.GeoDataFrame:
