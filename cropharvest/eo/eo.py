@@ -26,6 +26,7 @@ from cropharvest.config import (
     LABELS_FILENAME,
     TEST_REGIONS,
 )
+from cropharvest.columns import RequiredColumns
 
 from typing import Union, List, Optional, Tuple
 
@@ -59,7 +60,12 @@ class EarthEngineExporter:
 
         self.labels = self.default_labels if labels is None else labels
         self.using_default = labels is None
-        for expected_column in ["start_date", "end_date", "lat", "lon"]:
+        for expected_column in [
+            "start_date",
+            "end_date",
+            RequiredColumns.LAT,
+            RequiredColumns.LON,
+        ]:
             assert expected_column in self.labels
         if "export_identifier" not in self.labels:
             print("No explicit export_identifier in labels. One will be constructed during export")
