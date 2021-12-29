@@ -39,6 +39,17 @@ STATIC_IMAGE_FUNCTIONS = [get_single_srtm_image]
 
 
 class EarthEngineExporter:
+    """
+    Export satellite data from Earth engine. It's called using the following
+    script:
+    ```
+    from cropharvest.eo import EarthEngineExporter
+
+    exporter = EarthEngineExporter()
+    exporter.export_for_labels()
+    ```
+    """
+
     def __init__(
         self, data_folder: Path = DATAFOLDER_PATH, labels: Optional[geopandas.GeoDataFrame] = None
     ) -> None:
@@ -73,7 +84,7 @@ class EarthEngineExporter:
     @property
     def default_labels(self) -> geopandas.GeoDataFrame:
         labels = geopandas.read_file(self.data_folder / LABELS_FILENAME)
-        export_end_year = pd.to_datetime(self.labels["export_end_date"]).dt.year
+        export_end_year = pd.to_datetime(self.labels[RequiredColumns.EXPORT_END_DATE]).dt.year
         labels["end_date"] = export_end_year.apply(lambda x: date(x, 12, 12))
         labels = labels.assign(
             start_date=lambda x: x["end_date"] - timedelta(days=DAYS_PER_TIMESTEP * NUM_TIMESTEPS)
