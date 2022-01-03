@@ -38,6 +38,29 @@ STATIC_BANDS = SRTM_BANDS
 STATIC_IMAGE_FUNCTIONS = [get_single_srtm_image]
 
 
+def memoize(f):
+    "Stores results of previous function to avoid re-calculating"
+    memo = {}
+
+    def helper(x="default"):
+        if x not in memo:
+            memo[x] = f() if x == "default" else f(x)
+        return memo[x]
+
+    return helper
+
+
+@memoize
+def get_ee_task_list(key: str = "description") -> List[str]:
+    """Gets a list of all active tasks in the EE task list."""
+    task_list = ee.data.getTaskList()
+    return [
+        task[key]
+        for task in tqdm(task_list, desc="Loading Earth Engine tasks")
+        if task["state"] != "COMPLETED"
+    ]
+
+
 class EarthEngineExporter:
     """
     Export satellite data from Earth engine. It's called using the following
@@ -48,10 +71,17 @@ class EarthEngineExporter:
     exporter = EarthEngineExporter()
     exporter.export_for_labels()
     ```
+
+    :param check_ee: Whether to check Earth Engine before exporting
+    :param credentials: The credentials to use for the export. If not specified, the default credentials will be used
     """
 
     def __init__(
-        self, data_folder: Path = DATAFOLDER_PATH, labels: Optional[geopandas.GeoDataFrame] = None
+        self,
+        data_folder: Path = DATAFOLDER_PATH,
+        labels: Optional[geopandas.GeoDataFrame] = None,
+        check_ee: bool = True,
+        credentials: Optional[str] = None,
     ) -> None:
         self.data_folder = data_folder
         self.output_folder_name = "eo_data"
@@ -62,9 +92,15 @@ class EarthEngineExporter:
         self.test_output_folder.mkdir(exist_ok=True)
 
         try:
-            ee.Initialize()
+            if credentials:
+                ee.Initialize(credentials=credentials)
+            else:
+                ee.Initialize()
         except Exception:
             print("This code doesn't work unless you have authenticated your earthengine account")
+
+        self.check_ee = check_ee
+        self.ee_task_list = get_ee_task_list() if self.check_ee else []
 
         # allows for easy checkpointing
         self.cur_output_folder = f"{self.output_folder_name}_{str(date.today()).replace('-', '')}"
@@ -120,9 +156,9 @@ class EarthEngineExporter:
             # int downloaded
             max_index = max([int(x.name.split("-")[0]) for x in cur_dataset_files])
 
-            row = labels[
-                ((labels.dataset == datasets[idx]) & (labels["index"] == max_index))
-            ].iloc[0]
+            row = labels[((labels.dataset == datasets[idx]) & (labels["index"] == max_index))].iloc[
+                0
+            ]
             # + 1 - non inclusive
             labels = labels.loc[row.name + 1 :]
 
@@ -133,13 +169,17 @@ class EarthEngineExporter:
 
     @staticmethod
     def _export(
-        image: ee.Image, region: ee.Geometry, filename: str, drive_folder: str
+        image: ee.Image, region: ee.Geometry, filename: str, description: str, drive_folder: str
     ) -> ee.batch.Export:
 
-        task = ee.batch.Export.image(
-            image.clip(region),
-            filename,
-            {"scale": 10, "region": region, "maxPixels": 1e13, "driveFolder": drive_folder},
+        task = ee.batch.Export.image.toDrive(
+            image=image.clip(region),
+            fileNamePrefix=filename,
+            description=description[:100],
+            folder=drive_folder,
+            scale=10,
+            region=region,
+            maxPixels=1e13,
         )
 
         try:
@@ -161,26 +201,35 @@ class EarthEngineExporter:
         test: bool,
     ) -> bool:
 
-        cur_date = start_date
-        cur_end_date = cur_date + timedelta(days=days_per_timestep)
-
-        image_collection_list: List[ee.Image] = []
-
         output_folder = self.output_folder
         drive_folder = self.cur_output_folder
         if test:
             output_folder = self.test_output_folder
             drive_folder = self.test_output_folder.name
 
-        print(
-            f"Exporting image for polygon {polygon_identifier} from "
-            f"aggregated images between {str(cur_date)} and {str(end_date)}"
-        )
-        filename = f"{polygon_identifier}_{str(cur_date)}_{str(end_date)}"
-
+        filename = f"{polygon_identifier}_{str(start_date)}_{str(end_date)}"
         if checkpoint and (output_folder / f"{filename}.tif").exists():
             print("File already exists! Skipping")
             return False
+
+        # Description of the export cannot contain certrain characters
+        description = filename.replace(".", "-").replace("=", "-")[:100]
+
+        # Check if task is already started in EarthEngine
+        if self.check_ee and (description in self.ee_task_list):
+            return True
+
+        if self.check_ee and len(self.ee_task_list) >= 3000:
+            return False
+
+        print(
+            f"Exporting image for polygon {polygon_identifier} from "
+            f"aggregated images between {str(start_date)} and {str(end_date)}"
+        )
+
+        image_collection_list: List[ee.Image] = []
+        cur_date = start_date
+        cur_end_date = cur_date + timedelta(days=days_per_timestep)
 
         # first, we get all the S1 images in an exaggerated date range
         vv_imcol, vh_imcol = get_s1_image_collection(
@@ -226,6 +275,7 @@ class EarthEngineExporter:
             image=img,
             region=polygon,
             filename=filename,
+            description=description,
             drive_folder=drive_folder,
         )
         return True
@@ -288,9 +338,7 @@ class EarthEngineExporter:
             try:
                 export_identifier = row["export_identifier"]
             except KeyError:
-                export_identifier = cls.make_identifier(
-                    latlons, row["start_date"], row["end_date"]
-                )
+                export_identifier = cls.make_identifier(latlons, row["start_date"], row["end_date"])
 
             output.append(
                 (
@@ -305,7 +353,12 @@ class EarthEngineExporter:
 
     @staticmethod
     def make_identifier(latlons: Tuple[float, float, float, float], start_date, end_date) -> str:
-        min_lon, min_lat, max_lon, max_lat = latlons
+
+        # Identifier is rounded to the nearest ~10m
+        min_lon = round(latlons[0], 4)
+        min_lat = round(latlons[1], 4)
+        max_lon = round(latlons[2], 4)
+        max_lat = round(latlons[3], 4)
         return (
             f"min_lat={min_lat}_min_lon={min_lon}_max_lat={max_lat}_max_lon={max_lon}_"
             f"dates={start_date}_{end_date}_all"
