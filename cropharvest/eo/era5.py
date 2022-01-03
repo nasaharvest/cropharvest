@@ -21,18 +21,20 @@ def get_single_image(region: ee.Geometry, start_date: date, end_date: date) -> e
     # TODO: in the future, this could be updated to an overlapping_month function, similar
     # to what happens with the Plant Village labels
     month, year = start_date.month, start_date.year
-    dates = ee.DateRange(
-        date_to_string(date(year, month, 1)),
-        # first day of next month
-        date_to_string((date(year, month, 1) + timedelta(days=32)).replace(day=1)),
-    )
+    start = date(year, month, 1)
+    # first day of next month
+    end = (date(year, month, 1) + timedelta(days=32)).replace(day=1)
 
+    if (date.today().replace(day=1) - end) < timedelta(days=32):
+        raise ValueError(
+            f"Cannot get data for range {start} - {end}, please set an earlier end date"
+        )
+
+    dates = ee.DateRange(date_to_string(start), date_to_string(end))
     startDate = ee.DateRange(dates).start()
     endDate = ee.DateRange(dates).end()
 
-    imcol = (
-        ee.ImageCollection(image_collection).filterDate(startDate, endDate).filterBounds(region)
-    )
+    imcol = ee.ImageCollection(image_collection).filterDate(startDate, endDate).filterBounds(region)
 
     # there should only be one timestep per daterange, so a mean shouldn't change the values
     return imcol.select(BANDS).mean().toDouble()
