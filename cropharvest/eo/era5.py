@@ -34,7 +34,9 @@ def get_single_image(region: ee.Geometry, start_date: date, end_date: date) -> e
     startDate = ee.DateRange(dates).start()
     endDate = ee.DateRange(dates).end()
 
-    imcol = ee.ImageCollection(image_collection).filterDate(startDate, endDate).filterBounds(region)
+    imcol = (
+        ee.ImageCollection(image_collection).filterDate(startDate, endDate).filterBounds(region)
+    )
 
     # there should only be one timestep per daterange, so a mean shouldn't change the values
     return imcol.select(BANDS).mean().toDouble()

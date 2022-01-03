@@ -156,9 +156,9 @@ class EarthEngineExporter:
             # int downloaded
             max_index = max([int(x.name.split("-")[0]) for x in cur_dataset_files])
 
-            row = labels[((labels.dataset == datasets[idx]) & (labels["index"] == max_index))].iloc[
-                0
-            ]
+            row = labels[
+                ((labels.dataset == datasets[idx]) & (labels["index"] == max_index))
+            ].iloc[0]
             # + 1 - non inclusive
             labels = labels.loc[row.name + 1 :]
 
@@ -338,7 +338,9 @@ class EarthEngineExporter:
             try:
                 export_identifier = row["export_identifier"]
             except KeyError:
-                export_identifier = cls.make_identifier(latlons, row["start_date"], row["end_date"])
+                export_identifier = cls.make_identifier(
+                    latlons, row["start_date"], row["end_date"]
+                )
 
             output.append(
                 (
