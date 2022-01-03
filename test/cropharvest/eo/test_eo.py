@@ -8,10 +8,10 @@ from cropharvest.eo import EarthEngineExporter
 @pytest.mark.parametrize("with_identifier", (True, False))
 def test_labels_to_polygons_and_years(with_identifier, monkeypatch):
     data = {
-        "lon": [42],
-        "lat": [0],
-        "start_date": date(2021, 12, 15),
-        "end_date": date(2022, 12, 15),
+        "lon": [-74.55285616553732],
+        "lat": [46.22024965230018],
+        "start_date": date(2020, 12, 15),
+        "end_date": date(2021, 12, 15),
     }
     if with_identifier:
         data["export_identifier"] = ["hello_world"]
@@ -30,3 +30,8 @@ def test_labels_to_polygons_and_years(with_identifier, monkeypatch):
 
     if with_identifier:
         assert identifier == "hello_world"
+    else:
+        assert (
+            identifier
+            == "min_lat=45.2202_min_lon=-75.5529_max_lat=47.2202_max_lon=-73.5529_dates=2020-12-15_2021-12-15_all"
+        )
