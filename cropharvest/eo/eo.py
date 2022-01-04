@@ -73,7 +73,8 @@ class EarthEngineExporter:
     ```
 
     :param check_ee: Whether to check Earth Engine before exporting
-    :param credentials: The credentials to use for the export. If not specified, the default credentials will be used
+    :param credentials: The credentials to use for the export. If not specified,
+    the default credentials will be used
     """
 
     def __init__(

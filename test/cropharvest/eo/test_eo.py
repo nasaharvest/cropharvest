@@ -31,7 +31,8 @@ def test_labels_to_polygons_and_years(with_identifier, monkeypatch):
     if with_identifier:
         assert identifier == "hello_world"
     else:
-        assert (
-            identifier
-            == "min_lat=45.2202_min_lon=-75.5529_max_lat=47.2202_max_lon=-73.5529_dates=2020-12-15_2021-12-15_all"
+        expected_identifier = (
+            "min_lat=45.2202_min_lon=-75.5529_max_lat=47.2202_"
+            + "max_lon=-73.5529_dates=2020-12-15_2021-12-15_all"
         )
+        assert identifier == expected_identifier
