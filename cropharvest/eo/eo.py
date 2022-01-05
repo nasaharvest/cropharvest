@@ -16,7 +16,7 @@ from .era5 import get_single_image as get_single_era5_image, BANDS as ERA5_BANDS
 from .srtm import get_single_image as get_single_srtm_image, BANDS as SRTM_BANDS
 
 from .utils import make_combine_bands_function
-from cropharvest.utils import DATAFOLDER_PATH
+from cropharvest.utils import DATAFOLDER_PATH, memoized
 from cropharvest.countries import BBox
 from cropharvest.config import (
     EXPORT_END_DAY,
@@ -38,19 +38,7 @@ STATIC_BANDS = SRTM_BANDS
 STATIC_IMAGE_FUNCTIONS = [get_single_srtm_image]
 
 
-def memoize(f):
-    "Stores results of previous function to avoid re-calculating"
-    memo = {}
-
-    def helper(x="default"):
-        if x not in memo:
-            memo[x] = f() if x == "default" else f(x)
-        return memo[x]
-
-    return helper
-
-
-@memoize
+@memoized
 def get_ee_task_list(key: str = "description") -> List[str]:
     """Gets a list of all active tasks in the EE task list."""
     task_list = ee.data.getTaskList()
