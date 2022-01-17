@@ -250,11 +250,6 @@ class EarthEngineExporter:
         if self.check_ee and len(self.ee_task_list) >= 3000:
             return False
 
-        print(
-            f"Exporting image for polygon {polygon_identifier} from "
-            f"aggregated images between {str(start_date)} and {str(end_date)}"
-        )
-
         image_collection_list: List[ee.Image] = []
         cur_date = start_date
         cur_end_date = cur_date + timedelta(days=days_per_timestep)
@@ -463,7 +458,9 @@ class EarthEngineExporter:
         )
 
         exports_started = 0
-        for polygon, identifier, start_date, end_date in polygons_to_download:
+        for polygon, identifier, start_date, end_date in tqdm(
+            polygons_to_download, desc="Exporting:"
+        ):
             export_started = self._export_for_polygon(
                 polygon=polygon,
                 polygon_identifier=identifier,
