@@ -43,14 +43,14 @@ def test_labels_to_polygons_and_years(with_identifier, monkeypatch):
         assert identifier == expected_identifier
 
 
-@patch(f"cropharvest.eo.eo.storage")
+@patch("cropharvest.eo.eo.storage")
 def test_get_cloud_tif_list(mock_storage):
     mock_storage.Client().list_blobs("mock_bucket").return_value = []
     tif_list = get_cloud_tif_list("mock_bucket")
     assert tif_list == []
 
 
-@patch(f"cropharvest.eo.EarthEngineExporter._export_for_polygon")
+@patch("cropharvest.eo.EarthEngineExporter._export_for_polygon")
 def test_export_for_labels(mock_export_for_polygon, monkeypatch):
 
     start_date_str = "2019-04-22"
@@ -95,17 +95,3 @@ def test_export_for_labels(mock_export_for_polygon, monkeypatch):
         ],
         any_order=True,
     )
-
-
-def test_export():
-    labels = pd.DataFrame(
-        {
-            RequiredColumns.LON: [-74.55285616553732],
-            RequiredColumns.LAT: [46.22024965230018],
-            "start_date": date(2020, 4, 15),
-            "end_date": date(2021, 4, 15),
-        }
-    )
-    EarthEngineExporter(
-        check_gcp=True, check_ee=False, labels=labels, dest_bucket="cropharvest"
-    ).export_for_labels()
