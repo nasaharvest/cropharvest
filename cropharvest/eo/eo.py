@@ -4,6 +4,7 @@ import pandas as pd
 import ee
 from tqdm import tqdm
 from datetime import timedelta, date
+from google.cloud import storage
 from math import cos, radians
 
 from .sentinel1 import (
@@ -49,6 +50,18 @@ def get_ee_task_list(key: str = "description") -> List[str]:
     ]
 
 
+@memoized
+def get_cloud_tif_list(dest_bucket: str) -> List[str]:
+    """Gets a list of all cloud-free TIFs in a bucket."""
+    client = storage.Client()
+    cloud_tif_list_iterator = client.list_blobs(dest_bucket, prefix="tifs")
+    cloud_tif_list = [
+        blob.name
+        for blob in tqdm(cloud_tif_list_iterator, desc="Loading tifs already on Google Cloud")
+    ]
+    return cloud_tif_list
+
+
 class EarthEngineExporter:
     """
     Export satellite data from Earth engine. It's called using the following
@@ -70,7 +83,9 @@ class EarthEngineExporter:
         data_folder: Path = DATAFOLDER_PATH,
         labels: Optional[geopandas.GeoDataFrame] = None,
         check_ee: bool = True,
+        check_gcp: bool = True,
         credentials: Optional[str] = None,
+        dest_bucket: Optional[str] = None,
     ) -> None:
         self.data_folder = data_folder
         self.output_folder_name = "eo_data"
@@ -79,6 +94,8 @@ class EarthEngineExporter:
 
         self.test_output_folder = self.data_folder / "test_eo_data"
         self.test_output_folder.mkdir(exist_ok=True)
+
+        self.dest_bucket = dest_bucket
 
         try:
             if credentials:
@@ -90,6 +107,11 @@ class EarthEngineExporter:
 
         self.check_ee = check_ee
         self.ee_task_list = get_ee_task_list() if self.check_ee else []
+
+        if check_gcp and dest_bucket is None:
+            raise ValueError("check_gcp was set to True but dest_bucket was not specified")
+        self.check_gcp = check_gcp
+        self.cloud_tif_list = get_cloud_tif_list(dest_bucket) if self.check_gcp else []
 
         # allows for easy checkpointing
         self.cur_output_folder = f"{self.output_folder_name}_{str(date.today()).replace('-', '')}"
@@ -158,18 +180,32 @@ class EarthEngineExporter:
 
     @staticmethod
     def _export(
-        image: ee.Image, region: ee.Geometry, filename: str, description: str, drive_folder: str
+        image: ee.Image,
+        region: ee.Geometry,
+        filename: str,
+        description: str,
+        drive_folder: Optional[str] = None,
+        dest_bucket: Optional[str] = None,
+        file_dimensions: Optional[int] = None,
     ) -> ee.batch.Export:
 
-        task = ee.batch.Export.image.toDrive(
+        kwargs = dict(
             image=image.clip(region),
-            fileNamePrefix=filename,
             description=description[:100],
-            folder=drive_folder,
             scale=10,
             region=region,
             maxPixels=1e13,
+            fileDimensions=file_dimensions,
         )
+
+        if dest_bucket:
+            task = ee.batch.Export.image.toCloudStorage(
+                bucket=dest_bucket, fileNamePrefix=f"tifs/{filename}", **kwargs
+            )
+        else:
+            task = ee.batch.Export.image.toDrive(
+                folder=drive_folder, fileNamePrefix=filename, **kwargs
+            )
 
         try:
             task.start()
@@ -203,6 +239,9 @@ class EarthEngineExporter:
 
         # Description of the export cannot contain certrain characters
         description = filename.replace(".", "-").replace("=", "-")[:100]
+
+        if self.check_gcp and (f"tifs/{filename}.tif" in self.cloud_tif_list):
+            return False
 
         # Check if task is already started in EarthEngine
         if self.check_ee and (description in self.ee_task_list):
@@ -260,13 +299,12 @@ class EarthEngineExporter:
         img = ee.Image.cat(total_image_list)
 
         # and finally, export the image
-        self._export(
-            image=img,
-            region=polygon,
-            filename=filename,
-            description=description,
-            drive_folder=drive_folder,
-        )
+        kwargs = dict(image=img, region=polygon, filename=filename, description=description)
+        if self.dest_bucket:
+            kwargs["dest_bucket"] = self.dest_bucket
+        else:
+            kwargs["drive_folder"] = drive_folder
+        self._export(**kwargs)
         return True
 
     @staticmethod

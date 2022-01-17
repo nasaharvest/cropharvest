@@ -1,5 +1,6 @@
 -e .
 black
+google-cloud-storage
 mypy
 flake8==3.9.2
 pytest-flake8
