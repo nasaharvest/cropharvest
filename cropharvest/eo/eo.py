@@ -191,7 +191,6 @@ class EarthEngineExporter:
 
         kwargs = dict(
             image=image.clip(region),
-            fileNamePrefix=filename,
             description=description[:100],
             scale=10,
             region=region,
@@ -200,9 +199,13 @@ class EarthEngineExporter:
         )
 
         if dest_bucket:
-            task = ee.batch.Export.image.toCloudStorage(bucket=dest_bucket, **kwargs)
+            task = ee.batch.Export.image.toCloudStorage(
+                bucket=dest_bucket, fileNamePrefix=f"tifs/{filename}", **kwargs
+            )
         else:
-            task = ee.batch.Export.image.toDrive(folder=drive_folder, **kwargs)
+            task = ee.batch.Export.image.toDrive(
+                folder=drive_folder, fileNamePrefix=filename, **kwargs
+            )
 
         try:
             task.start()
