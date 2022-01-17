@@ -232,7 +232,7 @@ class EarthEngineExporter:
             output_folder = self.test_output_folder
             drive_folder = self.test_output_folder.name
 
-        filename = f"{polygon_identifier}_{str(start_date)}_{str(end_date)}"
+        filename = polygon_identifier
         if checkpoint and (output_folder / f"{filename}.tif").exists():
             print("File already exists! Skipping")
             return False
