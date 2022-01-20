@@ -75,7 +75,7 @@ def test_export_for_labels(mock_export_for_polygon, monkeypatch):
     mock_export_for_polygon.assert_has_calls(
         [
             call(
-                checkpoint=True,
+                checkpoint=None,
                 days_per_timestep=30,
                 end_date=end_date_str,
                 polygon=None,
@@ -84,7 +84,7 @@ def test_export_for_labels(mock_export_for_polygon, monkeypatch):
                 test=False,
             ),
             call(
-                checkpoint=True,
+                checkpoint=None,
                 days_per_timestep=30,
                 end_date=end_date_str,
                 polygon=None,

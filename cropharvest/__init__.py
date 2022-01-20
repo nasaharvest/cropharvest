@@ -4,9 +4,7 @@ from cropharvest import (
     countries,
     crops,
     datasets,
-    download,
     engineer,
-    export,
     utils,
 )
 
@@ -16,8 +14,6 @@ __all__ = [
     "countries",
     "crops",
     "datasets",
-    "download",
     "engineer",
-    "export",
     "utils",
 ]
