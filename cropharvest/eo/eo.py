@@ -78,22 +78,19 @@ class EarthEngineExporter:
     the default credentials will be used
     """
 
+    output_folder_name = "eo_data"
+    test_output_folder_name = "test_eo_data"
+
     def __init__(
         self,
-        data_folder: Path = DATAFOLDER_PATH,
         labels: Optional[geopandas.GeoDataFrame] = None,
         check_ee: bool = True,
         check_gcp: bool = True,
         credentials: Optional[str] = None,
         dest_bucket: Optional[str] = None,
     ) -> None:
-        self.data_folder = data_folder
-        self.output_folder_name = "eo_data"
-        self.output_folder = self.data_folder / self.output_folder_name
-        self.output_folder.mkdir(exist_ok=True)
-
-        self.test_output_folder = self.data_folder / "test_eo_data"
-        self.test_output_folder.mkdir(exist_ok=True)
+        # allows for easy checkpointing
+        self.cur_output_folder = f"{self.output_folder_name}_{str(date.today()).replace('-', '')}"
 
         self.dest_bucket = dest_bucket
 
@@ -113,9 +110,6 @@ class EarthEngineExporter:
         self.check_gcp = check_gcp
         self.cloud_tif_list = get_cloud_tif_list(dest_bucket) if self.check_gcp else []
 
-        # allows for easy checkpointing
-        self.cur_output_folder = f"{self.output_folder_name}_{str(date.today()).replace('-', '')}"
-
         self.labels = self.default_labels if labels is None else labels
         self.using_default = labels is None
         for expected_column in [
@@ -130,7 +124,7 @@ class EarthEngineExporter:
 
     @property
     def default_labels(self) -> geopandas.GeoDataFrame:
-        labels = geopandas.read_file(self.data_folder / LABELS_FILENAME)
+        labels = geopandas.read_file(DATAFOLDER_PATH / LABELS_FILENAME)
         export_end_year = pd.to_datetime(self.labels[RequiredColumns.EXPORT_END_DATE]).dt.year
         labels["end_date"] = export_end_year.apply(lambda x: date(x, 12, 12))
         labels = labels.assign(
@@ -141,20 +135,27 @@ class EarthEngineExporter:
         )
         return labels
 
-    def _filter_labels(self, labels: geopandas.GeoDataFrame) -> geopandas.GeoDataFrame:
+    def _filter_labels(
+        self, labels: geopandas.GeoDataFrame, checkpoint: Optional[Path]
+    ) -> geopandas.GeoDataFrame:
 
         # does not sort
         datasets = labels.dataset.unique()
 
-        if len(list(self.output_folder.glob(f"*{datasets[0]}*"))) == 0:
+        if checkpoint is None:
+            # if we have no checkpoint folder, then we have no
+            # downloaded files to check against
+            return labels
+
+        if len(list(checkpoint.glob(f"*{datasets[0]}*"))) == 0:
             # no files downloaded
             return labels
 
         for idx in range(len(datasets)):
-            cur_dataset_files = list(self.output_folder.glob(f"*{datasets[idx]}*"))
+            cur_dataset_files = list(checkpoint.glob(f"*{datasets[idx]}*"))
             does_cur_exist = len(cur_dataset_files) > 0
             if idx < (len(datasets) - 1):
-                does_next_exist = len(list(self.output_folder.glob(f"*{datasets[idx + 1]}*"))) > 0
+                does_next_exist = len(list(checkpoint.glob(f"*{datasets[idx + 1]}*"))) > 0
             else:
                 # we are on the last dataset
                 does_next_exist = False
@@ -222,18 +223,16 @@ class EarthEngineExporter:
         start_date: date,
         end_date: date,
         days_per_timestep: int,
-        checkpoint: bool,
+        checkpoint: Optional[Path],
         test: bool,
     ) -> bool:
 
-        output_folder = self.output_folder
         drive_folder = self.cur_output_folder
         if test:
-            output_folder = self.test_output_folder
-            drive_folder = self.test_output_folder.name
+            drive_folder = self.test_output_folder_name
 
         filename = polygon_identifier
-        if checkpoint and (output_folder / f"{filename}.tif").exists():
+        if (checkpoint is not None) and (checkpoint / f"{filename}.tif").exists():
             print("File already exists! Skipping")
             return False
 
@@ -411,7 +410,7 @@ class EarthEngineExporter:
     def export_for_test(
         self,
         padding_metres: int = 160,
-        checkpoint: bool = True,
+        checkpoint: Optional[Path] = None,
     ) -> None:
 
         for identifier, bbox in TEST_REGIONS.items():
@@ -434,7 +433,7 @@ class EarthEngineExporter:
         dataset: Optional[str] = None,
         num_labelled_points: Optional[int] = 3000,
         surrounding_metres: int = 80,
-        checkpoint: bool = True,
+        checkpoint: Optional[Path] = None,
         start_from_last: bool = True,
     ) -> None:
 
@@ -448,7 +447,7 @@ class EarthEngineExporter:
 
         if start_from_last:
             if self.using_default:
-                labels = self._filter_labels(labels)
+                labels = self._filter_labels(labels, checkpoint)
             else:
                 print("start_from_last cannot be used if passing a different set of labels")
 
