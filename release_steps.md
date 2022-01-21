@@ -29,7 +29,6 @@ Releasing a new package involves uploading new data to Zenodo and releasing the 
 7. Click publish
 
 
-/Users/izvonkov/nasaharvest/cropharvest/dist/cropharvest-0.2.0.tar.gz
 ## Python Package Release
 1. Update the `DATASET_VERSION_ID` in [cropharvest/config](cropharvest/config.py)
 2. Update the package version in setup.py
