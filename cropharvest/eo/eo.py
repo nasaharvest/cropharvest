@@ -231,7 +231,7 @@ class EarthEngineExporter:
         if test:
             drive_folder = self.test_output_folder_name
 
-        filename = f"{polygon_identifier}_{str(start_date)}_{str(end_date)}"
+        filename = polygon_identifier
         if (checkpoint is not None) and (checkpoint / f"{filename}.tif").exists():
             print("File already exists! Skipping")
             return False
@@ -248,11 +248,6 @@ class EarthEngineExporter:
 
         if self.check_ee and len(self.ee_task_list) >= 3000:
             return False
-
-        print(
-            f"Exporting image for polygon {polygon_identifier} from "
-            f"aggregated images between {str(start_date)} and {str(end_date)}"
-        )
 
         image_collection_list: List[ee.Image] = []
         cur_date = start_date
@@ -462,7 +457,9 @@ class EarthEngineExporter:
         )
 
         exports_started = 0
-        for polygon, identifier, start_date, end_date in polygons_to_download:
+        for polygon, identifier, start_date, end_date in tqdm(
+            polygons_to_download, desc="Exporting:"
+        ):
             export_started = self._export_for_polygon(
                 polygon=polygon,
                 polygon_identifier=identifier,
