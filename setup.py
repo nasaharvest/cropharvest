@@ -31,7 +31,7 @@ setup(
         "rasterio>=1.2.6",
         "openpyxl>=2.5.9",
         "scikit-learn>=0.22.2",
-        "google-cloud-storage >= 1.38s.0",
+        "google-cloud-storage >= 1.38.0",
     ],
     python_requires=">=3.6",
     include_package_data=True,
