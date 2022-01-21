@@ -15,7 +15,7 @@ setup(
     author="Gabriel Tseng",
     author_email="gabrieltseng95@gmail.com",
     url="https://github.com/nasaharvest/cropharvest",
-    version="0.1.2",
+    version="0.2.0",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: Other/Proprietary License",
@@ -31,6 +31,7 @@ setup(
         "rasterio>=1.2.6",
         "openpyxl>=2.5.9",
         "scikit-learn>=0.22.2",
+        "google-cloud-storage >= 1.38s.0",
     ],
     python_requires=">=3.6",
     include_package_data=True,
