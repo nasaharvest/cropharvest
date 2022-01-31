@@ -2,6 +2,7 @@ import ee
 from datetime import date
 import math
 
+from cropharvest.bands import S2_BANDS as BANDS
 from .utils import date_to_string
 
 
@@ -25,8 +26,6 @@ dilationPixels = 3
 # images with less than this many cloud pixels will be used with normal
 # mosaicing (most recent on top)
 cloudFreeKeepThresh = 3
-
-BANDS = ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B9", "B10", "B11", "B12"]
 
 
 def get_single_image(region: ee.Geometry, start_date: date, end_date: date) -> ee.Image:

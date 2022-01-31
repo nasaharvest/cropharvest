@@ -1,13 +1,12 @@
 import ee
 from datetime import date
-
-from .utils import date_to_string
-
 from typing import Tuple
 
-image_collection = "COPERNICUS/S1_GRD"
+from cropharvest.bands import S1_BANDS as BANDS
+from .utils import date_to_string
 
-BANDS = ["VV", "VH"]
+
+image_collection = "COPERNICUS/S1_GRD"
 
 
 def get_image_collection(

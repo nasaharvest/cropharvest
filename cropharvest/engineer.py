@@ -13,7 +13,7 @@ import h5py
 
 from sklearn.metrics import roc_auc_score, f1_score
 
-from cropharvest.eo import STATIC_BANDS, DYNAMIC_BANDS
+from cropharvest.bands import STATIC_BANDS, DYNAMIC_BANDS
 from cropharvest.columns import RequiredColumns, NullableColumns
 from .config import (
     EXPORT_END_DAY,

@@ -1,21 +1,27 @@
 from pathlib import Path
 import geopandas
 import pandas as pd
-import ee
 from tqdm import tqdm
 from datetime import timedelta, date
 from math import cos, radians
 
+try:
+    import ee
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "The Earth Engine API is not installed. Please install it with `pip install earthengine-api`."
+    )
+
 from .sentinel1 import (
     get_single_image as get_single_s1_image,
     get_image_collection as get_s1_image_collection,
-    BANDS as S1_BANDS,
 )
-from .sentinel2 import get_single_image as get_single_s2_image, BANDS as S2_BANDS
-from .era5 import get_single_image as get_single_era5_image, BANDS as ERA5_BANDS
-from .srtm import get_single_image as get_single_srtm_image, BANDS as SRTM_BANDS
+from .sentinel2 import get_single_image as get_single_s2_image
+from .era5 import get_single_image as get_single_era5_image
+from .srtm import get_single_image as get_single_srtm_image
 
 from .utils import make_combine_bands_function
+from cropharvest.bands import DYNAMIC_BANDS
 from cropharvest.utils import DATAFOLDER_PATH, memoized
 from cropharvest.countries import BBox
 from cropharvest.config import (
@@ -38,11 +44,7 @@ except ImportError:
     GOOGLE_CLOUD_STORAGE_INSTALLED = False
 INSTALL_MSG = "Please install the google-cloud-storage library (pip install google-cloud-storage)"
 
-
-DYNAMIC_BANDS = S1_BANDS + S2_BANDS + ERA5_BANDS
 DYNAMIC_IMAGE_FUNCTIONS = [get_single_s2_image, get_single_era5_image]
-
-STATIC_BANDS = SRTM_BANDS
 STATIC_IMAGE_FUNCTIONS = [get_single_srtm_image]
 
 

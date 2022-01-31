@@ -1,8 +1,8 @@
 import ee
 
-image_collection = "USGS/SRTMGL1_003"
+from cropharvest.bands import SRTM_BANDS as BANDS
 
-BANDS = ["elevation", "slope"]
+image_collection = "USGS/SRTMGL1_003"
 
 
 def get_single_image(region: ee.Geometry) -> ee.Image:
