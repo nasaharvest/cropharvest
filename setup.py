@@ -25,7 +25,6 @@ setup(
     install_requires=[
         "geopandas==0.9.0",
         "xarray>=0.16.2",
-        "earthengine-api>=0.1.271",
         "tqdm>=4.61.1",
         "h5py>=3.1.0",
         "rasterio>=1.2.6",
