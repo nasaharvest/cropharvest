@@ -9,7 +9,8 @@ try:
     import ee
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
-        "The Earth Engine API is not installed. Please install it with `pip install earthengine-api`."
+        "The Earth Engine API is not installed. "
+        + "Please install it with `pip install earthengine-api`."
     )
 
 from .sentinel1 import (
