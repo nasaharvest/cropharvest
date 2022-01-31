@@ -85,7 +85,8 @@ class EarthEngineExporter:
     ```
     :param labels: A geopandas.GeoDataFrame containing the labels for the exports
     :param check_ee: Whether to check Earth Engine before exporting
-    :param check_gcp: Whether to check Google Cloud Storage before exporting, google-cloud-storage must be installed.
+    :param check_gcp: Whether to check Google Cloud Storage before exporting,
+        google-cloud-storage must be installed.
     :param credentials: The credentials to use for the export. If not specified,
         the default credentials will be used
     :param dest_bucket: The bucket to export to, google-cloud-storage must be installed.
