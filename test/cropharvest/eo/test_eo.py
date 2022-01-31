@@ -5,7 +5,7 @@ import pytest
 
 from cropharvest.columns import RequiredColumns
 from cropharvest.eo import EarthEngineExporter
-from cropharvest.eo.eo import get_cloud_tif_list
+from cropharvest.eo.eo import get_cloud_tif_list, GOOGLE_CLOUD_STORAGE_INSTALLED, INSTALL_MSG
 
 
 def mock_bb_from_center(mid_lat, mid_lon, surrounding_metres):
@@ -43,11 +43,26 @@ def test_labels_to_polygons_and_years(with_identifier, monkeypatch):
         assert identifier == expected_identifier
 
 
+@pytest.mark.skipif(
+    not GOOGLE_CLOUD_STORAGE_INSTALLED,
+    reason="Google Cloud Storage must be installed for this test.",
+)
 @patch("cropharvest.eo.eo.storage")
 def test_get_cloud_tif_list(mock_storage):
     mock_storage.Client().list_blobs("mock_bucket").return_value = []
     tif_list = get_cloud_tif_list("mock_bucket")
     assert tif_list == []
+
+
+@pytest.mark.skipif(
+    GOOGLE_CLOUD_STORAGE_INSTALLED,
+    reason="Google Cloud Storage is installed, no need to run this test.",
+)
+def test_get_cloud_tif_list_error():
+    with pytest.raises(Exception) as e:
+        get_cloud_tif_list("mock_bucket")
+
+    assert str(e.value) == f"{INSTALL_MSG} to enable GCP checks"
 
 
 @patch("cropharvest.eo.EarthEngineExporter._export_for_polygon")
@@ -95,3 +110,22 @@ def test_export_for_labels(mock_export_for_polygon, monkeypatch):
         ],
         any_order=True,
     )
+
+
+def test_google_cloud_storage_errors():
+
+    with pytest.raises(Exception) as e:
+        EarthEngineExporter(check_gcp=True, check_ee=False)
+
+    assert str(e.value) == "check_gcp was set to True but dest_bucket was not specified"
+
+    if not GOOGLE_CLOUD_STORAGE_INSTALLED:
+        with pytest.raises(Exception) as e:
+            EarthEngineExporter(check_gcp=True, check_ee=False, dest_bucket="mock_bucket")
+
+        assert str(e.value) == f"{INSTALL_MSG} to enable GCP checks"
+
+        with pytest.raises(Exception) as e:
+            EarthEngineExporter(check_gcp=False, check_ee=False, dest_bucket="mock_bucket")
+
+        assert str(e.value) == f"{INSTALL_MSG} to enable export to destination bucket"
