@@ -1,22 +1,28 @@
 from pathlib import Path
 import geopandas
 import pandas as pd
-import ee
 from tqdm import tqdm
 from datetime import timedelta, date
-from google.cloud import storage
 from math import cos, radians
+
+try:
+    import ee
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "The Earth Engine API is not installed. "
+        + "Please install it with `pip install earthengine-api`."
+    )
 
 from .sentinel1 import (
     get_single_image as get_single_s1_image,
     get_image_collection as get_s1_image_collection,
-    BANDS as S1_BANDS,
 )
-from .sentinel2 import get_single_image as get_single_s2_image, BANDS as S2_BANDS
-from .era5 import get_single_image as get_single_era5_image, BANDS as ERA5_BANDS
-from .srtm import get_single_image as get_single_srtm_image, BANDS as SRTM_BANDS
+from .sentinel2 import get_single_image as get_single_s2_image
+from .era5 import get_single_image as get_single_era5_image
+from .srtm import get_single_image as get_single_srtm_image
 
 from .utils import make_combine_bands_function
+from cropharvest.bands import DYNAMIC_BANDS
 from cropharvest.utils import DATAFOLDER_PATH, memoized
 from cropharvest.countries import BBox
 from cropharvest.config import (
@@ -31,11 +37,15 @@ from cropharvest.columns import RequiredColumns
 
 from typing import Union, List, Optional, Tuple
 
+try:
+    from google.cloud import storage
 
-DYNAMIC_BANDS = S1_BANDS + S2_BANDS + ERA5_BANDS
+    GOOGLE_CLOUD_STORAGE_INSTALLED = True
+except ImportError:
+    GOOGLE_CLOUD_STORAGE_INSTALLED = False
+INSTALL_MSG = "Please install the google-cloud-storage library (pip install google-cloud-storage)"
+
 DYNAMIC_IMAGE_FUNCTIONS = [get_single_s2_image, get_single_era5_image]
-
-STATIC_BANDS = SRTM_BANDS
 STATIC_IMAGE_FUNCTIONS = [get_single_srtm_image]
 
 
@@ -53,6 +63,10 @@ def get_ee_task_list(key: str = "description") -> List[str]:
 @memoized
 def get_cloud_tif_list(dest_bucket: str) -> List[str]:
     """Gets a list of all cloud-free TIFs in a bucket."""
+    if not GOOGLE_CLOUD_STORAGE_INSTALLED:
+        # Added as precaution, but should never happen
+        raise ValueError(f"{INSTALL_MSG} to enable GCP checks")
+
     client = storage.Client()
     cloud_tif_list_iterator = client.list_blobs(dest_bucket, prefix="tifs")
     cloud_tif_list = [
@@ -72,10 +86,13 @@ class EarthEngineExporter:
     exporter = EarthEngineExporter()
     exporter.export_for_labels()
     ```
-
+    :param labels: A geopandas.GeoDataFrame containing the labels for the exports
     :param check_ee: Whether to check Earth Engine before exporting
+    :param check_gcp: Whether to check Google Cloud Storage before exporting,
+        google-cloud-storage must be installed.
     :param credentials: The credentials to use for the export. If not specified,
-    the default credentials will be used
+        the default credentials will be used
+    :param dest_bucket: The bucket to export to, google-cloud-storage must be installed.
     """
 
     output_folder_name = "eo_data"
@@ -107,6 +124,12 @@ class EarthEngineExporter:
 
         if check_gcp and dest_bucket is None:
             raise ValueError("check_gcp was set to True but dest_bucket was not specified")
+        elif not GOOGLE_CLOUD_STORAGE_INSTALLED:
+            if check_gcp:
+                raise ValueError(f"{INSTALL_MSG} to enable GCP checks")
+            elif dest_bucket is not None:
+                raise ValueError(f"{INSTALL_MSG} to enable export to destination bucket")
+
         self.check_gcp = check_gcp
         self.cloud_tif_list = get_cloud_tif_list(dest_bucket) if self.check_gcp else []
 
@@ -200,6 +223,10 @@ class EarthEngineExporter:
         )
 
         if dest_bucket:
+            if not GOOGLE_CLOUD_STORAGE_INSTALLED:
+                # Added as precaution, but should never happen
+                raise ValueError(f"{INSTALL_MSG} to enable export to destination bucket")
+
             task = ee.batch.Export.image.toCloudStorage(
                 bucket=dest_bucket, fileNamePrefix=f"tifs/{filename}", **kwargs
             )
@@ -231,7 +258,7 @@ class EarthEngineExporter:
         if test:
             drive_folder = self.test_output_folder_name
 
-        filename = polygon_identifier
+        filename = str(polygon_identifier)
         if (checkpoint is not None) and (checkpoint / f"{filename}.tif").exists():
             print("File already exists! Skipping")
             return False
@@ -471,9 +498,6 @@ class EarthEngineExporter:
             )
             if export_started:
                 exports_started += 1
-                if exports_started % 100 == 0:
-                    print(f"{exports_started} exports started")
-                if num_labelled_points is not None:
-                    if exports_started >= num_labelled_points:
-                        print(f"Started {exports_started} exports. Ending export")
-                        return None
+                if num_labelled_points is not None and exports_started >= num_labelled_points:
+                    print(f"Started {exports_started} exports. Ending export")
+                    return None

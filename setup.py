@@ -25,13 +25,11 @@ setup(
     install_requires=[
         "geopandas==0.9.0",
         "xarray>=0.16.2",
-        "earthengine-api>=0.1.271",
         "tqdm>=4.61.1",
         "h5py>=3.1.0",
         "rasterio>=1.2.6",
         "openpyxl>=2.5.9",
         "scikit-learn>=0.22.2",
-        "google-cloud-storage >= 1.38.0",
     ],
     python_requires=">=3.6",
     include_package_data=True,

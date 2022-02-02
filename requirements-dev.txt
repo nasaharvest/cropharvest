@@ -1,5 +1,6 @@
 -e .
 black
+earthengine-api>=0.1.271
 mypy
 flake8==3.9.2
 jupyter
