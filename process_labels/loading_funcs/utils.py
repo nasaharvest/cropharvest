@@ -3,7 +3,12 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime, timedelta
 
-from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH, NUM_TIMESTEPS, DAYS_PER_TIMESTEP
+from cropharvest.config import (
+    EXPORT_END_DAY,
+    EXPORT_END_MONTH,
+    DEFAULT_NUM_TIMESTEPS,
+    DAYS_PER_TIMESTEP,
+)
 from cropharvest.columns import RequiredColumns
 
 from typing import Optional, Dict
@@ -69,7 +74,7 @@ def _overlapping_year(harvest_date: datetime, planting_date: datetime) -> int:
         overlap_dict[harvest_year + diff] = _date_overlap(
             planting_date,
             harvest_date,
-            end_date - timedelta(days=NUM_TIMESTEPS * DAYS_PER_TIMESTEP),
+            end_date - timedelta(days=DEFAULT_NUM_TIMESTEPS * DAYS_PER_TIMESTEP),
             end_date,
         )
 

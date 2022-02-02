@@ -29,7 +29,7 @@ from cropharvest.config import (
     EXPORT_END_DAY,
     EXPORT_END_MONTH,
     DAYS_PER_TIMESTEP,
-    NUM_TIMESTEPS,
+    DEFAULT_NUM_TIMESTEPS,
     LABELS_FILENAME,
     TEST_REGIONS,
 )
@@ -151,7 +151,8 @@ class EarthEngineExporter:
         export_end_year = pd.to_datetime(self.labels[RequiredColumns.EXPORT_END_DATE]).dt.year
         labels["end_date"] = export_end_year.apply(lambda x: date(x, 12, 12))
         labels = labels.assign(
-            start_date=lambda x: x["end_date"] - timedelta(days=DAYS_PER_TIMESTEP * NUM_TIMESTEPS)
+            start_date=lambda x: x["end_date"]
+            - timedelta(days=DAYS_PER_TIMESTEP * DEFAULT_NUM_TIMESTEPS)
         )
         labels = labels.assign(
             export_identifier=lambda x: f"{x['index']}-{x[RequiredColumns.DATASET]}"
@@ -444,7 +445,7 @@ class EarthEngineExporter:
             polygon = self._bbox_to_ee_bounding_box(bbox, padding_metres)
             _, _, year, _ = identifier.split("_")
             end_date = date(int(year), EXPORT_END_MONTH, EXPORT_END_DAY)
-            start_date = end_date - timedelta(days=DAYS_PER_TIMESTEP * NUM_TIMESTEPS)
+            start_date = end_date - timedelta(days=DAYS_PER_TIMESTEP * DEFAULT_NUM_TIMESTEPS)
             _ = self._export_for_polygon(
                 polygon=polygon,
                 polygon_identifier=identifier,

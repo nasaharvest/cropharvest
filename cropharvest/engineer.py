@@ -20,7 +20,7 @@ from .config import (
     EXPORT_END_MONTH,
     LABELS_FILENAME,
     DAYS_PER_TIMESTEP,
-    NUM_TIMESTEPS,
+    DEFAULT_NUM_TIMESTEPS,
     TEST_REGIONS,
     TEST_DATASETS,
 )
@@ -200,7 +200,9 @@ class Engineer:
         return int(index), dataset
 
     @staticmethod
-    def load_tif(filepath: Path, start_date: datetime) -> Tuple[xr.DataArray, float]:
+    def load_tif(
+        filepath: Path, start_date: datetime, num_timesteps: Optional[int] = DEFAULT_NUM_TIMESTEPS
+    ) -> Tuple[xr.DataArray, float]:
         r"""
         The sentinel files exported from google earth have all the timesteps
         concatenated together. This function loads a tif files and splits the
@@ -215,12 +217,14 @@ class Engineer:
         num_bands = len(da.band)
         num_dynamic_bands = num_bands - len(STATIC_BANDS)
 
-        assert num_dynamic_bands == bands_per_timestep * NUM_TIMESTEPS
+        assert num_dynamic_bands % bands_per_timestep == 0
+        if num_timesteps is None:
+            num_timesteps = num_dynamic_bands // bands_per_timestep
 
         static_data = da.isel(band=slice(num_bands - len(STATIC_BANDS), num_bands))
         average_slope = np.nanmean(static_data.values[STATIC_BANDS.index("slope"), :, :])
 
-        for timestep in range(NUM_TIMESTEPS):
+        for timestep in range(num_timesteps):
             time_specific_da = da.isel(
                 band=slice(timestep * bands_per_timestep, (timestep + 1) * bands_per_timestep)
             )
@@ -229,7 +233,8 @@ class Engineer:
             da_split_by_time.append(time_specific_da)
 
         timesteps = [
-            start_date + timedelta(days=DAYS_PER_TIMESTEP) * i for i in range(NUM_TIMESTEPS)
+            start_date + timedelta(days=DAYS_PER_TIMESTEP) * i
+            for i in range(len(da_split_by_time))
         ]
 
         dynamic_data = xr.concat(da_split_by_time, pd.Index(timesteps, name="time"))
@@ -394,7 +399,7 @@ class Engineer:
         identifier = "_".join(id_components[:4])
         identifier_plus_idx = f"{identifier}_{id_in_region}"
         start_date = datetime(int(end_year), EXPORT_END_MONTH, EXPORT_END_DAY) - timedelta(
-            days=NUM_TIMESTEPS * DAYS_PER_TIMESTEP
+            days=DEFAULT_NUM_TIMESTEPS * DAYS_PER_TIMESTEP
         )
         da, average_slope = self.load_tif(path_to_file, start_date=start_date)
         lon, lat = np.meshgrid(da.x.values, da.y.values)
@@ -450,8 +455,13 @@ class Engineer:
 
         return identifier_plus_idx, TestInstance(x=final_x, y=y, lats=flat_lat, lons=flat_lon)
 
-    def process_single_file(self, path_to_file: Path, row: pd.Series) -> Optional[DataInstance]:
-        start_date = row.export_end_date - timedelta(days=NUM_TIMESTEPS * DAYS_PER_TIMESTEP)
+    def process_single_file(
+        self,
+        path_to_file: Path,
+        row: pd.Series,
+        num_timesteps: int = DEFAULT_NUM_TIMESTEPS,
+    ) -> Optional[DataInstance]:
+        start_date = row.export_end_date - timedelta(days=num_timesteps * DAYS_PER_TIMESTEP)
         da, average_slope = self.load_tif(path_to_file, start_date=start_date)
         closest_lon = self.find_nearest(da.x, row[RequiredColumns.LON])
         closest_lat = self.find_nearest(da.y, row[RequiredColumns.LAT])
