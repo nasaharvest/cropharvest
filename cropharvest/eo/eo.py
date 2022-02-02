@@ -41,7 +41,7 @@ try:
     from google.cloud import storage
 
     GOOGLE_CLOUD_STORAGE_INSTALLED = True
-except ImportError:
+except ModuleNotFoundError:
     GOOGLE_CLOUD_STORAGE_INSTALLED = False
 INSTALL_MSG = "Please install the google-cloud-storage library (pip install google-cloud-storage)"
 
