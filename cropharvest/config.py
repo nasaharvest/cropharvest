@@ -4,7 +4,7 @@ from typing import Dict
 
 
 DAYS_PER_TIMESTEP = 30
-NUM_TIMESTEPS = 12
+DEFAULT_NUM_TIMESTEPS = 12
 
 # we will export date until the
 # 1st February, at which point

@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 
 from cropharvest.engineer import Engineer, BANDS, DYNAMIC_BANDS, STATIC_BANDS
-from cropharvest.config import NUM_TIMESTEPS
+from cropharvest.config import DEFAULT_NUM_TIMESTEPS
 
 from typing import Dict, Union
 
@@ -13,12 +13,12 @@ TIF_FILE = Path(__file__).parent / "98-togo_2019-02-06_2020-02-01.tif"
 def test_load_tif_file():
 
     loaded_file, _ = Engineer.load_tif(TIF_FILE, start_date=datetime(2019, 2, 6))
-    assert loaded_file.shape[0] == NUM_TIMESTEPS
+    assert loaded_file.shape[0] == DEFAULT_NUM_TIMESTEPS
     assert loaded_file.shape[1] == len(DYNAMIC_BANDS) + len(STATIC_BANDS)
 
     # also, check the static bands are actually constant across time
     static_bands = loaded_file.values[:, len(DYNAMIC_BANDS)]
-    for i in range(1, NUM_TIMESTEPS):
+    for i in range(1, DEFAULT_NUM_TIMESTEPS):
         assert np.array_equal(static_bands[0], static_bands[i], equal_nan=True)
 
     # finally, check expected for temperature
