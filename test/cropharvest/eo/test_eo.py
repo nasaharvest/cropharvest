@@ -133,7 +133,7 @@ def test_export_for_bbox_metres_per_polygon_none(
         mock_export_for_polygon.assert_called_with(
             end_date=end_date,
             polygon=None,
-            polygon_identifier=f"Togo_{start_date}_{end_date}/batch",
+            polygon_identifier=f"Togo_{start_date}_{end_date}/batch/0",
             start_date=start_date,
         )
     else:

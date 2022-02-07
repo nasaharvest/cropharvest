@@ -408,7 +408,7 @@ class EarthEngineExporter:
             ids = [f"batch_{i}/{i}" for i in range(len(regions))]
         else:
             regions = [ee_bbox.to_ee_polygon()]
-            ids = [f"batch"]
+            ids = ["batch/0"]
 
         for identifier, region in zip(ids, regions):
             self._export_for_polygon(
