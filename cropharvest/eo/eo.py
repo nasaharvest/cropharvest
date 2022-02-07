@@ -133,7 +133,9 @@ class EarthEngineExporter:
         self.cloud_tif_list = get_cloud_tif_list(dest_bucket) if self.check_gcp else []
 
     @staticmethod
-    def load_default_labels(dataset: Optional[str]) -> geopandas.GeoDataFrame:
+    def load_default_labels(
+        dataset: Optional[str], start_from_last, checkpoint: Optional[Path]
+    ) -> geopandas.GeoDataFrame:
         labels = geopandas.read_file(DATAFOLDER_PATH / LABELS_FILENAME)
         export_end_year = pd.to_datetime(labels[RequiredColumns.EXPORT_END_DATE]).dt.year
         labels["end_date"] = export_end_year.apply(lambda x: date(x, 12, 12))
@@ -146,10 +148,15 @@ class EarthEngineExporter:
         )
         if dataset:
             labels = labels[labels.dataset == dataset]
+
+        if start_from_last:
+            labels = EarthEngineExporter._filter_labels(labels, checkpoint)
+
         return labels
 
+    @staticmethod
     def _filter_labels(
-        self, labels: geopandas.GeoDataFrame, checkpoint: Optional[Path]
+        labels: geopandas.GeoDataFrame, checkpoint: Optional[Path]
     ) -> geopandas.GeoDataFrame:
 
         # does not sort
@@ -423,9 +430,9 @@ class EarthEngineExporter:
     ) -> None:
 
         if labels is None:
-            labels = self.load_default_labels(dataset=dataset)
-            if start_from_last:
-                labels = self._filter_labels(labels, checkpoint)
+            labels = self.load_default_labels(
+                dataset=dataset, start_from_last=start_from_last, checkpoint=checkpoint
+            )
         else:
             if dataset is not None:
                 print("No dataset can be specified if passing a different set of labels")
