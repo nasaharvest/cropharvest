@@ -249,6 +249,7 @@ class EarthEngineExporter:
         days_per_timestep: int = DAYS_PER_TIMESTEP,
         checkpoint: Optional[Path] = None,
         test: bool = False,
+        file_dimensions: Optional[int] = None,
     ) -> bool:
 
         filename = str(polygon_identifier)
@@ -313,7 +314,13 @@ class EarthEngineExporter:
         img = ee.Image.cat(total_image_list)
 
         # and finally, export the image
-        kwargs = dict(image=img, region=polygon, filename=filename, description=description)
+        kwargs = dict(
+            image=img,
+            region=polygon,
+            filename=filename,
+            description=description,
+            file_dimensions=file_dimensions,
+        )
         if self.dest_bucket:
             kwargs["dest_bucket"] = self.dest_bucket
         elif test:
@@ -399,6 +406,7 @@ class EarthEngineExporter:
         start_date: date,
         end_date: date,
         metres_per_polygon: Optional[int] = 10000,
+        file_dimensions: Optional[str] = None,
     ) -> List[str]:
 
         ee_bbox = EEBoundingBox.from_bounding_box(bounding_box=bbox, padding_metres=0)
@@ -416,6 +424,7 @@ class EarthEngineExporter:
                 polygon_identifier=f"{general_identifier}/{identifier}",
                 start_date=start_date,
                 end_date=end_date,
+                file_dimensions=file_dimensions,
             )
         return ids
 
