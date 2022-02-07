@@ -114,9 +114,7 @@ def test_export_for_labels(mock_export_for_polygon, mock_polygon):
 
 @patch("cropharvest.eo.EarthEngineExporter._export_for_polygon")
 @pytest.mark.parametrize("metres_per_polygon", (None, 10000))
-def test_export_for_bbox_metres_per_polygon_none(
-    mock_export_for_polygon, metres_per_polygon, mock_polygon
-):
+def test_export_for_bbox(mock_export_for_polygon, metres_per_polygon, mock_polygon):
 
     start_date, end_date = date(2019, 4, 1), date(2020, 4, 1)
     EarthEngineExporter(check_gcp=False, check_ee=False).export_for_bbox(
@@ -135,6 +133,7 @@ def test_export_for_bbox_metres_per_polygon_none(
             polygon=None,
             polygon_identifier=f"Togo_{start_date}_{end_date}/batch/0",
             start_date=start_date,
+            file_dimensions=None,
         )
     else:
         assert mock_export_for_polygon.call_count == 1155
@@ -145,6 +144,7 @@ def test_export_for_bbox_metres_per_polygon_none(
                     polygon=None,
                     polygon_identifier=f"Togo_{start_date}_{end_date}/batch_{i}/{i}",
                     start_date=start_date,
+                    file_dimensions=None,
                 )
                 for i in range(1155)
             ],
