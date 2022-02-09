@@ -34,5 +34,5 @@ You will need to recreate the `features`, and upload the new `labels.geojson` to
 ### 3. Update the Zenodo link in CropHarvest
 Add the new Zenodo identifier to the [cropharvest config](cropharvest/config.py). Because the python package is coupled to the data, this will also require a new release. Once again, please contact Gabriel or Ivan to do this.
 
-### 4. Update the Readme to reflect the new dataset
-We keep track of certain statistics in the Readme (e.g. dataset size, number of multiclass labels, ...). The final step is to update these numbers so they remain accurate as new datasets are added.
+### 4. Update the Readme / datasets to reflect the new dataset
+We keep track of certain statistics in the Readme (e.g. dataset size, number of multiclass labels, ...). The final step is to update these numbers so they remain accurate as new datasets are added. In addition, [`datasets.md`][datasets.md] contains a list of datasets included in CropHarvest - this should also be updated.
