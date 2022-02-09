@@ -8,7 +8,7 @@ The dataset consists of **90,480** datapoints, of which **30,899** (34.2%) have 
 
 **65,690** (73%) of these labels are paired with remote sensing and climatology data, specifically [Sentinel-2](https://sentinel.esa.int/web/sentinel/missions/sentinel-2), [Sentinel-1](https://sentinel.esa.int/web/sentinel/missions/sentinel-1/), the [SRTM Digital Elevation Model](https://cgiarcsi.community/data/srtm-90m-digital-elevation-database-v4-1/) and [ERA 5 climatology data](https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5).
 
-21 datasets are aggregated into CropHarvest - these are documented [here](datasets.md).
+21 datasets are aggregated into CropHarvest - these are documented [here](https://github.com/nasaharvest/cropharvest/blob/main/datasets.md).
 
 More details about CropHarvest and the benchmarks are available in [this paper](https://openreview.net/forum?id=JtjzUXPEaCu).
 
@@ -17,15 +17,15 @@ More details about CropHarvest and the benchmarks are available in [this paper](
 `cropharvest` can be pip installed by running `pip install cropharvest`
 
 ### Getting started
-See the [`demo.ipynb`](demo.ipynb) notebook for an example on how to download the data from [Zenodo](https://zenodo.org/record/5533193) and train a random forest against this data.
+See the [`demo.ipynb`](https://github.com/nasaharvest/cropharvest/blob/main/demo.ipynb) notebook for an example on how to download the data from [Zenodo](https://zenodo.org/record/5533193) and train a random forest against this data.
 
-For more examples of models trained against this dataset, see the [benchmarks](benchmarks).
+For more examples of models trained against this dataset, see the [benchmarks](https://github.com/nasaharvest/cropharvest/blob/main/benchmarks).
 
 ### Contributing
-If you would like to contribute a dataset, please see the [contributing readme](contributing.md).
+If you would like to contribute a dataset, please see the [contributing readme](https://github.com/nasaharvest/cropharvest/blob/main/contributing.md).
 
 ### License
-CropHarvest has a [Creative Commons Attribution-ShareAlike 4.0 International](LICENSE.txt) license.
+CropHarvest has a [Creative Commons Attribution-ShareAlike 4.0 International](https://github.com/nasaharvest/cropharvest/blob/main/LICENSE.txt) license.
 
 ### Citation
 
