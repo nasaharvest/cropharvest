@@ -4,6 +4,14 @@ CropHarvest is an open source remote sensing dataset for agriculture with benchm
 
 <img src="diagrams/labels_spatial_distribution.png" alt="Spatial distribution of labels" height="400px"/>
 
+The dataset consists of **90,480** datapoints, of which **30,899** (34.2%) have multiclass labels. All other datapoints only have binary crop / non-crop labels.
+
+**65,690** (73%) of these labels are paired with remote sensing and climatology data, specifically [Sentinel-2](https://sentinel.esa.int/web/sentinel/missions/sentinel-2), [Sentinel-1](https://sentinel.esa.int/web/sentinel/missions/sentinel-1/), the [SRTM Digital Elevation Model](https://cgiarcsi.community/data/srtm-90m-digital-elevation-database-v4-1/) and [ERA 5 climatology data](https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5).
+
+21 datasets are aggregated into CropHarvest - these are documented [here](datasets.md).
+
+More details about CropHarvest and the benchmarks are available in [this paper](https://openreview.net/forum?id=JtjzUXPEaCu).
+
 ### Installation
 
 `cropharvest` can be pip installed by running `pip install cropharvest`
@@ -12,8 +20,6 @@ CropHarvest is an open source remote sensing dataset for agriculture with benchm
 See the [`demo.ipynb`](demo.ipynb) notebook for an example on how to download the data from [Zenodo](https://zenodo.org/record/5533193) and train a random forest against this data.
 
 For more examples of models trained against this dataset, see the [benchmarks](benchmarks).
-
-More details about CropHarvest and the benchmarks are available in [this paper](https://openreview.net/forum?id=JtjzUXPEaCu).
 
 ### Contributing
 If you would like to contribute a dataset, please see the [contributing readme](contributing.md).
