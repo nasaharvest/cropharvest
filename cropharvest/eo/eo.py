@@ -344,13 +344,12 @@ class EarthEngineExporter:
             ee_bbox = EEBoundingBox.from_centre(
                 mid_lat=row["lat"], mid_lon=row["lon"], surrounding_metres=surrounding_metres
             )
-            latlons = (ee_bbox.min_lon, ee_bbox.min_lat, ee_bbox.max_lon, ee_bbox.max_lat)
 
             try:
                 export_identifier = row["export_identifier"]
             except KeyError:
                 export_identifier = cls.make_identifier(
-                    latlons, row["start_date"], row["end_date"]
+                    ee_bbox, row["start_date"], row["end_date"]
                 )
 
             output.append(
@@ -365,13 +364,13 @@ class EarthEngineExporter:
         return output
 
     @staticmethod
-    def make_identifier(latlons: Tuple[float, float, float, float], start_date, end_date) -> str:
+    def make_identifier(bbox: BBox, start_date, end_date) -> str:
 
         # Identifier is rounded to the nearest ~10m
-        min_lon = round(latlons[0], 4)
-        min_lat = round(latlons[1], 4)
-        max_lon = round(latlons[2], 4)
-        max_lat = round(latlons[3], 4)
+        min_lon = round(bbox.min_lon, 4)
+        min_lat = round(bbox.min_lat, 4)
+        max_lon = round(bbox.max_lon, 4)
+        max_lat = round(bbox.max_lat, 4)
         return (
             f"min_lat={min_lat}_min_lon={min_lon}_max_lat={max_lat}_max_lon={max_lon}_"
             f"dates={start_date}_{end_date}_all"
