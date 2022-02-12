@@ -35,7 +35,7 @@ from cropharvest.config import (
 )
 from cropharvest.columns import RequiredColumns
 
-from typing import Union, List, Optional, Tuple
+from typing import Dict, Union, List, Optional, Tuple
 
 try:
     from google.cloud import storage
@@ -56,7 +56,7 @@ def get_ee_task_list(key: str = "description") -> List[str]:
     return [
         task[key]
         for task in tqdm(task_list, desc="Loading Earth Engine tasks")
-        if task["state"] != "COMPLETED"
+        if task["state"] in ["READY", "RUNNING"]
     ]
 
 
@@ -199,8 +199,8 @@ class EarthEngineExporter:
             return labels
         return labels
 
-    @staticmethod
     def _export(
+        self,
         image: ee.Image,
         region: ee.Geometry,
         filename: str,
@@ -208,6 +208,7 @@ class EarthEngineExporter:
         drive_folder: Optional[str] = None,
         dest_bucket: Optional[str] = None,
         file_dimensions: Optional[int] = None,
+        test: bool = False,
     ) -> ee.batch.Export:
 
         kwargs = dict(
@@ -224,8 +225,12 @@ class EarthEngineExporter:
                 # Added as precaution, but should never happen
                 raise ValueError(f"{INSTALL_MSG} to enable export to destination bucket")
 
+            if not test:
+                # If training data make sure it goes in the tifs folder
+                filename = f"tifs/{filename}"
+
             task = ee.batch.Export.image.toCloudStorage(
-                bucket=dest_bucket, fileNamePrefix=f"tifs/{filename}", **kwargs
+                bucket=dest_bucket, fileNamePrefix=filename, **kwargs
             )
         else:
             task = ee.batch.Export.image.toDrive(
@@ -234,6 +239,7 @@ class EarthEngineExporter:
 
         try:
             task.start()
+            self.ee_task_list.append(description)
         except ee.ee_exception.EEException as e:
             print(f"Task not started! Got exception {e}")
             return task
@@ -258,10 +264,15 @@ class EarthEngineExporter:
             return False
 
         # Description of the export cannot contain certrain characters
-        description = filename.replace(".", "-").replace("=", "-")[:100]
+        description = filename.replace(".", "-").replace("=", "-").replace("/", "-")[:100]
 
-        if self.check_gcp and (f"tifs/{filename}.tif" in self.cloud_tif_list):
-            return False
+        if self.check_gcp:
+            # If test data we check the root in the cloud bucket
+            if test and f"{filename}.tif" in self.cloud_tif_list:
+                return False
+            # If training data we check the tifs folder in thee cloud bucket
+            elif not test and (f"tifs/{filename}.tif" in self.cloud_tif_list):
+                return False
 
         # Check if task is already started in EarthEngine
         if self.check_ee and (description in self.ee_task_list):
@@ -320,6 +331,7 @@ class EarthEngineExporter:
             filename=filename,
             description=description,
             file_dimensions=file_dimensions,
+            test=test,
         )
         if self.dest_bucket:
             kwargs["dest_bucket"] = self.dest_bucket
@@ -406,8 +418,7 @@ class EarthEngineExporter:
         end_date: date,
         metres_per_polygon: Optional[int] = 10000,
         file_dimensions: Optional[str] = None,
-    ) -> List[str]:
-
+    ) -> Dict[str, bool]:
         ee_bbox = EEBoundingBox.from_bounding_box(bounding_box=bbox, padding_metres=0)
         general_identifier = f"{bbox_name}_{str(start_date)}_{str(end_date)}"
         if metres_per_polygon is not None:
@@ -417,15 +428,17 @@ class EarthEngineExporter:
             regions = [ee_bbox.to_ee_polygon()]
             ids = ["batch/0"]
 
+        return_obj = {}
         for identifier, region in zip(ids, regions):
-            self._export_for_polygon(
+            return_obj[identifier] = self._export_for_polygon(
                 polygon=region,
                 polygon_identifier=f"{general_identifier}/{identifier}",
                 start_date=start_date,
                 end_date=end_date,
                 file_dimensions=file_dimensions,
+                test=True
             )
-        return ids
+        return return_obj
 
     def export_for_labels(
         self,
