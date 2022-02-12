@@ -134,6 +134,7 @@ def test_export_for_bbox(mock_export_for_polygon, metres_per_polygon, mock_polyg
             polygon_identifier=f"Togo_{start_date}_{end_date}/batch/0",
             start_date=start_date,
             file_dimensions=None,
+            test=True,
         )
     else:
         assert mock_export_for_polygon.call_count == 1155
@@ -145,6 +146,7 @@ def test_export_for_bbox(mock_export_for_polygon, metres_per_polygon, mock_polyg
                     polygon_identifier=f"Togo_{start_date}_{end_date}/batch_{i}/{i}",
                     start_date=start_date,
                     file_dimensions=None,
+                    test=True,
                 )
                 for i in range(1155)
             ],
