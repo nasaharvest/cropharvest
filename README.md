@@ -13,8 +13,15 @@ The dataset consists of **90,480** datapoints, of which **30,899** (34.2%) have 
 More details about CropHarvest and the benchmarks are available in [this paper](https://openreview.net/forum?id=JtjzUXPEaCu).
 
 ### Installation
-
-`cropharvest` can be pip installed by running `pip install cropharvest`
+Linux and MacOS users can install the latest version of CropHarvest with the following command:
+```bash
+pip install cropharvest
+```
+Windows users must install the CropHarvest within a [conda](https://docs.conda.io/en/latest/miniconda.html) environment to ensure all dependencies are installed correctly:
+```bash
+conda install 'fiona>=1.5' 'rasterio>=1.2.6'
+pip install cropharvest
+```
 
 ### Getting started
 See the [`demo.ipynb`](https://github.com/nasaharvest/cropharvest/blob/main/demo.ipynb) notebook for an example on how to download the data from [Zenodo](https://zenodo.org/record/5533193) and train a random forest against this data.
