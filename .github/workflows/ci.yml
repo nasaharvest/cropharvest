@@ -38,7 +38,7 @@ jobs:
       MPLBACKEND: Agg
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [windows-latest] #[ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
         exclude:
         - os: windows-latest
@@ -58,9 +58,11 @@ jobs:
       if: ${{ runner.os == 'Windows' }}
     - name: Install conda dependencies (Windows)
       run: |
+        echo %PROJ_LIB%
         conda install 'fiona>=1.5' 'rasterio>=1.2.6'
         conda list
         conda info
+        echo %PROJ_LIB%
       if: ${{ runner.os == 'Windows' }}
     - name: Cache pip
       uses: actions/cache@v2
