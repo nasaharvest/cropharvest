@@ -1,10 +1,17 @@
 import geopandas
 from geopandas import array
 import pandas as pd
+import pandas.api.types as ptypes
 
 from process_labels import datasets
 from cropharvest.config import LABELS_FILENAME, EXPORT_END_DAY, EXPORT_END_MONTH
 from cropharvest.crops import CropClassifications
+
+class_to_ptype = {
+    int: ptypes.is_integer_dtype,
+    float: ptypes.is_float_dtype,
+    "<M8[ns]": ptypes.is_datetime64_ns_dtype,
+}
 
 
 def _check_columns_and_types(df: geopandas.GeoDataFrame) -> None:
@@ -18,7 +25,7 @@ def _check_columns_and_types(df: geopandas.GeoDataFrame) -> None:
         ("export_end_date", "<M8[ns]"),
     ]:
         assert expected_column in df
-        assert df[expected_column].dtype == expected_type
+        assert class_to_ptype[expected_type](df[expected_column])
 
     assert "geometry" in df
     assert type(df["geometry"].dtype) == array.GeometryDtype
