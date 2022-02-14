@@ -207,6 +207,8 @@ class Engineer:
         The sentinel files exported from google earth have all the timesteps
         concatenated together. This function loads a tif files and splits the
         timesteps
+
+        Returns: The loaded xr.DataArray, and the average slope (used for filling nan slopes)
         """
 
         da = xr.open_rasterio(filepath).rename("FEATURES")
@@ -336,6 +338,7 @@ class Engineer:
         r"""
         Given an input array of shape [timesteps, BANDS]
         fill NaN values with the mean of each band across the timestep
+        The slope values may all be nan so average_slope is manually passed
         """
         num_dims = len(array.shape)
         if num_dims == 2:
@@ -413,7 +416,7 @@ class Engineer:
         x_np = np.moveaxis(x_np, -1, 0)
         x_np = self.calculate_ndvi(x_np)
         x_np = self.remove_bands(x_np)
-        final_x = self.fillna(x_np, average_slope)
+        final_x = self.fillna(x_np, average_slope=average_slope)
         if final_x is None:
             raise RuntimeError(
                 "fillna on the test instance returned None; "
@@ -471,7 +474,7 @@ class Engineer:
         labelled_np = self.calculate_ndvi(labelled_np)
         labelled_np = self.remove_bands(labelled_np)
 
-        labelled_array = self.fillna(labelled_np, average_slope)
+        labelled_array = self.fillna(labelled_np, average_slope=average_slope)
         if labelled_array is None:
             return None
 
