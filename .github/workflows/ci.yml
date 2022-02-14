@@ -58,11 +58,14 @@ jobs:
       if: ${{ runner.os == 'Windows' }}
     - name: Install conda dependencies (Windows)
       run: |
-        echo %PROJ_LIB%
         conda install 'fiona>=1.5' 'rasterio>=1.2.6'
         conda list
         conda info
+        set INCLUDE=C:\Miniconda\envs\test\Library\include;%INCLUDE%
+        set LIB=C:\Miniconda\envs\test\Library\lib;%LIB%
         echo %PROJ_LIB%
+        echo %INCLUDE%
+        echo %LIB%
       if: ${{ runner.os == 'Windows' }}
     - name: Cache pip
       uses: actions/cache@v2
@@ -76,4 +79,7 @@ jobs:
       run: pip install -r requirements-dev.txt -r requirements-benchmarks.txt
     - name: Run tests
       run: |
+        echo %PROJ_LIB%
+        echo %INCLUDE%
+        echo %LIB%
         python -m pytest
