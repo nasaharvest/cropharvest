@@ -57,13 +57,11 @@ jobs:
         channel-priority: strict
       if: ${{ runner.os == 'Windows' }}
     - name: Install conda dependencies (Windows)
+      env:
+        PROJ_LIB: C:\Miniconda\envs\test\Library\share\proj
+        GDAL_DATA: C:\Miniconda\envs\test\Library\share\gdal
       run: |
         conda install 'fiona>=1.5' 'rasterio>=1.2.6'
-        conda list
-        conda info
-        dir C:\Miniconda\envs\test\Library\share
-        set PROJ_LIB=C:\Miniconda\envs\test\Library\share\proj
-        set GDAL_DATA=C:\Miniconda\envs\test\Library\share\gdal
         echo %PROJ_LIB%
         echo %GDAL_DATA%
       if: ${{ runner.os == 'Windows' }}
@@ -78,6 +76,10 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements-dev.txt -r requirements-benchmarks.txt
     - name: Run tests
+      if: ${{ runner.os == 'Windows' }}
+      env:
+        PROJ_LIB: C:\Miniconda\envs\test\Library\share\proj
+        GDAL_DATA: C:\Miniconda\envs\test\Library\share\gdal
       run: |
         echo %PROJ_LIB%
         echo %GDAL_DATA%
