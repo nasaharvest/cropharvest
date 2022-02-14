@@ -3,7 +3,6 @@ import geopandas
 import pandas as pd
 from tqdm import tqdm
 from datetime import timedelta, date
-from math import cos, radians
 
 try:
     import ee
@@ -13,6 +12,7 @@ except ModuleNotFoundError:
         + "Please install it with `pip install earthengine-api`."
     )
 
+from .ee_boundingbox import EEBoundingBox
 from .sentinel1 import (
     get_single_image as get_single_s1_image,
     get_image_collection as get_s1_image_collection,
@@ -35,7 +35,7 @@ from cropharvest.config import (
 )
 from cropharvest.columns import RequiredColumns
 
-from typing import Union, List, Optional, Tuple
+from typing import Dict, Union, List, Optional, Tuple
 
 try:
     from google.cloud import storage
@@ -56,7 +56,7 @@ def get_ee_task_list(key: str = "description") -> List[str]:
     return [
         task[key]
         for task in tqdm(task_list, desc="Loading Earth Engine tasks")
-        if task["state"] != "COMPLETED"
+        if task["state"] in ["READY", "RUNNING"]
     ]
 
 
@@ -100,7 +100,6 @@ class EarthEngineExporter:
 
     def __init__(
         self,
-        labels: Optional[geopandas.GeoDataFrame] = None,
         check_ee: bool = True,
         check_gcp: bool = True,
         credentials: Optional[str] = None,
@@ -133,22 +132,12 @@ class EarthEngineExporter:
         self.check_gcp = check_gcp
         self.cloud_tif_list = get_cloud_tif_list(dest_bucket) if self.check_gcp else []
 
-        self.labels = self.default_labels if labels is None else labels
-        self.using_default = labels is None
-        for expected_column in [
-            "start_date",
-            "end_date",
-            RequiredColumns.LAT,
-            RequiredColumns.LON,
-        ]:
-            assert expected_column in self.labels
-        if "export_identifier" not in self.labels:
-            print("No explicit export_identifier in labels. One will be constructed during export")
-
-    @property
-    def default_labels(self) -> geopandas.GeoDataFrame:
+    @staticmethod
+    def load_default_labels(
+        dataset: Optional[str], start_from_last, checkpoint: Optional[Path]
+    ) -> geopandas.GeoDataFrame:
         labels = geopandas.read_file(DATAFOLDER_PATH / LABELS_FILENAME)
-        export_end_year = pd.to_datetime(self.labels[RequiredColumns.EXPORT_END_DATE]).dt.year
+        export_end_year = pd.to_datetime(labels[RequiredColumns.EXPORT_END_DATE]).dt.year
         labels["end_date"] = export_end_year.apply(lambda x: date(x, 12, 12))
         labels = labels.assign(
             start_date=lambda x: x["end_date"]
@@ -157,10 +146,17 @@ class EarthEngineExporter:
         labels = labels.assign(
             export_identifier=lambda x: f"{x['index']}-{x[RequiredColumns.DATASET]}"
         )
+        if dataset:
+            labels = labels[labels.dataset == dataset]
+
+        if start_from_last:
+            labels = EarthEngineExporter._filter_labels(labels, checkpoint)
+
         return labels
 
+    @staticmethod
     def _filter_labels(
-        self, labels: geopandas.GeoDataFrame, checkpoint: Optional[Path]
+        labels: geopandas.GeoDataFrame, checkpoint: Optional[Path]
     ) -> geopandas.GeoDataFrame:
 
         # does not sort
@@ -203,8 +199,8 @@ class EarthEngineExporter:
             return labels
         return labels
 
-    @staticmethod
     def _export(
+        self,
         image: ee.Image,
         region: ee.Geometry,
         filename: str,
@@ -212,6 +208,7 @@ class EarthEngineExporter:
         drive_folder: Optional[str] = None,
         dest_bucket: Optional[str] = None,
         file_dimensions: Optional[int] = None,
+        test: bool = False,
     ) -> ee.batch.Export:
 
         kwargs = dict(
@@ -228,8 +225,12 @@ class EarthEngineExporter:
                 # Added as precaution, but should never happen
                 raise ValueError(f"{INSTALL_MSG} to enable export to destination bucket")
 
+            if not test:
+                # If training data make sure it goes in the tifs folder
+                filename = f"tifs/{filename}"
+
             task = ee.batch.Export.image.toCloudStorage(
-                bucket=dest_bucket, fileNamePrefix=f"tifs/{filename}", **kwargs
+                bucket=dest_bucket, fileNamePrefix=filename, **kwargs
             )
         else:
             task = ee.batch.Export.image.toDrive(
@@ -238,6 +239,7 @@ class EarthEngineExporter:
 
         try:
             task.start()
+            self.ee_task_list.append(description)
         except ee.ee_exception.EEException as e:
             print(f"Task not started! Got exception {e}")
             return task
@@ -250,14 +252,11 @@ class EarthEngineExporter:
         polygon_identifier: Union[int, str],
         start_date: date,
         end_date: date,
-        days_per_timestep: int,
-        checkpoint: Optional[Path],
-        test: bool,
+        days_per_timestep: int = DAYS_PER_TIMESTEP,
+        checkpoint: Optional[Path] = None,
+        test: bool = False,
+        file_dimensions: Optional[int] = None,
     ) -> bool:
-
-        drive_folder = self.cur_output_folder
-        if test:
-            drive_folder = self.test_output_folder_name
 
         filename = str(polygon_identifier)
         if (checkpoint is not None) and (checkpoint / f"{filename}.tif").exists():
@@ -265,10 +264,15 @@ class EarthEngineExporter:
             return False
 
         # Description of the export cannot contain certrain characters
-        description = filename.replace(".", "-").replace("=", "-")[:100]
+        description = filename.replace(".", "-").replace("=", "-").replace("/", "-")[:100]
 
-        if self.check_gcp and (f"tifs/{filename}.tif" in self.cloud_tif_list):
-            return False
+        if self.check_gcp:
+            # If test data we check the root in the cloud bucket
+            if test and f"{filename}.tif" in self.cloud_tif_list:
+                return False
+            # If training data we check the tifs folder in thee cloud bucket
+            elif not test and (f"tifs/{filename}.tif" in self.cloud_tif_list):
+                return False
 
         # Check if task is already started in EarthEngine
         if self.check_ee and (description in self.ee_task_list):
@@ -321,54 +325,23 @@ class EarthEngineExporter:
         img = ee.Image.cat(total_image_list)
 
         # and finally, export the image
-        kwargs = dict(image=img, region=polygon, filename=filename, description=description)
+        kwargs = dict(
+            image=img,
+            region=polygon,
+            filename=filename,
+            description=description,
+            file_dimensions=file_dimensions,
+            test=test,
+        )
         if self.dest_bucket:
             kwargs["dest_bucket"] = self.dest_bucket
+        elif test:
+            kwargs["drive_folder"] = self.test_output_folder_name
         else:
-            kwargs["drive_folder"] = drive_folder
+            kwargs["drive_folder"] = self.cur_output_folder
+
         self._export(**kwargs)
         return True
-
-    @staticmethod
-    def metre_per_degree(lat: float) -> Tuple[float, float]:
-        # https://gis.stackexchange.com/questions/75528/understanding-terms-in
-        # -length-of-degree-formula
-        # see the link above to explain the magic numbers
-        m_per_degree_lat = (
-            111132.954
-            + (-559.822 * cos(radians(2.0 * lat)))
-            + (1.175 * cos(radians(4.0 * lat)))
-            + (-0.0023 * cos(radians(6 * lat)))
-        )
-        m_per_degree_lon = (
-            (111412.84 * cos(radians(lat)))
-            + (-93.5 * cos(radians(3 * lat)))
-            + (0.118 * cos(radians(5 * lat)))
-        )
-
-        return m_per_degree_lat, m_per_degree_lon
-
-    @classmethod
-    def _bounding_box_from_centre(
-        cls, mid_lat: float, mid_lon: float, surrounding_metres: Union[int, Tuple[int, int]]
-    ) -> Tuple[Tuple[float, float, float, float], ee.Geometry.Polygon]:
-
-        m_per_deg_lat, m_per_deg_lon = cls.metre_per_degree(mid_lat)
-
-        if isinstance(surrounding_metres, int):
-            surrounding_metres = (surrounding_metres, surrounding_metres)
-
-        surrounding_lat, surrounding_lon = surrounding_metres
-
-        deg_lat = surrounding_lat / m_per_deg_lat
-        deg_lon = surrounding_lon / m_per_deg_lon
-
-        max_lat, min_lat = mid_lat + deg_lat, mid_lat - deg_lat
-        max_lon, min_lon = mid_lon + deg_lon, mid_lon - deg_lon
-
-        return (min_lon, min_lat, max_lon, max_lat), ee.Geometry.Polygon(
-            [[[min_lon, min_lat], [min_lon, max_lat], [max_lon, max_lat], [max_lon, min_lat]]]
-        )
 
     @classmethod
     def _labels_to_polygons_and_years(
@@ -380,7 +353,7 @@ class EarthEngineExporter:
         print(f"Exporting {len(labels)} labels")
 
         for _, row in tqdm(labels.iterrows()):
-            latlons, bounding_box = cls._bounding_box_from_centre(
+            ee_bbox = EEBoundingBox.from_centre(
                 mid_lat=row["lat"], mid_lon=row["lon"], surrounding_metres=surrounding_metres
             )
 
@@ -388,12 +361,12 @@ class EarthEngineExporter:
                 export_identifier = row["export_identifier"]
             except KeyError:
                 export_identifier = cls.make_identifier(
-                    latlons, row["start_date"], row["end_date"]
+                    ee_bbox, row["start_date"], row["end_date"]
                 )
 
             output.append(
                 (
-                    bounding_box,
+                    ee_bbox.to_ee_polygon(),
                     export_identifier,
                     row["start_date"],
                     row["end_date"],
@@ -403,36 +376,16 @@ class EarthEngineExporter:
         return output
 
     @staticmethod
-    def make_identifier(latlons: Tuple[float, float, float, float], start_date, end_date) -> str:
+    def make_identifier(bbox: BBox, start_date, end_date) -> str:
 
         # Identifier is rounded to the nearest ~10m
-        min_lon = round(latlons[0], 4)
-        min_lat = round(latlons[1], 4)
-        max_lon = round(latlons[2], 4)
-        max_lat = round(latlons[3], 4)
+        min_lon = round(bbox.min_lon, 4)
+        min_lat = round(bbox.min_lat, 4)
+        max_lon = round(bbox.max_lon, 4)
+        max_lat = round(bbox.max_lat, 4)
         return (
             f"min_lat={min_lat}_min_lon={min_lon}_max_lat={max_lat}_max_lon={max_lon}_"
             f"dates={start_date}_{end_date}_all"
-        )
-
-    @classmethod
-    def _bbox_to_ee_bounding_box(
-        cls, bounding_box: BBox, padding_metres: int
-    ) -> ee.Geometry.Polygon:
-        # get the mid lat, in degrees (the bounding box function returns it in radians)
-        mid_lat, _ = bounding_box.get_centre(in_radians=False)
-        m_per_deg_lat, m_per_deg_lon = cls.metre_per_degree(mid_lat)
-
-        extra_degrees_lon = padding_metres / m_per_deg_lon
-        extra_degrees_lat = padding_metres / m_per_deg_lat
-
-        min_lon = bounding_box.min_lon - extra_degrees_lon
-        max_lon = bounding_box.max_lon + extra_degrees_lon
-        min_lat = bounding_box.min_lat - extra_degrees_lat
-        max_lat = bounding_box.max_lat + extra_degrees_lat
-
-        return ee.Geometry.Polygon(
-            [[[min_lon, min_lat], [min_lon, max_lat], [max_lon, max_lat], [max_lon, min_lat]]]
         )
 
     def export_for_test(
@@ -442,7 +395,9 @@ class EarthEngineExporter:
     ) -> None:
 
         for identifier, bbox in TEST_REGIONS.items():
-            polygon = self._bbox_to_ee_bounding_box(bbox, padding_metres)
+            polygon = EEBoundingBox.from_bounding_box(
+                bounding_box=bbox, padding_metres=padding_metres
+            ).to_ee_polygon()
             _, _, year, _ = identifier.split("_")
             end_date = date(int(year), EXPORT_END_MONTH, EXPORT_END_DAY)
             start_date = end_date - timedelta(days=DAYS_PER_TIMESTEP * DEFAULT_NUM_TIMESTEPS)
@@ -451,13 +406,43 @@ class EarthEngineExporter:
                 polygon_identifier=identifier,
                 start_date=start_date,
                 end_date=end_date,
-                days_per_timestep=DAYS_PER_TIMESTEP,
                 checkpoint=checkpoint,
                 test=True,
             )
 
+    def export_for_bbox(
+        self,
+        bbox: BBox,
+        bbox_name: str,
+        start_date: date,
+        end_date: date,
+        metres_per_polygon: Optional[int] = 10000,
+        file_dimensions: Optional[str] = None,
+    ) -> Dict[str, bool]:
+        ee_bbox = EEBoundingBox.from_bounding_box(bounding_box=bbox, padding_metres=0)
+        general_identifier = f"{bbox_name}_{str(start_date)}_{str(end_date)}"
+        if metres_per_polygon is not None:
+            regions = ee_bbox.to_polygons(metres_per_patch=metres_per_polygon)
+            ids = [f"batch_{i}/{i}" for i in range(len(regions))]
+        else:
+            regions = [ee_bbox.to_ee_polygon()]
+            ids = ["batch/0"]
+
+        return_obj = {}
+        for identifier, region in zip(ids, regions):
+            return_obj[identifier] = self._export_for_polygon(
+                polygon=region,
+                polygon_identifier=f"{general_identifier}/{identifier}",
+                start_date=start_date,
+                end_date=end_date,
+                file_dimensions=file_dimensions,
+                test=True
+            )
+        return return_obj
+
     def export_for_labels(
         self,
+        labels: Optional[geopandas.GeoDataFrame] = None,
         dataset: Optional[str] = None,
         num_labelled_points: Optional[int] = 3000,
         surrounding_metres: int = 80,
@@ -465,19 +450,25 @@ class EarthEngineExporter:
         start_from_last: bool = True,
     ) -> None:
 
-        if dataset is not None:
-            if self.using_default:
-                labels = self.labels[self.labels.dataset == dataset]
-            else:
-                print("No dataset can be specified if passing a different set of labels")
+        if labels is None:
+            labels = self.load_default_labels(
+                dataset=dataset, start_from_last=start_from_last, checkpoint=checkpoint
+            )
         else:
-            labels = self.labels
-
-        if start_from_last:
-            if self.using_default:
-                labels = self._filter_labels(labels, checkpoint)
-            else:
+            if dataset is not None:
+                print("No dataset can be specified if passing a different set of labels")
+            if start_from_last:
                 print("start_from_last cannot be used if passing a different set of labels")
+
+        for expected_column in [
+            "start_date",
+            "end_date",
+            RequiredColumns.LAT,
+            RequiredColumns.LON,
+        ]:
+            assert expected_column in labels
+        if "export_identifier" not in labels:
+            print("No explicit export_identifier in labels. One will be constructed during export")
 
         polygons_to_download = self._labels_to_polygons_and_years(
             labels=labels,
@@ -493,7 +484,6 @@ class EarthEngineExporter:
                 polygon_identifier=identifier,
                 start_date=start_date,
                 end_date=end_date,
-                days_per_timestep=DAYS_PER_TIMESTEP,
                 checkpoint=checkpoint,
                 test=False,
             )
