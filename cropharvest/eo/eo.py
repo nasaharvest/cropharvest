@@ -436,7 +436,7 @@ class EarthEngineExporter:
                 start_date=start_date,
                 end_date=end_date,
                 file_dimensions=file_dimensions,
-                test=True
+                test=True,
             )
         return return_obj
 
