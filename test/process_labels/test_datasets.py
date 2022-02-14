@@ -66,6 +66,7 @@ def test_consistency() -> None:
     all_datasets = datasets.list_datasets()
 
     for dataset in all_datasets:
+        print(f"Testing dataset: {dataset}")
         loaded_dataset = datasets.load(dataset)
 
         _check_columns_and_types(loaded_dataset)
