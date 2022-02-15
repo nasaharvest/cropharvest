@@ -417,7 +417,7 @@ class EarthEngineExporter:
         start_date: date,
         end_date: date,
         metres_per_polygon: Optional[int] = 10000,
-        file_dimensions: Optional[str] = None,
+        file_dimensions: Optional[int] = None,
     ) -> Dict[str, bool]:
         ee_bbox = EEBoundingBox.from_bounding_box(bounding_box=bbox, padding_metres=0)
         general_identifier = f"{bbox_name}_{str(start_date)}_{str(end_date)}"
@@ -436,7 +436,7 @@ class EarthEngineExporter:
                 start_date=start_date,
                 end_date=end_date,
                 file_dimensions=file_dimensions,
-                test=True
+                test=True,
             )
         return return_obj
 

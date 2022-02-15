@@ -7,30 +7,75 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  mypy:
+    name: black & mypy
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-      - name: Cache pip
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-dev.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
-      - name: Install dependencies
-        run: pip install -r requirements-dev.txt -r requirements-benchmarks.txt
-      - name: Run tests
-        run: |
-          python -m black --check --diff .
-          python -m mypy cropharvest process_labels test benchmarks
-          python -m mypy benchmarks/dl
-          python -m pytest
+    - name: Clone repo
+      uses: actions/checkout@v2
+    - name: Set up python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements-dev.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+    - name: Install dependencies
+      run: pip install -r requirements-dev.txt -r requirements-benchmarks.txt
+    - name: Black & mypy
+      run: |
+        python -m black --check --diff .
+        python -m mypy cropharvest process_labels test benchmarks
+        python -m mypy benchmarks/dl
+  test:
+    runs-on: ${{ matrix.os }}
+    env:
+      MPLBACKEND: Agg
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+        exclude:
+        - os: windows-latest
+          python-version: 3.6
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install conda (Windows)
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+        channels: conda-forge
+        channel-priority: strict
+      if: ${{ runner.os == 'Windows' }}
+    - name: Install conda dependencies (Windows)
+      run: |
+        conda install 'fiona>=1.5' 'rasterio>=1.2.6'
+      if: ${{ runner.os == 'Windows' }}
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements-dev.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+    - name: Install dependencies
+      run: pip install -r requirements-dev.txt -r requirements-benchmarks.txt
+    - name: Run tests (Windows)
+      if: ${{ runner.os == 'Windows' }}
+      env:
+        PROJ_LIB: C:\Miniconda\envs\test\Library\share\proj
+        GDAL_DATA: C:\Miniconda\envs\test\Library\share\gdal
+      run: python -m pytest
+    - name: Run tests
+      if: ${{ runner.os != 'Windows' }}
+      run: python -m pytest
