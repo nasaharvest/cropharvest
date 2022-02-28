@@ -56,7 +56,7 @@ def get_ee_task_list(key: str = "description") -> List[str]:
     return [
         task[key]
         for task in tqdm(task_list, desc="Loading Earth Engine tasks")
-        if task["state"] in ["READY", "RUNNING"]
+        if task["state"] in ["READY", "RUNNING", "FAILED"]
     ]
 
 
