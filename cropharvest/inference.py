@@ -49,33 +49,6 @@ class Inference:
         return start_date
 
     @staticmethod
-    def _tif_to_np(
-        local_path: Path,
-        start_date: datetime,
-        normalizing_dict: Optional[Dict[str, np.ndarray]] = None,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-
-        da, slope = Engineer.load_tif(local_path, start_date=start_date)
-
-        # Process remote sensing data
-        x_np = da.values
-        x_np = x_np.reshape(x_np.shape[0], x_np.shape[1], x_np.shape[2] * x_np.shape[3])
-        x_np = np.moveaxis(x_np, -1, 0)
-        x_np = Engineer.calculate_ndvi(x_np)
-        x_np = Engineer.remove_bands(x_np)
-        x_np = Engineer.fillna(x_np, slope)
-        if normalizing_dict is not None:
-            x_np = (x_np - normalizing_dict["mean"]) / normalizing_dict["std"]
-
-        # Get lat lons
-        lon, lat = np.meshgrid(da.x.values, da.y.values)
-        flat_lat, flat_lon = (
-            np.squeeze(lat.reshape(-1, 1), -1),
-            np.squeeze(lon.reshape(-1, 1), -1),
-        )
-        return x_np, flat_lat, flat_lon
-
-    @staticmethod
     def _combine_predictions(
         flat_lat: np.ndarray, flat_lon: np.ndarray, batch_predictions: List[np.ndarray]
     ) -> xr.Dataset:
@@ -110,9 +83,16 @@ class Inference:
         start_date: Optional[datetime] = None,
         dest_path: Optional[Path] = None,
     ) -> xr.Dataset:
+        """Runs inference on a single tif file."""
         if start_date is None:
             start_date = self.start_date_from_str(local_path)
-        x_np, flat_lat, flat_lon = self._tif_to_np(local_path, start_date, self.normalizing_dict)
+        x_np, flat_lat, flat_lon = Engineer.process_test_file(
+            local_path, start_date, self.normalizing_dict
+        )
+
+        if self.normalizing_dict is not None:
+            x_np = (x_np - self.normalizing_dict["mean"]) / self.normalizing_dict["std"]
+
         batches = [
             x_np[i : i + self.batch_size] for i in range(0, (x_np.shape[0] - 1), self.batch_size)
         ]
