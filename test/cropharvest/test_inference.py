@@ -13,15 +13,6 @@ def test_start_date_from_str():
     assert actual_start_date == expected_start_date
 
 
-def test_tif_to_np():
-    x_np, flat_lat, flat_lon = Inference._tif_to_np(
-        TIF_FILE, start_date=datetime(2019, 2, 6, 0, 0)
-    )
-    assert x_np.shape, (289, 24, 18)
-    assert flat_lat.shape, (289,)
-    assert flat_lon.shape, (289,)
-
-
 def test_combine_predictions():
     flat_lat = np.array([14.95313164, 14.95313164, 14.95313164, 14.95313164, 14.95313164])
     flat_lon = np.array([-86.25070894, -86.25061911, -86.25052928, -86.25043945, -86.25034962])
@@ -31,8 +22,8 @@ def test_combine_predictions():
     )
 
     # Check size
-    assert xr_predictions.dims["lat"], 1
-    assert xr_predictions.dims["lon"], 5
+    assert xr_predictions.dims["lat"] == 1
+    assert xr_predictions.dims["lon"] == 5
 
     # Check coords
     assert (xr_predictions.lat.values == flat_lat[0:1]).all()
