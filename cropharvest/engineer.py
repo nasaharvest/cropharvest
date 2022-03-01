@@ -433,8 +433,10 @@ class Engineer:
         start_date = datetime(int(end_year), EXPORT_END_MONTH, EXPORT_END_DAY) - timedelta(
             days=DEFAULT_NUM_TIMESTEPS * DAYS_PER_TIMESTEP
         )
-        
-        final_x, flat_lat, flat_lon = Engineer.process_test_file(path_to_file, start_date)
+
+        final_x, flat_lat, flat_lon = Engineer.process_test_file(
+            path_to_file, start_date=start_date
+        )
 
         # finally, we need to calculate the mask
         region_bbox = TEST_REGIONS[identifier]
