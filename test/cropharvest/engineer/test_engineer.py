@@ -7,7 +7,7 @@ from cropharvest.config import DEFAULT_NUM_TIMESTEPS
 
 from typing import Dict, Union
 
-TIF_FILE = Path(__file__).parent / "98-togo_2019-02-06_2020-02-01.tif"
+TIF_FILE = Path(__file__).parent.parent / "98-togo_2019-02-06_2020-02-01.tif"
 
 
 def test_load_tif_file():
