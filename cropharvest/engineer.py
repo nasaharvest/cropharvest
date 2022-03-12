@@ -396,7 +396,36 @@ class Engineer:
             # Unreachable code logically but mypy does not see it this way
             raise ValueError(error_message)
 
-    def process_test_file(self, path_to_file: Path, id_in_region: int) -> Tuple[str, TestInstance]:
+    @staticmethod
+    def process_test_file(
+        path_to_file: Path, start_date: datetime
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        da, slope = Engineer.load_tif(path_to_file, start_date=start_date)
+
+        # Process remote sensing data
+        x_np = da.values
+        x_np = x_np.reshape(x_np.shape[0], x_np.shape[1], x_np.shape[2] * x_np.shape[3])
+        x_np = np.moveaxis(x_np, -1, 0)
+        x_np = Engineer.calculate_ndvi(x_np)
+        x_np = Engineer.remove_bands(x_np)
+        final_x = Engineer.fillna(x_np, slope)
+        if final_x is None:
+            raise RuntimeError(
+                "fillna on the test instance returned None; "
+                "does the test instance contain NaN only bands?"
+            )
+
+        # Get lat lons
+        lon, lat = np.meshgrid(da.x.values, da.y.values)
+        flat_lat, flat_lon = (
+            np.squeeze(lat.reshape(-1, 1), -1),
+            np.squeeze(lon.reshape(-1, 1), -1),
+        )
+        return final_x, flat_lat, flat_lon
+
+    def process_test_file_with_region(
+        self, path_to_file: Path, id_in_region: int
+    ) -> Tuple[str, TestInstance]:
         id_components = path_to_file.name.split("_")
         crop, end_year = id_components[1], id_components[2]
         identifier = "_".join(id_components[:4])
@@ -404,24 +433,10 @@ class Engineer:
         start_date = datetime(int(end_year), EXPORT_END_MONTH, EXPORT_END_DAY) - timedelta(
             days=DEFAULT_NUM_TIMESTEPS * DAYS_PER_TIMESTEP
         )
-        da, average_slope = self.load_tif(path_to_file, start_date=start_date)
-        lon, lat = np.meshgrid(da.x.values, da.y.values)
-        flat_lat, flat_lon = (
-            np.squeeze(lat.reshape(-1, 1), -1),
-            np.squeeze(lon.reshape(-1, 1), -1),
-        )
 
-        x_np = da.values
-        x_np = x_np.reshape(x_np.shape[0], x_np.shape[1], x_np.shape[2] * x_np.shape[3])
-        x_np = np.moveaxis(x_np, -1, 0)
-        x_np = self.calculate_ndvi(x_np)
-        x_np = self.remove_bands(x_np)
-        final_x = self.fillna(x_np, average_slope=average_slope)
-        if final_x is None:
-            raise RuntimeError(
-                "fillna on the test instance returned None; "
-                "does the test instance contain NaN only bands?"
-            )
+        final_x, flat_lat, flat_lon = Engineer.process_test_file(
+            path_to_file, start_date=start_date
+        )
 
         # finally, we need to calculate the mask
         region_bbox = TEST_REGIONS[identifier]
@@ -501,7 +516,9 @@ class Engineer:
                 print(f"No downloaded files for {region_identifier}")
                 continue
             for region_idx, filepath in enumerate(all_region_files):
-                instance_name, test_instance = self.process_test_file(filepath, region_idx)
+                instance_name, test_instance = self.process_test_file_with_region(
+                    filepath, region_idx
+                )
                 if test_instance is not None:
                     hf = h5py.File(self.test_savedir / f"{instance_name}.h5", "w")
 

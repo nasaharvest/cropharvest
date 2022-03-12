@@ -7,7 +7,7 @@ from cropharvest.config import DEFAULT_NUM_TIMESTEPS
 
 from typing import Dict, Union
 
-TIF_FILE = Path(__file__).parent / "98-togo_2019-02-06_2020-02-01.tif"
+TIF_FILE = Path(__file__).parent.parent / "98-togo_2019-02-06_2020-02-01.tif"
 
 
 def test_load_tif_file():
@@ -98,3 +98,12 @@ def test_filename_correctly_processed_2():
     idx, dataset = Engineer.process_filename(filename)
     assert idx == 98
     assert dataset == "geowiki-landcover-2017"
+
+
+def test_process_test_file():
+    x_np, flat_lat, flat_lon = Engineer.process_test_file(
+        TIF_FILE, start_date=datetime(2019, 2, 6, 0, 0)
+    )
+    assert x_np.shape, (289, 24, 18)
+    assert flat_lat.shape, (289,)
+    assert flat_lon.shape, (289,)
