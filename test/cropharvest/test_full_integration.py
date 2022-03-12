@@ -30,7 +30,7 @@ def test_full_integration():
     assert metrics["f1_score"] > 0.73, "f1-score should be greater than 0.73"
     assert metrics["auc_roc"] > 0.88, "AUC-ROC should be greater than 0.88"
 
-    preds = Inference(model=model).run(TIF_FILE)
+    preds = Inference(model=model, normalizing_dict=None).run(TIF_FILE)
 
     # Check size
     assert preds.dims["lat"] == 17

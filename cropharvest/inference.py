@@ -21,9 +21,9 @@ class Inference:
     def __init__(
         self,
         model,
+        normalizing_dict: Optional[Dict[str, np.ndarray]],
         device=None,
         batch_size: int = 64,
-        normalizing_dict: Optional[Dict[str, np.ndarray]] = None,
     ):
         self.model = model
         self.device = device
