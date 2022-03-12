@@ -12,6 +12,15 @@ The dataset consists of **90,480** datapoints, of which **30,899** (34.2%) have 
 
 More details about CropHarvest and the benchmarks are available in [this paper](https://openreview.net/forum?id=JtjzUXPEaCu).
 
+### Pipeline
+The code in this repository 1) combines the constituent datasets into a single geoJSON file, 2) exports the associated satellite data from Earth Engine, 3) combines both datasets to create `(X,y)` training tuples and 4) exposes those tuples via a `Dataset` object.
+
+The pipeline through which this happens is shown below:
+
+<img src="diagrams/pipeline.svg" width="100%">
+
+All blue boxes are associated with code in this repository. Anything green is data accessible via [Zenodo](https://zenodo.org/record/5828893).
+
 ### Installation
 Linux and MacOS users can install the latest version of CropHarvest with the following command:
 ```bash
@@ -24,7 +33,7 @@ pip install cropharvest
 ```
 
 ### Getting started
-See the [`demo.ipynb`](https://github.com/nasaharvest/cropharvest/blob/main/demo.ipynb) notebook for an example on how to download the data from [Zenodo](https://zenodo.org/record/5533193) and train a random forest against this data.
+See the [`demo.ipynb`](https://github.com/nasaharvest/cropharvest/blob/main/demo.ipynb) notebook for an example on how to download the data from [Zenodo](https://zenodo.org/record/5828893) and train a random forest against this data.
 
 For more examples of models trained against this dataset, see the [benchmarks](https://github.com/nasaharvest/cropharvest/blob/main/benchmarks).
 
