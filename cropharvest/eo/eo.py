@@ -354,7 +354,9 @@ class EarthEngineExporter:
 
         for _, row in tqdm(labels.iterrows()):
             ee_bbox = EEBoundingBox.from_centre(
-                mid_lat=row["lat"], mid_lon=row["lon"], surrounding_metres=surrounding_metres
+                mid_lat=row[RequiredColumns.LAT],
+                mid_lon=row[RequiredColumns.LON],
+                surrounding_metres=surrounding_metres,
             )
 
             try:
