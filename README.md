@@ -13,13 +13,20 @@ The dataset consists of **90,480** datapoints, of which **30,899** (34.2%) have 
 More details about CropHarvest and the benchmarks are available in [this paper](https://openreview.net/forum?id=JtjzUXPEaCu).
 
 ### Pipeline
-The code in this repository 1) combines the constituent datasets into a single geoJSON file, 2) exports the associated satellite data from Earth Engine, 3) combines both datasets to create `(X,y)` training tuples and 4) exposes those tuples via a `Dataset` object.
+The code in this repository 
+
+1) combines the constituent datasets into a single geoJSON file, 
+2) exports the associated satellite data from Earth Engine, 
+3) combines both datasets to create `(X,y)` training tuples and 
+4) exposes those tuples via a `Dataset` object.
 
 The pipeline through which this happens is shown below:
 
 <img src="diagrams/pipeline.svg" width="100%">
 
 All blue boxes are associated with code in this repository. Anything green is data accessible via [Zenodo](https://zenodo.org/record/5828893).
+
+There are unique cases where you may need to use the `EarthEngineExporter` directly, these use cases are demonstrated in the [`demo_exporting_data.ipynb`](https://github.com/nasaharvest/cropharvest/blob/main/demo_exporting_data.ipynb) notebook.
 
 ### Installation
 Linux and MacOS users can install the latest version of CropHarvest with the following command:
