@@ -100,8 +100,8 @@ class EarthEngineExporter:
 
     def __init__(
         self,
-        check_ee: bool = True,
-        check_gcp: bool = True,
+        check_ee: bool = False,
+        check_gcp: bool = False,
         credentials: Optional[str] = None,
         dest_bucket: Optional[str] = None,
     ) -> None:
@@ -447,7 +447,7 @@ class EarthEngineExporter:
         num_labelled_points: Optional[int] = 3000,
         surrounding_metres: int = 80,
         checkpoint: Optional[Path] = None,
-        start_from_last: bool = True,
+        start_from_last: bool = False,
     ) -> None:
 
         if labels is None:
