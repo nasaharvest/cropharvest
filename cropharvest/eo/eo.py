@@ -421,6 +421,10 @@ class EarthEngineExporter:
         metres_per_polygon: Optional[int] = 10000,
         file_dimensions: Optional[int] = None,
     ) -> Dict[str, bool]:
+
+        if start_date > end_date:
+            raise ValueError(f"Start date {start_date} is after end date {end_date}")
+
         ee_bbox = EEBoundingBox.from_bounding_box(bounding_box=bbox, padding_metres=0)
         general_identifier = f"{bbox_name}_{str(start_date)}_{str(end_date)}"
         if metres_per_polygon is not None:
