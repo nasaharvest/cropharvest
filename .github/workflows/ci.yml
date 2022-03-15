@@ -84,7 +84,7 @@ jobs:
 
   publish-to-pypi:
     needs: [mypy, test]
-    if: startsWith(github.ref, 'refs/tags') && github.ref == 'refs/heads/main'
+    if: startsWith(github.ref, 'refs/tags')
     name: Publish to PyPI (if tagged)
     runs-on: ubuntu-18.04
     steps:
