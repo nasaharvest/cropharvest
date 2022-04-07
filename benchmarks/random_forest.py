@@ -31,7 +31,11 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
 
                 # train a model
                 gs_model = RandomForestClassifier()
-                parameters = {"n_estimators": [10, 100, 200], "max_depth": [10, 50, None]}
+                parameters = {
+                    "n_estimators": [10, 100, 200],
+                    "max_depth": [10, 50, None],
+                    "min_samples_leaf": [1, 2, 5],
+                }
                 grid_search = GridSearchCV(gs_model, parameters, verbose=1)
                 grid_search.fit(train_x, train_y)
 
