@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
 
 from cropharvest.datasets import CropHarvest
 from cropharvest.utils import DATAFOLDER_PATH
@@ -29,7 +30,12 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
                 train_x, train_y = dataset.as_array(flatten_x=True, num_samples=sample_size)
 
                 # train a model
-                model = RandomForestClassifier()
+                gs_model = RandomForestClassifier()
+                parameters = {"n_estimators": [10, 100, 200], "max_depth": [10, 50, None]}
+                grid_search = GridSearchCV(gs_model, parameters, verbose=1)
+                grid_search.fit(train_x, train_y)
+
+                model = RandomForestClassifier(**grid_search.best_params_)
                 model.fit(train_x, train_y)
 
                 for test_id, test_instance in dataset.test_data(flatten_x=True, max_size=10000):
