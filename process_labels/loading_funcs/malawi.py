@@ -35,7 +35,7 @@ def load_malawi():
     df[RequiredColumns.LAT] = df[
         "field_specification_assessment/_geopoint_widget_placementmap_latitude"
     ]
-    df[RequiredColumns.COLLECTION_DATE] = df["today"]
+    df[RequiredColumns.COLLECTION_DATE] = pd.to_datetime(df["today"])
     df[RequiredColumns.IS_CROP] = 1
 
     df[NullableColumns.LABEL] = df["current_season_crop/current_season_current_crop"]
