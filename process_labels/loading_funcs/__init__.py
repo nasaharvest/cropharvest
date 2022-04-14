@@ -10,11 +10,10 @@ from .uganda import load_uganda
 from .tanzania import load_tanzania
 from .croplands import load_croplands
 from .zimbabwe import load_zimbabwe
-from .mali import load_mali, load_mali_crop_noncrop
+from .mali import load_mali, load_mali_crop_noncrop, load_mali_hlc
 from .france import load_ile_de_france, load_reunion, load_martinique
 from .canada import load_canada
 from .germany import load_germany
-from .malawi import load_malawi
 
 
 __all__ = [
@@ -40,5 +39,5 @@ __all__ = [
     "load_martinique",
     "load_canada",
     "load_germany",
-    "load_malawi",
+    "load_mali_hlc",
 ]

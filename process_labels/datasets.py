@@ -165,8 +165,8 @@ DATASETS = {
             "https://github.com/lukaskondmann/DENETHOR"
         ),
     },
-    "malawi-helmets-labelling-crops": {
-        "function": loading_funcs.load_malawi,
+    "mali-helmets-labelling-crops": {
+        "function": loading_funcs.load_mali_hlc,
         "description": ("2022 data collected as part of the Helmets Labelling Crops project"),
     },
 }
