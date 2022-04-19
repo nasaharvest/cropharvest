@@ -7,6 +7,7 @@ This decouples the EO data from the labels.geojson
 from pathlib import Path
 import shutil
 import geopandas
+from tqdm import tqdm
 
 from cropharvest.columns import RequiredColumns
 from cropharvest.eo.eo import EarthEngineExporter
@@ -42,7 +43,7 @@ def copy_and_rename_dataset(org_folder: Path, new_folder: Path):
     original_tif_files = list(org_folder.glob("*.tif"))
     labels = EarthEngineExporter.load_default_labels()
 
-    for tif_file in original_tif_files:
+    for tif_file in tqdm(original_tif_files):
         new_name = construct_new_name(labels, tif_file.name)
         shutil.copy(tif_file, new_folder / new_name)
 
