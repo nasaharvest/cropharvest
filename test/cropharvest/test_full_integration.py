@@ -3,13 +3,20 @@ from cropharvest.inference import Inference
 from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
 
+from urllib.error import HTTPError
+
 DATA_DIR = "data"
 TIF_FILE = Path(__file__).parent / "98-togo_2019-02-06_2020-02-01.tif"
 
 
 def test_full_integration():
     # This test mirrors all the functionality in the demo notebook
-    evaluation_datasets = CropHarvest.create_benchmark_datasets(DATA_DIR)
+    try:
+        evaluation_datasets = CropHarvest.create_benchmark_datasets(DATA_DIR)
+    except HTTPError:
+        print("Zenodo could not be reached - skipping")
+        return None
+
     assert len(evaluation_datasets) == 3, "There should be 3 evaluation datasets"
 
     togo_dataset = evaluation_datasets[-1]
