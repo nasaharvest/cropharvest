@@ -48,4 +48,6 @@ def copy_and_rename_dataset(org_folder: Path, new_folder: Path):
 
 
 if __name__ == "__main__":
-    copy_and_rename_dataset(DATAFOLDER_PATH / "eo_data", DATAFOLDER_PATH / "renamed_eo_data")
+    output_folder = DATAFOLDER_PATH / "renamed_eo_data"
+    output_folder.mkdir(exist_ok=True)
+    copy_and_rename_dataset(DATAFOLDER_PATH / "eo_data", output_folder)
