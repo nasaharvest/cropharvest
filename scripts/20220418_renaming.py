@@ -41,7 +41,9 @@ def construct_new_name(labels: geopandas.GeoDataFrame, old_name: str) -> str:
 def copy_and_rename_dataset(org_folder: Path, new_folder: Path):
 
     original_tif_files = list(org_folder.glob("*.tif"))
-    labels = EarthEngineExporter.load_default_labels()
+    labels = EarthEngineExporter.load_default_labels(
+        dataset=None, start_from_last=False, checkpoint=None
+    )
 
     for tif_file in tqdm(original_tif_files):
         new_name = construct_new_name(labels, tif_file.name)
