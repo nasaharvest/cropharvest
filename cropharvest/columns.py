@@ -18,7 +18,7 @@ class Columns:
 
 class RequiredColumns(Columns):
 
-    INDEX = "index"
+    INDEX = "dataset_index"
     IS_CROP = "is_crop"
     LAT = "lat"
     LON = "lon"

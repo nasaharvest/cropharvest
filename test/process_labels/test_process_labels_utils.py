@@ -8,7 +8,7 @@ def test_is_test_column():
     labels = geopandas.GeoDataFrame(
         data={
             "dataset": ["togo-eval", "geowiki", "geowiki"],
-            "index": [1, 2, 3],
+            "dataset_index": [1, 2, 3],
             "lat": [7.5817201079726511, -12.17, 1.11],
             "lon": [1.3954393874414535, -45.8, 8.29],
         }
