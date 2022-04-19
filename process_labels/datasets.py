@@ -166,8 +166,8 @@ DATASETS = {
         ),
     },
     "tanzania-rice-ecaas": {
-        "functions": loading_funcs.load_tanzania_ecaas,
-        "description": "Tanzania Rice ECAAS campaign"
+        "function": loading_funcs.load_tanzania_ecaas,
+        "description": ("Tanzania Rice ECAAS campaign"),
     },
 }
 
