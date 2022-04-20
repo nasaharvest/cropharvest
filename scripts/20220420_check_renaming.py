@@ -37,7 +37,7 @@ def check_file(path: Path) -> None:
     lat, lon = bbox.get_centre(in_radians=False)
     x, y = tif_file.x.values, tif_file.y.values
 
-    assert isin(lon, x) & isin(lat, y)
+    assert isin(x, lon) & isin(y, lat)
 
 
 def main(renamed_path: Path, num_to_check: int = 1000):
