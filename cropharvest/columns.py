@@ -42,3 +42,15 @@ class NullableColumns(Columns):
     @classmethod
     def date_columns(cls) -> List[str]:
         return [cls.HARVEST_DATE, cls.PLANTING_DATE]
+
+
+class EngColumns:
+    """
+    Some columns uniquely created & used by the labels
+    as loaded by the Engineer
+    """
+
+    FEATURES_FILENAME = "features_filename"
+    FEATURES_PATH = "features_path"
+    EXISTS = "feature_exists"
+    TIF_FILEPATH = "tif_path"

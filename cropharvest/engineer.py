@@ -15,8 +15,9 @@ import re
 from sklearn.metrics import roc_auc_score, f1_score
 
 from cropharvest.bands import STATIC_BANDS, DYNAMIC_BANDS
-from cropharvest.columns import RequiredColumns, NullableColumns
-from .config import (
+from cropharvest.columns import RequiredColumns, NullableColumns, EngColumns
+from cropharvest.boundingbox import BBox
+from cropharvest.config import (
     EXPORT_END_DAY,
     EXPORT_END_MONTH,
     LABELS_FILENAME,
@@ -24,8 +25,14 @@ from .config import (
     DEFAULT_NUM_TIMESTEPS,
     TEST_REGIONS,
     TEST_DATASETS,
+    DATAFOLDER_PATH,
+    FEATURES_FILEPATH,
+    EO_FILEPATH,
+    TEST_EO_FILEPATH,
+    ARRAYS_FILEPATH,
+    TEST_FEATURES_FILEPATH,
 )
-from .utils import DATAFOLDER_PATH, load_normalizing_dict
+from cropharvest.utils import load_normalizing_dict
 
 from typing import cast, Optional, Dict, Union, Tuple, List, Sequence
 
@@ -168,21 +175,36 @@ class TestInstance:
 
 
 class Engineer:
-    def __init__(self, data_folder: Path = DATAFOLDER_PATH) -> None:
-        self.data_folder = data_folder
-        self.eo_files = data_folder / "eo_data"
-        self.test_eo_files = data_folder / "test_eo_data"
+    def __init__(self) -> None:
 
-        self.labels = geopandas.read_file(data_folder / LABELS_FILENAME)
-        self.labels["export_end_date"] = pd.to_datetime(self.labels.export_end_date).dt.date
-
-        self.savedir = data_folder / "features"
-        self.savedir.mkdir(exist_ok=True)
-
-        self.test_savedir = data_folder / "test_features"
-        self.test_savedir.mkdir(exist_ok=True)
+        self.labels = self.load_labels()
+        FEATURES_FILEPATH.mkdir(exist_ok=True)
+        ARRAYS_FILEPATH.mkdir(exist_ok=True)
+        TEST_FEATURES_FILEPATH.mkdir(exist_ok=True)
 
         self.norm_interim: Dict[str, Union[np.ndarray, int]] = {"n": 0}
+
+    @staticmethod
+    def load_labels() -> geopandas.GeoDataFrame:
+        labels = geopandas.read_file(DATAFOLDER_PATH / LABELS_FILENAME)
+        labels[RequiredColumns.EXPORT_END_DATE] = pd.to_datetime(
+            labels[RequiredColumns.EXPORT_END_DATE]
+        ).dt.date
+        labels[EngColumns.FEATURES_FILENAME] = (
+            "lat="
+            + labels[RequiredColumns.LAT].round(8).astype(str)
+            + "_lon="
+            + labels[RequiredColumns.LON].round(8).astype(str)
+            + "_date="
+            + labels[RequiredColumns.EXPORT_END_DATE].astype(str)
+        )
+        labels[EngColumns.FEATURES_PATH] = (
+            str(ARRAYS_FILEPATH) + labels[EngColumns.FEATURES_FILENAME]
+        )
+        labels[EngColumns.EXISTS] = np.vectorize(lambda p: Path(p).exists())(
+            labels[EngColumns.FEATURES_PATH]
+        )
+        return labels
 
     @staticmethod
     def find_nearest(array, value: float) -> float:
@@ -203,7 +225,7 @@ class Engineer:
 
     @staticmethod
     def load_tif(
-        ds: xr.Dataset, start_date: datetime, num_timesteps: Optional[int] = DEFAULT_NUM_TIMESTEPS
+        filepath: Path, start_date: datetime, num_timesteps: Optional[int] = DEFAULT_NUM_TIMESTEPS
     ) -> Tuple[xr.DataArray, float]:
         r"""
         The sentinel files exported from google earth have all the timesteps
@@ -212,7 +234,7 @@ class Engineer:
 
         Returns: The loaded xr.DataArray, and the average slope (used for filling nan slopes)
         """
-        da = da.rename("FEATURES")
+        da = xr.open_rasterio(filepath).rename("FEATURES")
         da_split_by_time: List[xr.DataArray] = []
 
         bands_per_timestep = len(DYNAMIC_BANDS)
@@ -473,37 +495,15 @@ class Engineer:
 
         return identifier_plus_idx, TestInstance(x=final_x, y=y, lats=flat_lat, lons=flat_lon)
 
-    @staticmethod
-    def _year_from_filepath(p: Path) -> date:
-        dates_in_p = re.findall(r"(\d+-\d+-\d+)", p.stem)
-        end_date = dates_in_p[-1].split("-")
-        return date(end_date[0], end_date[1], end_date[2])
-
-    def find_row_from_path(
-        self, lat: np.ndarray, lon: np.ndarray, export_end_date: date
-    ) -> pd.Series:
-        relevant_labels = self.labels[
-            (
-                (self.labels[RequiredColumns.LAT] >= lat.min())
-                & (self.labels[RequiredColumns.LAT] <= lat.max())
-                & (self.labels[RequiredColumns.LON] <= lon.max())
-                & (self.labels[RequiredColumns.LON] >= lon.min())
-                & (self.labels[RequiredColumns.EXPORT_END_DATE] == export_end_date)
-            )
-        ]
-        # TODO - check for the most central row if there is more than 1 row
-        return relevant_labels.iloc[0]
-
     def process_single_file(
         self,
-        path_to_file: Path,
+        row: pd.Series,
         num_timesteps: int = DEFAULT_NUM_TIMESTEPS,
     ) -> Optional[DataInstance]:
-        ds = xr.open_rasterio(path_to_file)
-        year = self._year_from_filepath(path_to_file)
-        row = self.find_row_from_path(ds.y, ds.x, year)
-        start_date = row.export_end_date - timedelta(days=num_timesteps * DAYS_PER_TIMESTEP)
-        da, average_slope = self.load_tif(path_to_file, start_date=start_date)
+        start_date = row[RequiredColumns.EXPORT_END_DATE] - timedelta(
+            days=num_timesteps * DAYS_PER_TIMESTEP
+        )
+        da, average_slope = self.load_tif(row[EngColumns.TIF_FILEPATH], start_date=start_date)
         closest_lon = self.find_nearest(da.x, row[RequiredColumns.LON])
         closest_lat = self.find_nearest(da.y, row[RequiredColumns.LAT])
 
@@ -535,7 +535,7 @@ class Engineer:
         self,
     ) -> None:
         for region_identifier, _ in TEST_REGIONS.items():
-            all_region_files = list(self.test_eo_files.glob(f"{region_identifier}*.tif"))
+            all_region_files = list(TEST_EO_FILEPATH.glob(f"{region_identifier}*.tif"))
             if len(all_region_files) == 0:
                 print(f"No downloaded files for {region_identifier}")
                 continue
@@ -544,7 +544,7 @@ class Engineer:
                     filepath, region_idx
                 )
                 if test_instance is not None:
-                    hf = h5py.File(self.test_savedir / f"{instance_name}.h5", "w")
+                    hf = h5py.File(TEST_FEATURES_FILEPATH / f"{instance_name}.h5", "w")
 
                     for key, val in test_instance.datasets.items():
                         hf.create_dataset(key, data=val)
@@ -581,27 +581,74 @@ class Engineer:
                 hf.create_dataset(key, data=val)
             hf.close()
 
-    def create_h5_dataset(self, checkpoint: bool = True) -> None:
-        arrays_dir = self.savedir / "arrays"
-        arrays_dir.mkdir(exist_ok=True)
+    @staticmethod
+    def generate_bbox_from_paths(filepath: Path) -> Dict[Path, BBox]:
+        return {
+            p: BBox.from_path(p)
+            for p in tqdm(filepath.glob("**/*.tif"), desc="Generating BoundingBoxes from paths")
+        }
+
+    @staticmethod
+    def get_tif_paths(path_to_bbox, lat, lon, end_date, pbar):
+        candidate_paths = []
+        for p, bbox in path_to_bbox.items():
+            if bbox.contains(lat, lon) and f"dates=*_{end_date}" in p.stem:
+                candidate_paths.append(p)
+        pbar.update(1)
+        return candidate_paths
+
+    @classmethod
+    def match_labels_to_tifs(cls, labels: geopandas.GeoDataFrame) -> pd.Series:
+        bbox_for_labels = BBox(
+            min_lon=labels[RequiredColumns.LON].min(),
+            min_lat=labels[RequiredColumns.LAT].min(),
+            max_lon=labels[RequiredColumns.LON].max(),
+            max_lat=labels[RequiredColumns.LAT].max(),
+        )
+        # Get all tif paths and bboxes
+        path_to_bbox = {
+            p: bbox
+            for p, bbox in cls.generate_bbox_from_paths(EO_FILEPATH).items()
+            if bbox_for_labels.contains_bbox(bbox)
+        }
+
+        # Match labels to tif files
+        # Faster than going through bboxes
+        with tqdm(total=len(labels), desc="Matching labels to tif paths") as pbar:
+            tif_paths = np.vectorize(cls.get_tif_paths, otypes=[np.ndarray])(
+                path_to_bbox,
+                labels[RequiredColumns.LAT],
+                labels[RequiredColumns.LON],
+                labels[RequiredColumns.EXPORT_END_DATE],
+                pbar,
+            )
+        return tif_paths
+
+    def create_h5_dataset(self) -> None:
 
         old_normalizing_dict: Optional[Tuple[int, Optional[Dict[str, np.ndarray]]]] = None
-        if checkpoint:
-            # check for an already existing normalizing dict
-            if (self.savedir / "normalizing_dict.h5").exists():
-                old_nd = load_normalizing_dict(self.savedir / "normalizing_dict.hf")
-                num_existing_files = len(list(arrays_dir.glob("*")))
-                old_normalizing_dict = (num_existing_files, old_nd)
+        # check for an already existing normalizing dict
+        if (FEATURES_FILEPATH / "normalizing_dict.h5").exists():
+            old_nd = load_normalizing_dict(FEATURES_FILEPATH / "normalizing_dict.hf")
+            num_existing_files = len(list(ARRAYS_FILEPATH.glob("*")))
+            old_normalizing_dict = (num_existing_files, old_nd)
+
+        labels_with_no_features = self.labels[~self.labels[EngColumns.EXISTS]].copy()
+        labels_with_no_features[EngColumns.TIF_FILEPATH] = self.match_labels_to_tifs(
+            labels_with_no_features
+        )
+        tifs_found = labels_with_no_features[EngColumns.TIF_FILEPATH].str.len() > 0
+        labels_with_tifs_but_no_features = labels_with_no_features.loc[tifs_found]
 
         skipped_files: int = 0
         num_new_files: int = 0
-        for file_path in tqdm(list(self.eo_files.glob("*.tif"))):
-            instance = self.process_single_file(file_path)
+        for _, row in tqdm(labels_with_tifs_but_no_features.iterrows()):
+            instance = self.process_single_file(row)
             if instance is not None:
                 filename = (
                     f"lat={instance.label_lat}_lon={instance.label_lon}_year={instance.year}.h5"
                 )
-                hf = h5py.File(arrays_dir / filename, "w")
+                hf = h5py.File(ARRAYS_FILEPATH / filename, "w")
                 hf.create_dataset("array", data=instance.array)
 
                 for key, val in instance.attrs.items():
@@ -616,11 +663,11 @@ class Engineer:
 
         normalizing_dict = self.calculate_normalizing_dict()
 
-        if checkpoint and (old_normalizing_dict is not None):
+        if old_normalizing_dict is not None:
             normalizing_dicts = [old_normalizing_dict, (num_new_files, normalizing_dict)]
             normalizing_dict = self.adjust_normalizing_dict(normalizing_dicts)
         if normalizing_dict is not None:
-            save_path = self.savedir / "normalizing_dict.h5"
+            save_path = FEATURES_FILEPATH / "normalizing_dict.h5"
             hf = h5py.File(save_path, "w")
             for key, val in normalizing_dict.items():
                 hf.create_dataset(key, data=val)

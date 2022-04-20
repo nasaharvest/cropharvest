@@ -23,7 +23,7 @@ from .srtm import get_single_image as get_single_srtm_image
 
 from .utils import make_combine_bands_function
 from cropharvest.bands import DYNAMIC_BANDS
-from cropharvest.utils import DATAFOLDER_PATH, memoized
+from cropharvest.utils import memoized
 from cropharvest.countries import BBox
 from cropharvest.config import (
     EXPORT_END_DAY,
@@ -32,6 +32,9 @@ from cropharvest.config import (
     DEFAULT_NUM_TIMESTEPS,
     LABELS_FILENAME,
     TEST_REGIONS,
+    DATAFOLDER_PATH,
+    EO_FILEPATH,
+    TEST_EO_FILEPATH,
 )
 from cropharvest.columns import RequiredColumns
 
@@ -95,8 +98,8 @@ class EarthEngineExporter:
     :param dest_bucket: The bucket to export to, google-cloud-storage must be installed.
     """
 
-    output_folder_name = "eo_data"
-    test_output_folder_name = "test_eo_data"
+    output_folder_name = EO_FILEPATH.name
+    test_output_folder_name = TEST_EO_FILEPATH.name
 
     def __init__(
         self,
