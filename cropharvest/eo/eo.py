@@ -137,7 +137,7 @@ class EarthEngineExporter:
         dataset: Optional[str], start_from_last, checkpoint: Optional[Path]
     ) -> geopandas.GeoDataFrame:
         labels = geopandas.read_file(DATAFOLDER_PATH / LABELS_FILENAME)
-        labels["end_date"] = labels[RequiredColumns.EXPORT_END_DATE]
+        labels["end_date"] = pd.to_datetime(labels[RequiredColumns.EXPORT_END_DATE])
         labels = labels.assign(
             start_date=lambda x: x["end_date"]
             - timedelta(days=DAYS_PER_TIMESTEP * DEFAULT_NUM_TIMESTEPS)
