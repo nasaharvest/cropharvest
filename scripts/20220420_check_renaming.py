@@ -2,6 +2,12 @@
 After 20220418_renaming.py was run,
 this script was used to check that
 the renaming happened correctly
+
+From 3 runs, this had a failure rate of 8, 10 and 6
+(out of 1000), which is <1%. In all cases, I looked at
+the failures and the corresponding latitudes and longitudes
+were just outside of the margins, which I am happy to attribute
+to rounding errors.
 """
 from pathlib import Path
 import xarray as xr
