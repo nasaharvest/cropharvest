@@ -45,8 +45,15 @@ def main(renamed_path: Path, num_to_check: int = 1000):
     all_files = list(renamed_path.glob("*.tif"))
     shuffle(all_files)
 
+    failed = 0
     for path_to_check in tqdm(all_files[:num_to_check]):
-        check_file(path_to_check)
+        try:
+            check_file(path_to_check)
+        except AssertionError as e:
+            print(e)
+            failed += 1
+
+    print(f"{failed} files failed check out of {num_to_check}")
 
 
 if __name__ == "__main__":
