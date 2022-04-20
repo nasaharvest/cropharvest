@@ -7,7 +7,7 @@ from .central_asia import load_central_asia
 from .rwanda import load_rwanda_ceo
 from .kenya import load_kenya, load_kenya_non_crop
 from .uganda import load_uganda
-from .tanzania import load_tanzania
+from .tanzania import load_tanzania, load_tanzania_ecaas
 from .croplands import load_croplands
 from .zimbabwe import load_zimbabwe
 from .mali import load_mali, load_mali_crop_noncrop
@@ -39,4 +39,5 @@ __all__ = [
     "load_martinique",
     "load_canada",
     "load_germany",
+    "load_tanzania_ecaas",
 ]

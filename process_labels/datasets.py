@@ -165,6 +165,10 @@ DATASETS = {
             "https://github.com/lukaskondmann/DENETHOR"
         ),
     },
+    "tanzania-rice-ecaas": {
+        "function": loading_funcs.load_tanzania_ecaas,
+        "description": ("Tanzania Rice ECAAS campaign"),
+    },
 }
 
 
