@@ -1,5 +1,5 @@
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import geopandas
 from dataclasses import dataclass
 import numpy as np
@@ -10,6 +10,7 @@ from rasterio import mask
 from tqdm import tqdm
 import warnings
 import h5py
+import re
 
 from sklearn.metrics import roc_auc_score, f1_score
 
@@ -43,6 +44,7 @@ class DataInstance:
     instance_lon: float
     array: np.ndarray
     is_crop: int
+    year: int
     label: Optional[str] = None
 
     @property
@@ -172,7 +174,7 @@ class Engineer:
         self.test_eo_files = data_folder / "test_eo_data"
 
         self.labels = geopandas.read_file(data_folder / LABELS_FILENAME)
-        self.labels["export_end_date"] = pd.to_datetime(self.labels.export_end_date)
+        self.labels["export_end_date"] = pd.to_datetime(self.labels.export_end_date).dt.date
 
         self.savedir = data_folder / "features"
         self.savedir.mkdir(exist_ok=True)
@@ -201,7 +203,7 @@ class Engineer:
 
     @staticmethod
     def load_tif(
-        filepath: Path, start_date: datetime, num_timesteps: Optional[int] = DEFAULT_NUM_TIMESTEPS
+        ds: xr.Dataset, start_date: datetime, num_timesteps: Optional[int] = DEFAULT_NUM_TIMESTEPS
     ) -> Tuple[xr.DataArray, float]:
         r"""
         The sentinel files exported from google earth have all the timesteps
@@ -210,9 +212,7 @@ class Engineer:
 
         Returns: The loaded xr.DataArray, and the average slope (used for filling nan slopes)
         """
-
-        da = xr.open_rasterio(filepath).rename("FEATURES")
-
+        da = da.rename("FEATURES")
         da_split_by_time: List[xr.DataArray] = []
 
         bands_per_timestep = len(DYNAMIC_BANDS)
@@ -400,7 +400,7 @@ class Engineer:
     def process_test_file(
         path_to_file: Path, start_date: datetime
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        da, slope = Engineer.load_tif(path_to_file, start_date=start_date)
+        da, slope = Engineer.load_tif(xr.open_rasterio(path_to_file), start_date=start_date)
 
         # Process remote sensing data
         x_np = da.values
@@ -473,12 +473,35 @@ class Engineer:
 
         return identifier_plus_idx, TestInstance(x=final_x, y=y, lats=flat_lat, lons=flat_lon)
 
+    @staticmethod
+    def _year_from_filepath(p: Path) -> date:
+        dates_in_p = re.findall(r"(\d+-\d+-\d+)", p.stem)
+        end_date = dates_in_p[-1].split("-")
+        return date(end_date[0], end_date[1], end_date[2])
+
+    def find_row_from_path(
+        self, lat: np.ndarray, lon: np.ndarray, export_end_date: date
+    ) -> pd.Series:
+        relevant_labels = self.labels[
+            (
+                (self.labels[RequiredColumns.LAT] >= lat.min())
+                & (self.labels[RequiredColumns.LAT] <= lat.max())
+                & (self.labels[RequiredColumns.LON] <= lon.max())
+                & (self.labels[RequiredColumns.LON] >= lon.min())
+                & (self.labels[RequiredColumns.EXPORT_END_DATE] == export_end_date)
+            )
+        ]
+        # TODO - check for the most central row if there is more than 1 row
+        return relevant_labels.iloc[0]
+
     def process_single_file(
         self,
         path_to_file: Path,
-        row: pd.Series,
         num_timesteps: int = DEFAULT_NUM_TIMESTEPS,
     ) -> Optional[DataInstance]:
+        ds = xr.open_rasterio(path_to_file)
+        year = self._year_from_filepath(path_to_file)
+        row = self.find_row_from_path(ds.y, ds.x, year)
         start_date = row.export_end_date - timedelta(days=num_timesteps * DAYS_PER_TIMESTEP)
         da, average_slope = self.load_tif(path_to_file, start_date=start_date)
         closest_lon = self.find_nearest(da.x, row[RequiredColumns.LON])
@@ -505,6 +528,7 @@ class Engineer:
             is_crop=row[RequiredColumns.IS_CROP],
             label=row[NullableColumns.LABEL],
             dataset=row[RequiredColumns.DATASET],
+            year=start_date.year,
         )
 
     def create_h5_test_instances(
@@ -572,23 +596,12 @@ class Engineer:
         skipped_files: int = 0
         num_new_files: int = 0
         for file_path in tqdm(list(self.eo_files.glob("*.tif"))):
-            file_index, dataset = self.process_filename(file_path.name)
-            file_name = f"{file_index}_{dataset}.h5"
-            if (checkpoint) & ((arrays_dir / file_name).exists()):
-                # we check if the file has already been written
-                continue
-
-            file_row = self.labels[
-                (
-                    (self.labels[RequiredColumns.DATASET] == dataset)
-                    & (self.labels[RequiredColumns.INDEX] == file_index)
-                )
-            ].iloc[0]
-
-            instance = self.process_single_file(file_path, row=file_row)
+            instance = self.process_single_file(file_path)
             if instance is not None:
-
-                hf = h5py.File(arrays_dir / file_name, "w")
+                filename = (
+                    f"lat={instance.label_lat}_lon={instance.label_lon}_year={instance.year}.h5"
+                )
+                hf = h5py.File(arrays_dir / filename, "w")
                 hf.create_dataset("array", data=instance.array)
 
                 for key, val in instance.attrs.items():
