@@ -12,7 +12,7 @@ from tqdm import tqdm
 from cropharvest.columns import RequiredColumns
 from cropharvest.eo.eo import EarthEngineExporter
 from cropharvest.eo.ee_boundingbox import EEBoundingBox
-from cropharvest.utils import DATAFOLDER_PATH
+from cropharvest.config import DATAFOLDER_PATH
 
 
 SURROUNDING_METRES = 80

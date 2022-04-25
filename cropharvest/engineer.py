@@ -1,5 +1,5 @@
 from pathlib import Path
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 import geopandas
 from dataclasses import dataclass
 import numpy as np
@@ -10,7 +10,6 @@ from rasterio import mask
 from tqdm import tqdm
 import warnings
 import h5py
-import re
 
 from sklearn.metrics import roc_auc_score, f1_score
 
@@ -584,7 +583,7 @@ class Engineer:
     @staticmethod
     def generate_bbox_from_paths(filepath: Path) -> Dict[Path, BBox]:
         return {
-            p: BBox.from_path(p)
+            p: BBox.from_eo_tif_file(p)
             for p in tqdm(filepath.glob("**/*.tif"), desc="Generating BoundingBoxes from paths")
         }
 

@@ -17,7 +17,7 @@ from random import shuffle
 from tqdm import tqdm
 
 from cropharvest.countries import BBox
-from cropharvest.utils import DATAFOLDER_PATH
+from cropharvest.config import DATAFOLDER_PATH
 
 
 def _bbox_from_filepath(p: Path) -> BBox:

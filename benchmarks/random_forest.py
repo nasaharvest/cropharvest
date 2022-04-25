@@ -3,7 +3,7 @@ import json
 from sklearn.ensemble import RandomForestClassifier
 
 from cropharvest.datasets import CropHarvest
-from cropharvest.utils import DATAFOLDER_PATH
+from cropharvest.config import DATAFOLDER_PATH
 from cropharvest.engineer import TestInstance
 
 from config import SHUFFLE_SEEDS, DATASET_TO_SIZES, RANDOM_FOREST
