@@ -587,7 +587,7 @@ class Engineer:
     def get_tif_paths(path_to_bbox, lat, lon, end_date, pbar):
         candidate_paths = []
         for p, bbox in path_to_bbox.items():
-            if bbox.contains(lat, lon) and fnmatch(p.stem, f"dates=*_{end_date}*"):
+            if bbox.contains(lat, lon) and fnmatch(p.stem, f"*dates=*_{end_date}*"):
                 candidate_paths.append(p)
         pbar.update(1)
         return candidate_paths
