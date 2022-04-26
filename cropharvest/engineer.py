@@ -2,6 +2,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import geopandas
 from dataclasses import dataclass
+from fnmatch import fnmatch
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -199,7 +200,7 @@ class Engineer:
             + labels[RequiredColumns.EXPORT_END_DATE].astype(str)
         )
         labels[EngColumns.FEATURES_PATH] = (
-            str(ARRAYS_FILEPATH) + labels[EngColumns.FEATURES_FILENAME]
+            str(ARRAYS_FILEPATH) + "/" + labels[EngColumns.FEATURES_FILENAME]
         )
         labels[EngColumns.EXISTS] = np.vectorize(lambda p: Path(p).exists())(
             labels[EngColumns.FEATURES_PATH]
@@ -586,7 +587,7 @@ class Engineer:
     def get_tif_paths(path_to_bbox, lat, lon, end_date, pbar):
         candidate_paths = []
         for p, bbox in path_to_bbox.items():
-            if bbox.contains(lat, lon) and f"dates=*_{end_date}" in p.stem:
+            if bbox.contains(lat, lon) and fnmatch(p.stem, f"dates=*_{end_date}*"):
                 candidate_paths.append(p)
         pbar.update(1)
         return candidate_paths
