@@ -1,4 +1,5 @@
 from pathlib import Path
+from collections import defaultdict
 
 from .boundingbox import BBox
 
@@ -60,13 +61,10 @@ TEST_DATASETS = {"Togo": "togo-eval"}
 
 
 def test_countries_to_crops():
-    output_dict = {}
+    output_dict = defaultdict(list)
     for identifier, _ in TEST_REGIONS.items():
         country, crop, _, _ = identifier.split("_")
-        if country in output_dict.keys():
-            assert output_dict[country] == crop
-        else:
-            output_dict[country].append(crop)
+        output_dict[country].append(crop)
 
     for country, _ in TEST_DATASETS.items():
         output_dict[country].append(None)
