@@ -13,6 +13,7 @@ from cropharvest.utils import (
     load_normalizing_dict,
     sample_with_memory,
     NoDataForBoundingBoxError,
+    filter_geojson,
 )
 from cropharvest.config import (
     FEATURES_DIR,
@@ -89,18 +90,8 @@ class CropHarvestLabels(BaseDataset):
     def as_geojson(self) -> geopandas.GeoDataFrame:
         return self._labels
 
-    @staticmethod
-    def filter_geojson(gpdf: geopandas.GeoDataFrame, bounding_box: BBox) -> geopandas.GeoDataFrame:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            # warning: invalid value encountered in ? (vectorized)
-            in_bounding_box = np.vectorize(bounding_box.contains)(
-                gpdf[RequiredColumns.LAT], gpdf[RequiredColumns.LON]
-            )
-        return gpdf[in_bounding_box]
-
     def classes_in_bbox(self, bounding_box: BBox) -> List[str]:
-        bbox_geojson = self.filter_geojson(self.as_geojson(), bounding_box)
+        bbox_geojson = filter_geojson(self.as_geojson(), bounding_box)
         unique_labels = [x for x in bbox_geojson.label.unique() if x is not None]
         return unique_labels
 
@@ -117,7 +108,7 @@ class CropHarvestLabels(BaseDataset):
         if filter_test:
             gpdf = gpdf[gpdf[RequiredColumns.IS_TEST] == False]
         if task.bounding_box is not None:
-            gpdf = self.filter_geojson(gpdf, task.bounding_box)
+            gpdf = filter_geojson(gpdf, task.bounding_box)
 
         if len(gpdf) == 0:
             raise NoDataForBoundingBoxError

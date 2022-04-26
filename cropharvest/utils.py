@@ -8,10 +8,13 @@ import geopandas
 import collections
 import functools
 import tarfile
+import warnings
 
 from typing import Dict, List, Tuple, Optional
 
 from cropharvest.config import DATASET_URL
+from cropharvest.boundingbox import BBox
+from cropharvest.columns import RequiredColumns
 
 try:
     import torch
@@ -146,3 +149,13 @@ def read_geopandas(file_path) -> geopandas.GeoDataFrame:
 
 class NoDataForBoundingBoxError(Exception):
     pass
+
+
+def filter_geojson(gpdf: geopandas.GeoDataFrame, bounding_box: BBox) -> geopandas.GeoDataFrame:
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        # warning: invalid value encountered in ? (vectorized)
+        in_bounding_box = np.vectorize(bounding_box.contains)(
+            gpdf[RequiredColumns.LAT], gpdf[RequiredColumns.LON]
+        )
+    return gpdf[in_bounding_box]

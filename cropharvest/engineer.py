@@ -15,6 +15,7 @@ from sklearn.metrics import roc_auc_score, f1_score
 
 from cropharvest.bands import STATIC_BANDS, DYNAMIC_BANDS
 from cropharvest.columns import RequiredColumns, NullableColumns, EngColumns
+from cropharvest.countries import get_country_bbox
 from cropharvest.boundingbox import BBox
 from cropharvest.config import (
     EXPORT_END_DAY,
@@ -31,7 +32,7 @@ from cropharvest.config import (
     ARRAYS_FILEPATH,
     TEST_FEATURES_FILEPATH,
 )
-from cropharvest.utils import load_normalizing_dict
+from cropharvest.utils import load_normalizing_dict, filter_geojson
 
 from typing import cast, Optional, Dict, Union, Tuple, List, Sequence
 
@@ -549,24 +550,18 @@ class Engineer:
                         hf.create_dataset(key, data=val)
                     hf.close()
 
-        for _, dataset in TEST_DATASETS.items():
+        for country, dataset in TEST_DATASETS.items():
             x: List[np.ndarray] = []
             y: List[int] = []
             lats: List[float] = []
             lons: List[float] = []
-            relevant_labels = self.labels[self.labels[RequiredColumns.DATASET] == dataset]
+            country_bboxes = get_country_bbox(country)
+            relevant_labels = pd.concat(
+                [filter_geojson(self.labels, box) for box in country_bboxes]
+            )
 
             for _, row in tqdm(relevant_labels.iterrows()):
-                tif_paths = list(
-                    self.eo_files.glob(
-                        f"{row[RequiredColumns.INDEX]}-{row[RequiredColumns.DATASET]}_*.tif"
-                    )
-                )
-                if len(tif_paths) == 0:
-                    continue
-                else:
-                    tif_path = tif_paths[0]
-                instance = self.process_single_file(tif_path, row)
+                instance = self.process_single_file(row)
                 if instance is not None:
                     x.append(instance.array)
                     y.append(instance.is_crop)
@@ -575,7 +570,7 @@ class Engineer:
 
             # then, combine the instances into a test instance
             test_instance = TestInstance(np.stack(x), np.stack(y), np.stack(lats), np.stack(lons))
-            hf = h5py.File(self.test_savedir / f"{dataset}.h5", "w")
+            hf = h5py.File(TEST_FEATURES_FILEPATH / f"{dataset}.h5", "w")
             for key, val in test_instance.datasets.items():
                 hf.create_dataset(key, data=val)
             hf.close()
