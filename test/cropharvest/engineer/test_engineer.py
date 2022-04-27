@@ -92,14 +92,6 @@ def test_filename_correctly_processed():
     assert dataset == "togo"
 
 
-def test_filename_correctly_processed_2():
-
-    filename = "98-geowiki-landcover-2017_2019-02-06_2020-02-01.tif"
-    idx, dataset = Engineer.process_filename(filename)
-    assert idx == 98
-    assert dataset == "geowiki-landcover-2017"
-
-
 def test_process_test_file():
     x_np, flat_lat, flat_lon = Engineer.process_test_file(
         TIF_FILE, start_date=datetime(2019, 2, 6, 0, 0)

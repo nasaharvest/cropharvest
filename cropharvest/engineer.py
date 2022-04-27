@@ -235,17 +235,6 @@ class Engineer:
         return array[idx], idx
 
     @staticmethod
-    def process_filename(filename: str) -> Tuple[int, str]:
-        r"""
-        Given an exported sentinel file, process it to get the dataset
-        it came from, and the index of that dataset
-        """
-        parts = filename.split("_")[0].split("-")
-        index = parts[0]
-        dataset = "-".join(parts[1:])
-        return int(index), dataset
-
-    @staticmethod
     def load_tif(
         filepath: Path, start_date: datetime, num_timesteps: Optional[int] = DEFAULT_NUM_TIMESTEPS
     ) -> Tuple[xr.DataArray, float]:
@@ -444,7 +433,7 @@ class Engineer:
     def process_test_file(
         path_to_file: Path, start_date: datetime
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        da, slope = Engineer.load_tif(xr.open_rasterio(path_to_file), start_date=start_date)
+        da, slope = Engineer.load_tif(path_to_file, start_date=start_date)
 
         # Process remote sensing data
         x_np = da.values
