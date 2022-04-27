@@ -82,7 +82,7 @@ def test_find_nearest():
 
     target = 1.1
 
-    assert Engineer.find_nearest(array, target) == 1
+    assert Engineer.find_nearest(array, target) == (1, 0)
 
 
 def test_filename_correctly_processed():
