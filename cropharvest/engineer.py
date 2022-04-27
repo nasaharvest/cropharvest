@@ -537,7 +537,7 @@ class Engineer:
             closest_lat, _ = self.find_nearest(tif.y, row[RequiredColumns.LAT])
 
             labelled_np = tif.sel(x=closest_lon).sel(y=closest_lat).values
-            tif_file = row[EngColumns.TIF_FILEPATHS].iloc[0].name
+            tif_file = row[EngColumns.TIF_FILEPATHS][0].name
 
         else:
             min_distance_from_point = np.inf
@@ -561,7 +561,7 @@ class Engineer:
 
                     labelled_np = tif.sel(x=lon).sel(y=lat).values
                     average_slope = slope
-                    tif_file = row[EngColumns.TIF_FILEPATHS].iloc[i].name
+                    tif_file = row[EngColumns.TIF_FILEPATHS][i].name
 
         labelled_np = self.calculate_ndvi(labelled_np)
         labelled_np = self.remove_bands(labelled_np)
