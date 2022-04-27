@@ -53,4 +53,4 @@ class EngColumns:
     FEATURES_FILENAME = "features_filename"
     FEATURES_PATH = "features_path"
     EXISTS = "feature_exists"
-    TIF_FILEPATH = "tif_path"
+    TIF_FILEPATHS = "tif_path"

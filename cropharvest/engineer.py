@@ -53,6 +53,7 @@ class DataInstance:
     array: np.ndarray
     is_crop: int
     year: int
+    source_tif_file: str
     label: Optional[str] = None
 
     @property
@@ -208,10 +209,30 @@ class Engineer:
         return labels
 
     @staticmethod
-    def find_nearest(array, value: float) -> float:
+    def distance_from_degrees(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        """
+        haversince formula, inspired by:
+        https://stackoverflow.com/questions/41336756/find-the-closest-latitude-and-longitude/41337005
+        """
+        p = 0.017453292519943295
+        a = (
+            0.5
+            - np.cos((lat2 - lat1) * p) / 2
+            + np.cos(lat1 * p) * np.cos(lat2 * p) * (1 - np.cos((lon2 - lon1) * p)) / 2
+        )
+        return 12742 * np.arcsin(np.sqrt(a))
+
+    @staticmethod
+    def distance_point_from_center(lat_idx: int, lon_idx: int, tif) -> int:
+        x_dist = np.abs((len(tif.x) - 1) / 2 - lon_idx)
+        y_dist = np.abs((len(tif.y) - 1) / 2 - lat_idx)
+        return x_dist + y_dist
+
+    @staticmethod
+    def find_nearest(array, value: float) -> Tuple[float, int]:
         array = np.asarray(array)
         idx = (np.abs(array - value)).argmin()
-        return array[idx]
+        return array[idx], idx
 
     @staticmethod
     def process_filename(filename: str) -> Tuple[int, str]:
@@ -504,11 +525,43 @@ class Engineer:
         start_date = row[RequiredColumns.EXPORT_END_DATE] - timedelta(
             days=num_timesteps * DAYS_PER_TIMESTEP
         )
-        da, average_slope = self.load_tif(row[EngColumns.TIF_FILEPATH], start_date=start_date)
-        closest_lon = self.find_nearest(da.x, row[RequiredColumns.LON])
-        closest_lat = self.find_nearest(da.y, row[RequiredColumns.LAT])
 
-        labelled_np = da.sel(x=closest_lon).sel(y=closest_lat).values
+        tif_slope_tuples = [
+            self.load_tif(filepath, start_date=start_date)
+            for filepath in row[EngColumns.TIF_FILEPATHS]
+        ]
+        if len(tif_slope_tuples) == 1:
+            tif, average_slope = tif_slope_tuples[0]
+
+            closest_lon, _ = self.find_nearest(tif.x, row[RequiredColumns.LON])
+            closest_lat, _ = self.find_nearest(tif.y, row[RequiredColumns.LAT])
+
+            labelled_np = tif.sel(x=closest_lon).sel(y=closest_lat).values
+            tif_file = row[EngColumns.TIF_FILEPATHS].iloc[0].name
+
+        else:
+            min_distance_from_point = np.inf
+            min_distance_from_center = np.inf
+            for i, tif_slope_tuple in enumerate(tif_slope_tuples):
+                tif, slope = tif_slope_tuple
+                lon, lon_idx = self.find_nearest(tif.x, row[RequiredColumns.LON])
+                lat, lat_idx = self.find_nearest(tif.y, row[RequiredColumns.LAT])
+                distance_from_point = self.distance_from_degrees(
+                    row[RequiredColumns.LAT], row[RequiredColumns.LON], lat, lon
+                )
+                distance_from_center = self.distance_point_from_center(lat_idx, lon_idx, tif)
+                if (distance_from_point < min_distance_from_point) or (
+                    distance_from_point == min_distance_from_point
+                    and distance_from_center < min_distance_from_center
+                ):
+                    closest_lon = lon
+                    closest_lat = lat
+                    min_distance_from_center = distance_from_center
+                    min_distance_from_point = distance_from_point
+
+                    labelled_np = tif.sel(x=lon).sel(y=lat).values
+                    average_slope = slope
+                    tif_file = row[EngColumns.TIF_FILEPATHS].iloc[i].name
 
         labelled_np = self.calculate_ndvi(labelled_np)
         labelled_np = self.remove_bands(labelled_np)
@@ -530,6 +583,7 @@ class Engineer:
             label=row[NullableColumns.LABEL],
             dataset=row[RequiredColumns.DATASET],
             year=start_date.year,
+            source_tif_file=tif_file,
         )
 
     def create_h5_test_instances(
@@ -629,10 +683,10 @@ class Engineer:
             old_normalizing_dict = (num_existing_files, old_nd)
 
         labels_with_no_features = self.labels[~self.labels[EngColumns.EXISTS]].copy()
-        labels_with_no_features[EngColumns.TIF_FILEPATH] = self.match_labels_to_tifs(
+        labels_with_no_features[EngColumns.TIF_FILEPATHS] = self.match_labels_to_tifs(
             labels_with_no_features
         )
-        tifs_found = labels_with_no_features[EngColumns.TIF_FILEPATH].str.len() > 0
+        tifs_found = labels_with_no_features[EngColumns.TIF_FILEPATHS].str.len() > 0
         labels_with_tifs_but_no_features = labels_with_no_features.loc[tifs_found]
 
         skipped_files: int = 0
