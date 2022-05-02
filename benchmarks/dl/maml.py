@@ -3,7 +3,6 @@ import json
 import dill
 import warnings
 from random import shuffle, random
-from collections import defaultdict
 
 import torch
 from torch import nn
@@ -19,10 +18,10 @@ from .lstm import Classifier
 
 from cropharvest.datasets import CropHarvest, CropHarvestLabels, Task
 from cropharvest import countries
-from cropharvest.config import TEST_DATASETS, TEST_REGIONS, TEST_COUNTRIES_TO_CROPS
+from cropharvest.config import TEST_COUNTRIES_TO_CROPS
 from cropharvest.utils import NoDataForBoundingBoxError
 
-from typing import Dict, Tuple, Optional, List, DefaultDict
+from typing import Dict, Tuple, Optional, List
 
 
 class TrainDataLoader:
