@@ -161,7 +161,7 @@ class CropHarvestLabels(BaseDataset):
         except IndexError:
             raise NoDataForBoundingBoxError
 
-        positive_paths = positive_paths[EngColumns.FEATURES_PATH].tolist()
+        positive_paths = positive_labels[EngColumns.FEATURES_PATH].tolist()
 
         if (len(positive_paths) == 0) or (len(negative_paths) == 0):
             raise NoDataForBoundingBoxError
