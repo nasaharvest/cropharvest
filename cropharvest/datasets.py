@@ -21,6 +21,7 @@ from cropharvest.config import (
     DEFAULT_SEED,
     TEST_REGIONS,
     TEST_DATASETS,
+    DEFAULT_SEED,
 )
 from cropharvest.columns import NullableColumns, RequiredColumns, EngColumns
 from cropharvest.engineer import TestInstance, Engineer
@@ -206,8 +207,8 @@ class CropHarvest(BaseDataset):
         if val_ratio > 0.0:
             # the fixed seed is to ensure the validation set is always
             # different from the training set
-            positive_paths = deterministic_shuffle(positive_paths, seed=42)
-            negative_paths = deterministic_shuffle(negative_paths, seed=42)
+            positive_paths = deterministic_shuffle(positive_paths, seed=DEFAULT_SEED)
+            negative_paths = deterministic_shuffle(negative_paths, seed=DEFAULT_SEED)
             if is_val:
                 positive_paths = positive_paths[: int(len(positive_paths) * val_ratio)]
                 negative_paths = negative_paths[: int(len(negative_paths) * val_ratio)]
