@@ -606,7 +606,7 @@ class Engineer:
 
             relevant_labels[EngColumns.TIF_FILEPATHS] = self.match_labels_to_tifs(relevant_labels)
             tifs_found = relevant_labels[EngColumns.TIF_FILEPATHS].str.len() > 0
-            labels_with_tifs = labels_with_tifs.loc[tifs_found]
+            labels_with_tifs = relevant_labels.loc[tifs_found]
 
             for _, row in tqdm(labels_with_tifs.iterrows()):
                 instance = self.process_single_file(row)
