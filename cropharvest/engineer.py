@@ -187,8 +187,8 @@ class Engineer:
         self.norm_interim: Dict[str, Union[np.ndarray, int]] = {"n": 0}
 
     @staticmethod
-    def load_labels() -> geopandas.GeoDataFrame:
-        labels = geopandas.read_file(DATAFOLDER_PATH / LABELS_FILENAME)
+    def load_labels(root=DATAFOLDER_PATH) -> geopandas.GeoDataFrame:
+        labels = geopandas.read_file(root / LABELS_FILENAME)
         labels[RequiredColumns.EXPORT_END_DATE] = pd.to_datetime(
             labels[RequiredColumns.EXPORT_END_DATE]
         ).dt.date

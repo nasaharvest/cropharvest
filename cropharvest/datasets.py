@@ -23,8 +23,8 @@ from cropharvest.config import (
     TEST_REGIONS,
     TEST_DATASETS,
 )
-from cropharvest.columns import NullableColumns, RequiredColumns
-from cropharvest.engineer import TestInstance
+from cropharvest.columns import NullableColumns, RequiredColumns, EngColumns
+from cropharvest.engineer import TestInstance, Engineer
 from cropharvest import countries
 
 from typing import cast, List, Optional, Tuple, Generator
@@ -84,8 +84,13 @@ class CropHarvestLabels(BaseDataset):
         super().__init__(root, download, filenames=(LABELS_FILENAME,))
 
         # self._labels will always contain the original dataframe;
-        # the CropHarvestLabels class should not modify it
-        self._labels = read_geopandas(self.root / LABELS_FILENAME)
+        # the CropHarvestLabels class should not modify it.
+        # We use the Engineer load_labels since this also loads the .h5
+        # filenames for each row
+        # TODO: The load_labels doesn't actually allow the root to be
+        # modified. We should probably do this at a package level, not
+        # at a class level
+        self._labels = Engineer.load_labels(root=root)
 
     def as_geojson(self) -> geopandas.GeoDataFrame:
         return self._labels
@@ -128,15 +133,17 @@ class CropHarvestLabels(BaseDataset):
                     # then we can just collect all classes which either
                     # 1) are crop, or 2) are a different non crop class (e.g. forest)
                     negative_labels = gpdf[((is_null & is_crop) | (~is_null & ~is_target))]
-                    negative_paths = self._dataframe_to_paths(negative_labels)
+                    negative_paths = negative_labels[EngColumns.FEATURES_PATH].tolist()
                 else:
                     # otherwise, the target label is a crop. If balance_negative_crops is
                     # true, then we want an equal number of (other) crops and non crops in
                     # the negative labels
                     negative_non_crop_labels = gpdf[~is_crop]
                     negative_other_crop_labels = gpdf[(is_crop & ~is_null & ~is_target)]
-                    negative_non_crop_paths = self._dataframe_to_paths(negative_non_crop_labels)
-                    negative_paths = self._dataframe_to_paths(negative_other_crop_labels)
+                    negative_paths = negative_other_crop_labels[EngColumns.FEATURES_PATH].tolist()
+                    negative_non_crop_paths = negative_non_crop_labels[
+                        EngColumns.FEATURES_PATH
+                    ].tolist()
 
                     if task.balance_negative_crops:
                         negative_paths.extend(
@@ -150,25 +157,16 @@ class CropHarvestLabels(BaseDataset):
                 # otherwise, we will just filter by crop and non crop
                 positive_labels = gpdf[is_crop]
                 negative_labels = gpdf[~is_crop]
-                negative_paths = self._dataframe_to_paths(negative_labels)
+                negative_paths = negative_labels[EngColumns.FEATURES_PATH].tolist()
         except IndexError:
             raise NoDataForBoundingBoxError
 
-        positive_paths = self._dataframe_to_paths(positive_labels)
+        positive_paths = positive_paths[EngColumns.FEATURES_PATH].tolist()
 
         if (len(positive_paths) == 0) or (len(negative_paths) == 0):
             raise NoDataForBoundingBoxError
 
         return [x for x in positive_paths if x.exists()], [x for x in negative_paths if x.exists()]
-
-    def _path_from_row(self, row: geopandas.GeoSeries) -> Path:
-        return (
-            self.root
-            / f"features/arrays/{row[RequiredColumns.INDEX]}_{row[RequiredColumns.DATASET]}.h5"
-        )
-
-    def _dataframe_to_paths(self, df: geopandas.GeoDataFrame) -> List[Path]:
-        return [self._path_from_row(row) for _, row in df.iterrows()]
 
 
 class CropHarvestTifs(BaseDataset):
