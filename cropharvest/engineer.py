@@ -16,7 +16,6 @@ from sklearn.metrics import roc_auc_score, f1_score
 
 from cropharvest.bands import STATIC_BANDS, DYNAMIC_BANDS
 from cropharvest.columns import RequiredColumns, NullableColumns, EngColumns
-from cropharvest.countries import get_country_bbox
 from cropharvest.boundingbox import BBox
 from cropharvest.config import (
     EXPORT_END_DAY,

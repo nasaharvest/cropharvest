@@ -9,7 +9,6 @@ from cropharvest.countries import BBox
 from cropharvest.utils import (
     download_and_extract_archive,
     deterministic_shuffle,
-    read_geopandas,
     load_normalizing_dict,
     sample_with_memory,
     NoDataForBoundingBoxError,
