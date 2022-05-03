@@ -594,15 +594,12 @@ class Engineer:
                         hf.create_dataset(key, data=val)
                     hf.close()
 
-        for country, dataset in TEST_DATASETS.items():
+        for _, dataset in TEST_DATASETS.items():
             x: List[np.ndarray] = []
             y: List[int] = []
             lats: List[float] = []
             lons: List[float] = []
-            country_bboxes = get_country_bbox(country)
-            relevant_labels = pd.concat(
-                [filter_geojson(self.labels, box) for box in country_bboxes]
-            )
+            relevant_labels = self.labels[self.labels[RequiredColumns.DATASET] == dataset]
 
             relevant_labels[EngColumns.TIF_FILEPATHS] = self.match_labels_to_tifs(relevant_labels)
             tifs_found = relevant_labels[EngColumns.TIF_FILEPATHS].str.len() > 0
