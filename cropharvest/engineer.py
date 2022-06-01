@@ -1,3 +1,4 @@
+import enum
 from pathlib import Path
 from datetime import datetime, timedelta
 import geopandas
@@ -13,7 +14,7 @@ import h5py
 
 from sklearn.metrics import roc_auc_score, f1_score
 
-from cropharvest.bands import STATIC_BANDS, DYNAMIC_BANDS
+from cropharvest.bands import STATIC_BANDS, DYNAMIC_BANDS, STATIC_BANDS_MAX, DYNAMIC_BANDS_MAX
 from cropharvest.columns import RequiredColumns, NullableColumns
 from .config import (
     EXPORT_END_DAY,
@@ -30,7 +31,14 @@ from typing import cast, Optional, Dict, Union, Tuple, List, Sequence
 
 REMOVED_BANDS = ["B1", "B10"]
 RAW_BANDS = DYNAMIC_BANDS + STATIC_BANDS
+
 BANDS = [x for x in DYNAMIC_BANDS if x not in REMOVED_BANDS] + STATIC_BANDS + ["NDVI"]
+# NDVI is between 0 and 1
+BANDS_MAX = (
+    [DYNAMIC_BANDS_MAX[i] for i, x in enumerate(DYNAMIC_BANDS) if x not in REMOVED_BANDS]
+    + STATIC_BANDS_MAX
+    + [1]
+)
 
 
 @dataclass
