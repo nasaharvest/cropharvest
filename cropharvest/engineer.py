@@ -37,7 +37,7 @@ BANDS = [x for x in DYNAMIC_BANDS if x not in REMOVED_BANDS] + STATIC_BANDS + ["
 BANDS_MAX = (
     [DYNAMIC_BANDS_MAX[i] for i, x in enumerate(DYNAMIC_BANDS) if x not in REMOVED_BANDS]
     + STATIC_BANDS_MAX
-    + [1]
+    + [1.]
 )
 
 
