@@ -14,7 +14,7 @@ import h5py
 
 from sklearn.metrics import roc_auc_score, f1_score
 
-from cropharvest.bands import STATIC_BANDS, DYNAMIC_BANDS, STATIC_BANDS_MAX, DYNAMIC_BANDS_MAX
+from cropharvest.bands import STATIC_BANDS, DYNAMIC_BANDS, BANDS, RAW_BANDS, REMOVED_BANDS
 from cropharvest.columns import RequiredColumns, NullableColumns
 from .config import (
     EXPORT_END_DAY,
@@ -28,17 +28,6 @@ from .config import (
 from .utils import DATAFOLDER_PATH, load_normalizing_dict
 
 from typing import cast, Optional, Dict, Union, Tuple, List, Sequence
-
-REMOVED_BANDS = ["B1", "B10"]
-RAW_BANDS = DYNAMIC_BANDS + STATIC_BANDS
-
-BANDS = [x for x in DYNAMIC_BANDS if x not in REMOVED_BANDS] + STATIC_BANDS + ["NDVI"]
-# NDVI is between 0 and 1
-BANDS_MAX = (
-    [DYNAMIC_BANDS_MAX[i] for i, x in enumerate(DYNAMIC_BANDS) if x not in REMOVED_BANDS]
-    + STATIC_BANDS_MAX
-    + [1.]
-)
 
 
 @dataclass
@@ -174,6 +163,12 @@ class TestInstance:
 
 
 class Engineer:
+    """
+    This engineer creates features with BANDS defined in bands.py.
+    If the engineer changes, the bands there will need to change as
+    well.
+    """
+
     def __init__(self, data_folder: Path = DATAFOLDER_PATH) -> None:
         self.data_folder = data_folder
         self.eo_files = data_folder / "eo_data"
