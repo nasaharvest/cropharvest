@@ -1,4 +1,3 @@
-import enum
 from pathlib import Path
 from datetime import datetime, timedelta
 import geopandas
