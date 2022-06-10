@@ -97,7 +97,7 @@ def load_tanzania_ecaas():
 
     gdfs: List[geopandas.GeoDataFrame] = []
     for file_path in ecaas_files:
-        gdf = geopandas.GeoDataFrame(crs="EPSG:32736")
+        gdf = geopandas.GeoDataFrame(crs="EPSG:4326")
         df = pd.read_csv(file_path)
 
         # replace NaN with Rice
@@ -136,7 +136,7 @@ def load_tanzania_ecaas():
             convert_date
         )
 
-        gdfs.append(gdf.to_crs("EPSG:4326"))
+        gdfs.append(gdf)
 
     df = pd.concat(gdfs)
 
@@ -168,6 +168,3 @@ def convert_date(date_str):
     month = date_str[1]
     day = date_str[2]
     return datetime(int(year), int(month), int(day))
-
-
-load_tanzania_ecaas()

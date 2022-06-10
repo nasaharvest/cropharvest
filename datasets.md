@@ -16,7 +16,7 @@
 |[[6]](#6)| Uzbekistan, Tajikistan | 5,302            | Multi-class| CC BY-4.0|
 |[[7]](#7)| Germany           | 2,550             | Multi-class| DL-DE->BY-2.0|
 |[[8]](#8)| Brazil            | 800                   | Multi-class| CC BY-4.0|
-|[[9]](#9)| Tanzania          | 392                   | Multi-class| CC BY-4.0|
+|[[9]](#9)| Tanzania          | 1192                   | Multi-class| CC BY-4.0|
 |[[10]](#10)| Kenya           | 319                | Multi-class| CC BY-SA-4.0|
 |[[11]](#11)| Uganda          | 233                   | Multi-class| CC BY-4.0|
 | Harvest Partner | Mali      | 148                   | Multi-class| CC BY-4.0|
