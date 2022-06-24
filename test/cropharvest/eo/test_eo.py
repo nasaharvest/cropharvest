@@ -131,7 +131,7 @@ def test_export_for_bbox(mock_export_for_polygon, metres_per_polygon, mock_polyg
         mock_export_for_polygon.assert_called_with(
             end_date=end_date,
             polygon=None,
-            polygon_identifier=f"Togo/batch/0",
+            polygon_identifier="Togo/batch/0",
             start_date=start_date,
             file_dimensions=None,
             test=True,
