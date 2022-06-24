@@ -42,9 +42,9 @@ class Inference:
     @staticmethod
     def start_date_from_str(path: Union[Path, str]) -> datetime:
         dates = re.findall(r"\d{4}-\d{2}-\d{2}", str(path))
-        if len(dates) != 2:
-            raise ValueError(f"{path} should have start and end date")
-        start_date_str, _ = dates
+        if len(dates) < 1:
+            raise ValueError(f"{path} should have at least one date")
+        start_date_str = dates[0]
         start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
         return start_date
 
