@@ -15,7 +15,7 @@ setup(
     author="Gabriel Tseng",
     author_email="gabrieltseng95@gmail.com",
     url="https://github.com/nasaharvest/cropharvest",
-    version="0.4.0",
+    version="0.4.1",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: Other/Proprietary License",
