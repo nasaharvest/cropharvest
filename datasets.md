@@ -48,4 +48,4 @@ https://doi.org/10.34911/RDNT.5VX40R, 2019.
 
 <a id="11">[11]</a> Christophe Bocquet. Dalberg data insights uganda crop classification. https://doi.org/10.34911/RDNT.EII04X, 2019.
 
-<a id="12">[12]</a> Enabling Crop Analytics at Scale (ECAAS) Tanzania rice campaign.
+<a id="12">[12]</a> Catherine Nakalembe, Andreas Schlueter, Sixbert Maurice, & Taryn Devereux. (2022). 2022 Rice Crop-type Data for Western Tanzania (Version 1). https://doi.org/10.5281/zenodo.6824200
