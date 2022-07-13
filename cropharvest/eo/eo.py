@@ -145,8 +145,8 @@ class EarthEngineExporter:
             start_date=lambda x: x["end_date"]
             - timedelta(days=DAYS_PER_TIMESTEP * DEFAULT_NUM_TIMESTEPS)
         )
-        labels = labels.assign(
-            export_identifier=lambda x: f"{x['index']}-{x[RequiredColumns.DATASET]}"
+        labels["export_identifier"] = labels.apply(
+            lambda x: f"{x['index']}-{x[RequiredColumns.DATASET]}", axis=1
         )
         if dataset:
             labels = labels[labels.dataset == dataset]
