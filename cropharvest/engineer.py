@@ -14,10 +14,10 @@ import h5py
 
 from sklearn.metrics import roc_auc_score, f1_score
 
-from cropharvest.bands import STATIC_BANDS, DYNAMIC_BANDS
 from cropharvest.columns import RequiredColumns, NullableColumns, EngColumns
+from cropharvest.bands import STATIC_BANDS, DYNAMIC_BANDS, BANDS, RAW_BANDS, REMOVED_BANDS
 from cropharvest.boundingbox import BBox
-from cropharvest.config import (
+from .config import (
     EXPORT_END_DAY,
     EXPORT_END_MONTH,
     LABELS_FILENAME,
@@ -35,10 +35,6 @@ from cropharvest.config import (
 from cropharvest.utils import load_normalizing_dict, filter_geojson
 
 from typing import cast, Optional, Dict, Union, Tuple, List, Sequence
-
-REMOVED_BANDS = ["B1", "B10"]
-RAW_BANDS = DYNAMIC_BANDS + STATIC_BANDS
-BANDS = [x for x in DYNAMIC_BANDS if x not in REMOVED_BANDS] + STATIC_BANDS + ["NDVI"]
 
 
 @dataclass
@@ -177,7 +173,6 @@ class TestInstance:
 
 class Engineer:
     def __init__(self) -> None:
-
         self.labels = self.load_labels()
         FEATURES_FILEPATH.mkdir(exist_ok=True)
         ARRAYS_FILEPATH.mkdir(exist_ok=True)
