@@ -17,7 +17,7 @@ class_to_ptype = {
 def _check_columns_and_types(df: geopandas.GeoDataFrame) -> None:
 
     for expected_column, expected_type in [
-        ("index", int),
+        ("dataset_index", int),
         ("lat", float),
         ("lon", float),
         ("is_crop", int),
@@ -50,7 +50,7 @@ def _check_export_end_date(df: geopandas.GeoDataFrame) -> None:
 
 
 def _check_index(df: geopandas.GeoDataFrame) -> None:
-    assert len(df["index"].unique()) == len(df)
+    assert len(df["dataset_index"].unique()) == len(df)
 
 
 def _check_labels(df: geopandas.GeoDataFrame) -> None:

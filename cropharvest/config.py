@@ -1,4 +1,7 @@
-from .countries import BBox
+from pathlib import Path
+from collections import defaultdict
+
+from .boundingbox import BBox
 
 from typing import Dict
 
@@ -21,6 +24,14 @@ DATASET_URL = f"https://zenodo.org/record/{DATASET_VERSION_ID}"
 LABELS_FILENAME = "labels.geojson"
 FEATURES_DIR = "features"
 TEST_FEATURES_DIR = "test_features"
+
+# These values describe the structure of the data folder
+DATAFOLDER_PATH = Path(__file__).parent.parent / "data"
+EO_FILEPATH = DATAFOLDER_PATH / "eo_data"
+TEST_EO_FILEPATH = DATAFOLDER_PATH / "test_eo_data"
+FEATURES_FILEPATH = DATAFOLDER_PATH / FEATURES_DIR
+ARRAYS_FILEPATH = FEATURES_FILEPATH / "arrays"
+TEST_FEATURES_FILEPATH = DATAFOLDER_PATH / TEST_FEATURES_DIR
 
 # the default seed is useful because it also seeds the deterministic
 # shuffling algorithm we use (in cropharvest.utils.deterministic_shuffle)
@@ -47,3 +58,18 @@ TEST_REGIONS: Dict[str, BBox] = {
 }
 
 TEST_DATASETS = {"Togo": "togo-eval"}
+
+
+def test_countries_to_crops():
+    output_dict = defaultdict(list)
+    for identifier, _ in TEST_REGIONS.items():
+        country, crop, _, _ = identifier.split("_")
+        output_dict[country].append(crop)
+
+    for country, _ in TEST_DATASETS.items():
+        output_dict[country].append(None)
+
+    return output_dict
+
+
+TEST_COUNTRIES_TO_CROPS = test_countries_to_crops()

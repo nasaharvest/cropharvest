@@ -6,8 +6,7 @@ from . import loading_funcs
 from .utils import add_is_test_column
 
 from cropharvest.columns import NullableColumns, RequiredColumns
-from cropharvest.utils import DATAFOLDER_PATH
-from cropharvest.config import LABELS_FILENAME
+from cropharvest.config import LABELS_FILENAME, DATAFOLDER_PATH
 
 from typing import cast, Callable, List, Optional
 

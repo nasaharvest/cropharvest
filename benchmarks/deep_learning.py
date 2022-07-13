@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 from cropharvest.datasets import CropHarvest
-from cropharvest.utils import DATAFOLDER_PATH
+from cropharvest.config import DATAFOLDER_PATH
 from cropharvest.engineer import TestInstance
 
 from config import (

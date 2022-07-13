@@ -72,7 +72,7 @@ def load_kenya():
 
     df = pd.concat(dfs)
     df = df.reset_index(drop=True)
-    df["index"] = df.index
+    df[RequiredColumns.INDEX] = df.index
     return df
 
 

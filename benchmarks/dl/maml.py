@@ -3,7 +3,6 @@ import json
 import dill
 import warnings
 from random import shuffle, random
-from collections import defaultdict
 
 import torch
 from torch import nn
@@ -19,10 +18,10 @@ from .lstm import Classifier
 
 from cropharvest.datasets import CropHarvest, CropHarvestLabels, Task
 from cropharvest import countries
-from cropharvest.config import TEST_DATASETS, TEST_REGIONS
+from cropharvest.config import TEST_COUNTRIES_TO_CROPS
 from cropharvest.utils import NoDataForBoundingBoxError
 
-from typing import Dict, Tuple, Optional, List, DefaultDict
+from typing import Dict, Tuple, Optional, List
 
 
 class TrainDataLoader:
@@ -363,18 +362,11 @@ class Learner:
     ) -> Tuple[Dict[str, CropHarvest], Dict[str, CropHarvest]]:
         labels = CropHarvestLabels(self.root)
 
-        # remove any test regions, and collect the countries / crops
-        test_countries_to_crops: DefaultDict[str, List[str]] = defaultdict(list)
-
-        # reshuffle the test_regions dict so its a little easier to
-        # manipulate in this function
-        for identifier, _ in TEST_REGIONS.items():
-            country, crop, _, _ = identifier.split("_")
-            test_countries_to_crops[country].append(crop)
-
         label_to_task: Dict[str, CropHarvest] = {}
 
-        countries_to_ignore = [country for country, _ in TEST_DATASETS.items() if crop is None]
+        countries_to_ignore = [
+            country for country, crop in TEST_COUNTRIES_TO_CROPS.items() if crop is not None
+        ]
 
         for country in tqdm(countries.get_countries()):
             if country in countries_to_ignore:
@@ -394,8 +386,8 @@ class Learner:
                     label_to_task[task.id] = task
 
                 for label in labels.classes_in_bbox(country_bbox):
-                    if country in test_countries_to_crops:
-                        if label in test_countries_to_crops[country]:
+                    if country in TEST_COUNTRIES_TO_CROPS:
+                        if label in TEST_COUNTRIES_TO_CROPS[country]:
                             continue
                     try:
                         task = CropHarvest(

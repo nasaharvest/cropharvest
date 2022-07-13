@@ -3,7 +3,7 @@ from math import cos, radians
 from typing import List, Tuple, Union
 import ee
 
-from cropharvest.countries import BBox
+from cropharvest.boundingbox import BBox
 
 
 @dataclass
