@@ -32,7 +32,7 @@ from .config import (
     ARRAYS_FILEPATH,
     TEST_FEATURES_FILEPATH,
 )
-from cropharvest.utils import load_normalizing_dict, filter_geojson
+from cropharvest.utils import load_normalizing_dict
 
 from typing import cast, Optional, Dict, Union, Tuple, List, Sequence
 

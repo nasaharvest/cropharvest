@@ -18,7 +18,6 @@ from cropharvest.config import (
     FEATURES_DIR,
     TEST_FEATURES_DIR,
     LABELS_FILENAME,
-    DEFAULT_SEED,
     TEST_REGIONS,
     TEST_DATASETS,
     DEFAULT_SEED,
