@@ -138,13 +138,15 @@ class EarthEngineExporter:
     ) -> geopandas.GeoDataFrame:
         labels = geopandas.read_file(DATAFOLDER_PATH / LABELS_FILENAME)
         export_end_year = pd.to_datetime(labels[RequiredColumns.EXPORT_END_DATE]).dt.year
-        labels["end_date"] = export_end_year.apply(lambda x: date(x, 12, 12))
+        labels["end_date"] = export_end_year.apply(
+            lambda x: date(x, EXPORT_END_MONTH, EXPORT_END_DAY)
+        )
         labels = labels.assign(
             start_date=lambda x: x["end_date"]
             - timedelta(days=DAYS_PER_TIMESTEP * DEFAULT_NUM_TIMESTEPS)
         )
-        labels = labels.assign(
-            export_identifier=lambda x: f"{x['index']}-{x[RequiredColumns.DATASET]}"
+        labels["export_identifier"] = labels.apply(
+            lambda x: f"{x['index']}-{x[RequiredColumns.DATASET]}", axis=1
         )
         if dataset:
             labels = labels[labels.dataset == dataset]
