@@ -1,3 +1,5 @@
+import pytest
+
 from datetime import datetime
 from pathlib import Path
 import numpy as np
@@ -9,6 +11,19 @@ TIF_FILE = Path(__file__).parent / "98-togo_2019-02-06_2020-02-01.tif"
 
 def test_start_date_from_str():
     actual_start_date = Inference.start_date_from_str(TIF_FILE.name)
+    expected_start_date = datetime(2019, 2, 6, 0, 0)
+    assert actual_start_date == expected_start_date
+
+
+def test_start_date_from_str_none():
+    with pytest.raises(ValueError):
+        Inference.start_date_from_str("98-togo")
+
+
+def test_start_date_from_str_more_than_2():
+    actual_start_date = Inference.start_date_from_str(
+        "98-togo_2019-02-06_2020-02-01_2019-02-06_2020-02-01"
+    )
     expected_start_date = datetime(2019, 2, 6, 0, 0)
     assert actual_start_date == expected_start_date
 
