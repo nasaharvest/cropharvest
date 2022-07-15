@@ -169,6 +169,10 @@ DATASETS = {
         "function": loading_funcs.load_mali_hlc,
         "description": ("2022 data collected as part of the Helmets Labelling Crops project"),
     },
+    "tanzania-rice-ecaas": {
+        "function": loading_funcs.load_tanzania_ecaas,
+        "description": ("Tanzania Rice ECAAS campaign"),
+    },
 }
 
 
