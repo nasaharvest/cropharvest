@@ -574,7 +574,7 @@ class Engineer:
         skipped_files: int = 0
         num_new_files: int = 0
         for file_path in tqdm(list(self.eo_files.glob("*.tif"))):
-            file_index, dataset = self.process_filename(file_path.name)
+            file_index, dataset = self.process_filename(file_path.stem)
             file_name = f"{file_index}_{dataset}.h5"
             if (checkpoint) & ((arrays_dir / file_name).exists()):
                 # we check if the file has already been written
