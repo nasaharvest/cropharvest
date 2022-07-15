@@ -21,6 +21,7 @@
 |[[11]](#11)| Uganda          | 233                   | Multi-class| CC BY-4.0|
 |[[12]](#12)| Tanzania        | 800                   | Multi-class| CC BY-SA-4.0|
 | Harvest Partner | Mali      | 148                   | Multi-class| CC BY-4.0|
+| Harvest Partner | Mali      | 1506                  | Multi-class| CC BY-4.0|
 | FEWS NET| Zimbabwe          | 49                 | Multi-class| CC BY-SA-4.0|
 
 
