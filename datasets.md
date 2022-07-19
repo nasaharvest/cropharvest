@@ -19,8 +19,11 @@
 |[[9]](#9)| Tanzania          | 392                   | Multi-class| CC BY-4.0|
 |[[10]](#10)| Kenya           | 319                | Multi-class| CC BY-SA-4.0|
 |[[11]](#11)| Uganda          | 233                   | Multi-class| CC BY-4.0|
+|[[12]](#12)| Tanzania        | 800                   | Multi-class| CC BY-SA-4.0|
 | Harvest Partner | Mali      | 148                   | Multi-class| CC BY-4.0|
+| Harvest Partner | Mali      | 1506                  | Multi-class| CC BY-4.0|
 | FEWS NET| Zimbabwe          | 49                 | Multi-class| CC BY-SA-4.0|
+
 
 ## References
 <a id="1">[1]</a> Hannah Kerner, Gabriel Tseng, Inbal Becker-Reshef, Catherine Nakalembe, Brian Barker, Blake Munshell, Madhava Paliyam, and Mehdi Hosseini. Rapid response crop maps in data sparse regions. In ACM SIGKDD Conference on Data Mining and Knowledge Discovery Workshops, 2020.
@@ -45,3 +48,5 @@ https://doi.org/10.34911/RDNT.5VX40R, 2019.
 <a id="10">[10]</a> Annalyse Kehs, Peter McCloskey, John Chelal, Derek Morr, Stellah Amakove, Bismark Plimo, John Mayieka, Gladys Ntango, Kelvin Nyongesa, Lawrence Pamba, Melodine Jeptoo, James Mugo, Mercyline Tsuma, Winnie Onyango, and David Hughes. From village to globe: A dynamic real-time map of african fields through plantvillage. bioRxiv, 2019
 
 <a id="11">[11]</a> Christophe Bocquet. Dalberg data insights uganda crop classification. https://doi.org/10.34911/RDNT.EII04X, 2019.
+
+<a id="12">[12]</a> Catherine Nakalembe, Andreas Schlueter, Sixbert Maurice, & Taryn Devereux. (2022). 2022 Rice Crop-type Data for Western Tanzania (Version 1). https://doi.org/10.5281/zenodo.6824200
