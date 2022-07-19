@@ -25,6 +25,15 @@ LABEL_TO_CLASSIFICATION = {
 }
 
 
+def convert_date(date_str):
+    date_str = date_str.split("T")[0]
+    date_str = date_str.split("-")
+    year = date_str[0]
+    month = date_str[1]
+    day = date_str[2]
+    return datetime(int(year), int(month), int(day))
+
+
 def _load_single_stac(path_to_stac: Path) -> List[Tuple[Polygon, str, datetime, datetime]]:
     with (path_to_stac / "labels.geojson").open("r") as f:
         label_json = json.load(f)
@@ -159,12 +168,3 @@ def load_tanzania_ecaas():
     df[RequiredColumns.INDEX] = df.index
 
     return df
-
-
-def convert_date(date_str):
-    date_str = date_str.split("T")[0]
-    date_str = date_str.split("-")
-    year = date_str[0]
-    month = date_str[1]
-    day = date_str[2]
-    return datetime(int(year), int(month), int(day))
