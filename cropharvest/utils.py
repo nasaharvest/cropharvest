@@ -20,7 +20,7 @@ try:
 except ImportError:
     TORCH_INSTALLED = False
 
-DATAFOLDER_PATH = Path(__file__).parent.parent / "data"
+DATAFOLDER_PATH = Path(__file__).parent / "data"
 
 
 def set_seed(seed: int = 42) -> None:
