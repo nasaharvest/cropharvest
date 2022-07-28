@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 from urllib.error import HTTPError
 
-DATA_DIR = "data"
+DATA_DIR = "cropharvest/data"
 TIF_FILE = Path(__file__).parent / "98-togo_2019-02-06_2020-02-01.tif"
 
 
