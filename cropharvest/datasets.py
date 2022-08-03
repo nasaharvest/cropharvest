@@ -1,4 +1,5 @@
 from pathlib import Path
+from xml.etree.ElementInclude import include
 import geopandas
 import numpy as np
 import h5py
@@ -36,6 +37,7 @@ class Task:
     balance_negative_crops: bool = False
     test_identifier: Optional[str] = None
     normalize: bool = True
+    include_externally_contributed_labels: bool = True
 
     def __post_init__(self):
         if self.target_label is None:
@@ -90,17 +92,27 @@ class CropHarvestLabels(BaseDataset):
         return self._labels
 
     @staticmethod
-    def filter_geojson(gpdf: geopandas.GeoDataFrame, bounding_box: BBox) -> geopandas.GeoDataFrame:
+    def filter_geojson(
+        gpdf: geopandas.GeoDataFrame, bounding_box: BBox, include_external_contributions: bool
+    ) -> geopandas.GeoDataFrame:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             # warning: invalid value encountered in ? (vectorized)
-            in_bounding_box = np.vectorize(bounding_box.contains)(
+            include_condition = np.vectorize(bounding_box.contains)(
                 gpdf[RequiredColumns.LAT], gpdf[RequiredColumns.LON]
             )
-        return gpdf[in_bounding_box]
+        if not include_external_contributions:
+            include_condition &= gpdf[
+                gpdf[RequiredColumns.EXTERNALLY_CONTRIBUTED_DATASET] == False
+            ]
+        return gpdf[include_condition]
 
-    def classes_in_bbox(self, bounding_box: BBox) -> List[str]:
-        bbox_geojson = self.filter_geojson(self.as_geojson(), bounding_box)
+    def classes_in_bbox(
+        self, bounding_box: BBox, include_external_contributions: bool
+    ) -> List[str]:
+        bbox_geojson = self.filter_geojson(
+            self.as_geojson(), bounding_box, include_external_contributions
+        )
         unique_labels = [x for x in bbox_geojson.label.unique() if x is not None]
         return unique_labels
 
@@ -117,7 +129,9 @@ class CropHarvestLabels(BaseDataset):
         if filter_test:
             gpdf = gpdf[gpdf[RequiredColumns.IS_TEST] == False]
         if task.bounding_box is not None:
-            gpdf = self.filter_geojson(gpdf, task.bounding_box)
+            gpdf = self.filter_geojson(
+                gpdf, task.bounding_box, task.include_externally_contributed_labels
+            )
 
         if len(gpdf) == 0:
             raise NoDataForBoundingBoxError
