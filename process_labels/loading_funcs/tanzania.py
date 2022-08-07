@@ -121,8 +121,6 @@ def load_tanzania_ceo():
     df[RequiredColumns.IS_CROP] = np.where(df["is_crop_mean"] > 0.5, 1, 0)
     df = df.reset_index(drop=True)
     df[RequiredColumns.INDEX] = df.index
-    print(len(df))
-    print(df.head())
     return df
 
 
@@ -203,6 +201,4 @@ def convert_date(date_str):
     month = date_str[1]
     day = date_str[2]
     return datetime(int(year), int(month), int(day))
-
-
-load_tanzania_ceo()
+    
