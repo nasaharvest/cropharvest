@@ -169,6 +169,10 @@ DATASETS = {
         "function": loading_funcs.load_tanzania_ecaas,
         "description": ("Tanzania Rice ECAAS campaign"),
     },
+    "tanzania-ceo": {
+        "function": loading_funcs.load_tanzania_ceo,
+        "description": "Hand-labelled crop / non crop labels in Tanzania",
+    },
 }
 
 
