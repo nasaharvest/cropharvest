@@ -15,7 +15,7 @@ setup(
     author="Gabriel Tseng",
     author_email="gabrieltseng95@gmail.com",
     url="https://github.com/nasaharvest/cropharvest",
-    version="0.3.0",
+    version="0.5.0",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: Other/Proprietary License",
@@ -26,7 +26,9 @@ setup(
         "geopandas==0.9.0",
         "xarray>=0.16.2",
         "tqdm>=4.61.1",
-        "h5py>=3.1.0",
+        # h5py 3.7.0 breaks windows, see
+        # https://github.com/h5py/h5py/issues/2110
+        "h5py>=3.1.0,!=3.7.0",
         "rasterio>=1.2.6",
         "openpyxl>=2.5.9",
         "scikit-learn>=0.22.2",
