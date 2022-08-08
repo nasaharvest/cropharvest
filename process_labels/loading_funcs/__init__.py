@@ -41,5 +41,5 @@ __all__ = [
     "load_germany",
     "load_mali_hlc",
     "load_tanzania_ecaas",
-    "load_tanzania_ceo"
+    "load_tanzania_ceo",
 ]
