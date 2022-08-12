@@ -15,14 +15,17 @@ DATASETS = {
     "ethiopia": {
         "function": loading_funcs.load_ethiopia,
         "description": "Hand-labelled crop / non-crop labels in Ethiopia",
+        "externally_contributed": False,
     },
     "sudan": {
         "function": loading_funcs.load_sudan,
         "description": "Hand-labelled crop / non crop labels in Sudan",
+        "externally_contributed": False,
     },
     "togo": {
         "function": loading_funcs.load_togo,
         "description": "Hand-labelled crop / non crop labels in Togo",
+        "externally_contributed": False,
     },
     "togo-eval": {
         "function": loading_funcs.load_togo_eval,
@@ -30,6 +33,7 @@ DATASETS = {
             "Hand-labelled crop / non crop labels in Togo. "
             "These labels are a consensus set collected from 4 labellers."
         ),
+        "externally_contributed": False,
     },
     "lem-brazil": {
         "function": loading_funcs.load_lem_brazil,
@@ -38,6 +42,7 @@ DATASETS = {
             "For more information, please refer to "
             "https://www.sciencedirect.com/science/article/pii/S2352340920314359"
         ),
+        "externally_contributed": False,
     },
     "geowiki-landcover-2017": {
         "function": loading_funcs.load_geowiki_landcover_2017,
@@ -46,6 +51,7 @@ DATASETS = {
             "GeoWiki. For more information, please refer to "
             "https://doi.pangaea.de/10.1594/PANGAEA.873912"
         ),
+        "externally_contributed": False,
     },
     "central-asia": {
         "function": loading_funcs.load_central_asia,
@@ -54,6 +60,7 @@ DATASETS = {
             "For more information, please refer to "
             "https://www.nature.com/articles/s41597-020-00591-2.pdf"
         ),
+        "externally_contributed": False,
     },
     "kenya": {
         "function": loading_funcs.load_kenya,
@@ -62,10 +69,12 @@ DATASETS = {
             "information, please refer to "
             "https://doi.org/10.34911/rdnt.u41j87"
         ),
+        "externally_contributed": False,
     },
     "kenya-non-crop": {
         "function": loading_funcs.load_kenya_non_crop,
         "description": "Hand-labelled non crop labels in Kenya",
+        "externally_contributed": False,
     },
     "uganda": {
         "function": loading_funcs.load_uganda,
@@ -74,6 +83,7 @@ DATASETS = {
             "information, please refer to "
             "https://registry.mlhub.earth/10.34911/rdnt.eii04x/"
         ),
+        "externally_contributed": False,
     },
     "tanzania": {
         "function": loading_funcs.load_tanzania,
@@ -82,6 +92,7 @@ DATASETS = {
             "more information, please refer to "
             "https://doi.org/10.34911/rdnt.5vx40r"
         ),
+        "externally_contributed": False,
     },
     "croplands": {
         "function": loading_funcs.load_croplands,
@@ -91,10 +102,12 @@ DATASETS = {
             "project (https://croplands.org/home) retrieved from "
             "https://croplands.org/app/data/search?page=1&page_size=200 "
         ),
+        "externally_contributed": False,
     },
     "zimbabwe": {
         "function": loading_funcs.load_zimbabwe,
         "description": "Maize labels collected by the FEWS NET",
+        "externally_contributed": False,
     },
     "mali": {
         "function": loading_funcs.load_mali,
@@ -103,10 +116,12 @@ DATASETS = {
             "collected as part of the Relief to Resistance in the Sahel "
             "(R2R)"
         ),
+        "externally_contributed": False,
     },
     "mali-non-crop": {
         "function": loading_funcs.load_mali_crop_noncrop,
         "description": "Hand labelled non-crop labels in Mali",
+        "externally_contributed": False,
     },
     "ile-de-france": {
         "function": loading_funcs.load_ile_de_france,
@@ -117,10 +132,12 @@ DATASETS = {
             "on May 4th 2021. When loaded from the raw data, the dataset size is significantly "
             "reduced (i.e. we take a small subset of the total available labels) "
         ),
+        "externally_contributed": False,
     },
     "brazil-non-crop": {
         "function": loading_funcs.load_brazil_noncrop,
         "description": {"Hand labelled non-crop labels in Brazil"},
+        "externally_contributed": False,
     },
     "reunion-france": {
         "function": loading_funcs.load_reunion,
@@ -132,6 +149,7 @@ DATASETS = {
             "on June 2nd 2021. When loaded from the raw data, the dataset size is significantly "
             "reduced (i.e. we take a small subset of the total available labels) "
         ),
+        "externally_contributed": False,
     },
     "martinique-france": {
         "function": loading_funcs.load_martinique,
@@ -143,10 +161,12 @@ DATASETS = {
             "on June 2nd 2021. When loaded from the raw data, the dataset size is significantly "
             "reduced (i.e. we take a small subset of the total available labels) "
         ),
+        "externally_contributed": False,
     },
     "rwanda-ceo": {
         "function": loading_funcs.load_rwanda_ceo,
         "description": "Hand-labelled crop / non crop labels in Rwanda",
+        "externally_contributed": False,
     },
     "canada": {
         "function": loading_funcs.load_canada,
@@ -156,6 +176,7 @@ DATASETS = {
             "https://open.canada.ca/data/en/dataset/503a3113-e435-49f4-850c-d70056788632. "
             "Contains information licensed under the Open Government Licence – Canada."
         ),
+        "externally_contributed": False,
     },
     "germany": {
         "function": loading_funcs.load_germany,
@@ -164,14 +185,17 @@ DATASETS = {
             " of the European Union, and processed in "
             "https://github.com/lukaskondmann/DENETHOR"
         ),
+        "externally_contributed": False,
     },
     "mali-helmets-labelling-crops": {
         "function": loading_funcs.load_mali_hlc,
         "description": ("2022 data collected as part of the Helmets Labelling Crops project"),
+        "externally_contributed": False,
     },
     "tanzania-rice-ecaas": {
         "function": loading_funcs.load_tanzania_ecaas,
-        "description": ("Tanzania Rice ECAAS campaign"),
+        "description": "Tanzania Rice ECAAS campaign",
+        "externally_contributed": False,
     },
 }
 
@@ -200,8 +224,14 @@ def combine_datasets(datasets: Optional[List[str]] = None) -> geopandas.GeoDataF
 
     for dataset_name in datasets:
         dataset = load(dataset_name)
-        dataset = dataset.assign(dataset=dataset_name)
-
+        dataset = dataset.assign(
+            **{
+                RequiredColumns.DATASET: dataset_name,
+                RequiredColumns.EXTERNALLY_CONTRIBUTED_DATASET: DATASETS[dataset_name][
+                    "externally_contributed"
+                ],
+            }
+        )
         for column in NullableColumns.tolist():
             if column not in dataset:
                 dataset = dataset.assign(

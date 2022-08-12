@@ -393,7 +393,7 @@ class Learner:
                 if task.k >= min_task_k:
                     label_to_task[task.id] = task
 
-                for label in labels.classes_in_bbox(country_bbox):
+                for label in labels.classes_in_bbox(country_bbox, True):
                     if country in test_countries_to_crops:
                         if label in test_countries_to_crops[country]:
                             continue

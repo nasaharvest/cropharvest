@@ -27,6 +27,7 @@ class RequiredColumns(Columns):
     EXPORT_END_DATE = "export_end_date"
     GEOMETRY = "geometry"
     IS_TEST = "is_test"
+    EXTERNALLY_CONTRIBUTED_DATASET = "externally_contributed_dataset"
 
     @classmethod
     def date_columns(cls) -> List[str]:
