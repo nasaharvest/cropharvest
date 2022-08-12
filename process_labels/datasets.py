@@ -74,6 +74,7 @@ DATASETS = {
     "kenya-non-crop": {
         "function": loading_funcs.load_kenya_non_crop,
         "description": "Hand-labelled non crop labels in Kenya",
+        "externally_contributed": False,
     },
     "uganda": {
         "function": loading_funcs.load_uganda,
