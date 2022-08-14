@@ -1,5 +1,6 @@
 import torch
 
+from datetime import datetime
 from pathlib import Path
 
 from cropharvest.utils import DATAFOLDER_PATH
@@ -83,4 +84,7 @@ if __name__ == "__main__":
     if state_dict_path is not None:
         state_dict = torch.load(state_dict_path)
 
+    start_time = datetime.now()
+    print(start_time)
     run(tif_path, data_folder, state_dict, "experimental_results")
+    print(datetime.now() - start_time)
