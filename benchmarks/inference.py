@@ -14,7 +14,7 @@ from config import (
 
 from dl import Classifier
 
-from typing import Dict, Optional, Generator
+from typing import Dict, Optional, Generator, Tuple
 
 MAX_INFERENCE_BATCH_SIZE = 10000
 
