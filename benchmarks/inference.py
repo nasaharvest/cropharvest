@@ -1,10 +1,16 @@
 import torch
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from cropharvest.utils import DATAFOLDER_PATH
-from cropharvest.engineer import TestInstance
+from cropharvest.engineer import TestInstance, Engineer
+from cropharvest.config import (
+    EXPORT_END_DAY,
+    EXPORT_END_MONTH,
+    DEFAULT_NUM_TIMESTEPS,
+    DAYS_PER_TIMESTEP,
+)
 
 from config import (
     CLASSIFIER_DROPOUT,
@@ -55,16 +61,22 @@ def run(
 
     model.eval()
 
-    test_array = TestInstance.load_from_nc(tif_path)
+    start_date = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY) - timedelta(
+        days=DEFAULT_NUM_TIMESTEPS * DAYS_PER_TIMESTEP
+    )
 
-    for test_id, test_instance in _test_batch(test_array):
+    for idx, path_to_file in enumerate(tif_path):
+        final_x, flat_lat, flat_lon = Engineer.process_test_file(
+            path_to_file, start_date=start_date
+        )
+        test_instance = TestInstance(x=final_x, y=None, lats=flat_lon, lons=flat_lon)
 
         test_x = torch.from_numpy(test_instance.x).float()
         with torch.no_grad():
             preds = model(test_x).squeeze(dim=1).numpy()
 
         ds = test_instance.to_xarray(preds)
-        ds.to_netcdf(results_folder / f"{test_id}.nc")
+        ds.to_netcdf(results_folder / f"{idx}.nc")
     # finally, we want to get results when all the test instances are considered
     # together
     all_nc_files = list(results_folder.glob(f"*.nc"))
@@ -83,8 +95,10 @@ if __name__ == "__main__":
 
     if state_dict_path is not None:
         state_dict = torch.load(state_dict_path)
+    else:
+        state_dict = None
 
     start_time = datetime.now()
     print(start_time)
-    run(tif_path, data_folder, state_dict, "experimental_results")
+    run(tif_path, "experimental_results", data_folder, state_dict)
     print(datetime.now() - start_time)
