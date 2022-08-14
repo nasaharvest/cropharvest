@@ -15,7 +15,7 @@ from config import (
 
 from dl import Classifier
 
-from typing import Dict, Optional, Generator, Tuple
+from typing import Dict, Optional, Generator, Tuple, List
 
 MAX_INFERENCE_BATCH_SIZE = 10000
 
@@ -33,7 +33,7 @@ def _test_batch(
 
 
 def run(
-    tif_path: Path,
+    tif_path: List[Path],
     savefolder_name: str,
     data_folder: Path = DATAFOLDER_PATH,
     state_dict: Optional[Dict] = None,
