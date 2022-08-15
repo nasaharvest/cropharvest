@@ -125,7 +125,7 @@ def load_tanzania_ceo():
         }
     )
 
-    df[RequiredColumns.COLLECTION_DATE] = datetime(2022, 8, 8)
+    df[RequiredColumns.COLLECTION_DATE] = datetime(2019, 1, 2)
     df[RequiredColumns.EXPORT_END_DATE] = datetime(2022, EXPORT_END_MONTH, EXPORT_END_DAY)
     df[RequiredColumns.IS_CROP] = np.where(df["is_crop_mean"] > 0.5, 1, 0)
     df = df.reset_index(drop=True)
