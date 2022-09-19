@@ -14,17 +14,15 @@ from typing import List
 def load_zambia_ceo():
 
     ceo_files = (DATASET_PATH / "zambia" / "ceo_labels").glob("*.csv")
-    
+
     gdfs: List[geopandas.GeoDataFrame] = []
     for filepath in ceo_files:
-        
+
         single_df = pd.read_csv(filepath)
         single_df[RequiredColumns.GEOMETRY] = single_df["sample_geom"].apply(wkt.loads)
-        single_df["is_crop_mean"] = single_df.apply(
-            lambda x: x["Crop/non-crop"] == "Crop", axis=1
-        )
+        single_df["is_crop_mean"] = single_df.apply(lambda x: x["Crop/non-crop"] == "Crop", axis=1)
         gdfs.append(geopandas.GeoDataFrame(single_df, crs="epsg:4326"))
-   
+
     df = pd.concat(gdfs)
     df = df.groupby("plotid").agg(
         {
