@@ -7,6 +7,7 @@
 |NASA Harvest | Mali          | 142                   | Binary     | CC BY-4.0|
 |NASA Harvest | Brazil        | 36                    | Binary     | CC BY-4.0|
 |NASA Harvest | Tanzania        | 2400                    | Binary     | CC BY-4.0|
+|NASA Harvest | Zambia        | 2400                    | Binary     | CC BY-4.0|
 |[[1]](#1)    | Togo          | 1,582                 | Binary     | CC BY-4.0|
 |[[2]](#2)| France (Ile de France) | 6,184 |Multi-class| etalab Open License |
 |[[2]](#2)| France (Reunion) | 2,776       |Multi-class| etalab Open License |

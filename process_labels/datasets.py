@@ -202,6 +202,11 @@ DATASETS = {
         "description": "Hand-labelled crop / non crop labels in Tanzania",
         "externally_contributed": False,
     },
+    "zambia-ceo": {
+        "function": loading_funcs.load_zambia_ceo,
+        "description": "Hand-labelled crop / non crop labels in Zambia",
+        "externally_contributed": False,
+    },
 }
 
 
