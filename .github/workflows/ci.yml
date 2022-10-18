@@ -10,7 +10,7 @@ on:
 
 jobs:
   mypy:
-    name: black & mypy
+    name: black, flake8 & mypy
     runs-on: ubuntu-latest
     steps:
     - name: Clone repo
@@ -32,6 +32,7 @@ jobs:
     - name: Black & mypy
       run: |
         python -m black --check --diff .
+        python -m flake8 .
         python -m mypy cropharvest process_labels test benchmarks
         python -m mypy benchmarks/dl
   test:

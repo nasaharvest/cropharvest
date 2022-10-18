@@ -2,7 +2,6 @@
 black
 earthengine-api>=0.1.271
 mypy
-flake8==3.9.2
+flake8==5.0.4
 jupyter
-pytest-flake8
 pytest-mock
