@@ -71,6 +71,15 @@ class BBox:
         (min_lon, min_lat, max_lon, max_lat) = polygon.bounds
         return cls(min_lat, max_lat, min_lon, max_lon, name)
 
+    def __add__(self, other_box: "BBox") -> "BBox":
+        return BBox(
+            min_lat=min([self.min_lat, other_box.min_lat]),
+            min_lon=min([self.min_lon, other_box.min_lon]),
+            max_lon=max([self.max_lon, other_box.max_lon]),
+            max_lat=max([self.max_lat, other_box.max_lat]),
+            name="_".join([self.name, other_box.name]),
+        )
+
 
 def get_country_bbox(country_name: str) -> List[BBox]:
 
