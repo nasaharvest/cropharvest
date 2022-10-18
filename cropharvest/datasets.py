@@ -1,5 +1,6 @@
 from pathlib import Path
 import geopandas
+import math
 import numpy as np
 import h5py
 import warnings
@@ -18,7 +19,6 @@ from cropharvest.config import (
     FEATURES_DIR,
     TEST_FEATURES_DIR,
     LABELS_FILENAME,
-    DEFAULT_SEED,
     TEST_REGIONS,
     TEST_DATASETS,
 )
@@ -161,11 +161,9 @@ class CropHarvestLabels(BaseDataset):
                     negative_paths = self._dataframe_to_paths(negative_other_crop_labels)
 
                     if task.balance_negative_crops:
-                        negative_paths.extend(
-                            deterministic_shuffle(negative_non_crop_paths, DEFAULT_SEED)[
-                                : len(negative_paths)
-                            ]
-                        )
+                        multiplier = math.ceil(len(negative_non_crop_paths) / len(negative_paths))
+                        negative_paths *= multiplier
+                        negative_paths.extend(negative_non_crop_paths)
                     else:
                         negative_paths.extend(negative_non_crop_paths)
             else:
