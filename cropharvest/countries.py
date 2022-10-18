@@ -77,11 +77,11 @@ class BBox:
             min_lon=min([self.min_lon, other_box.min_lon]),
             max_lon=max([self.max_lon, other_box.max_lon]),
             max_lat=max([self.max_lat, other_box.max_lat]),
-            name="_".join([self.name, other_box.name]),
+            name="_".join([x for x in [self.name, other_box.name] if x is not None]),
         )
 
 
-def get_country_bbox(country_name: str) -> List[BBox]:
+def get_country_bbox(country_name: str, largest_only: bool = False) -> List[BBox]:
 
     country = COUNTRY_SHAPEFILE[COUNTRY_SHAPEFILE.NAME_EN == country_name]
     if len(country) != 1:
@@ -90,6 +90,8 @@ def get_country_bbox(country_name: str) -> List[BBox]:
     if isinstance(polygon, Polygon):
         return [BBox.polygon_to_bbox(polygon, country_name)]
     elif isinstance(polygon, MultiPolygon):
+        if largest_only:
+            polygon = MultiPolygon([max([x for x in polygon.geoms], key=lambda p: p.area)])
         bboxes = [
             BBox.polygon_to_bbox(x, f"{country_name}_{idx}") for idx, x in enumerate(polygon.geoms)
         ]
