@@ -23,4 +23,4 @@ def test_add_boxes_missing_name():
 
 def test_largest_country():
     france = get_country_bbox("France", largest_only=True)
-    assert france.name == "France_0"  # the biggest polygon for France
+    assert france[0].name == "France_0"  # the biggest polygon for France
