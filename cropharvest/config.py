@@ -1,4 +1,4 @@
-from .countries import BBox
+from .bbox import BBox
 
 from typing import Dict
 
