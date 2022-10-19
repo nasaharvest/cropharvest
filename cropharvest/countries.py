@@ -7,7 +7,12 @@ from pathlib import Path
 
 from typing import Optional
 
-COUNTRY_SHAPEFILE = geopandas.read_file(str(Path(__file__).parent / "country_shapefile"))
+from cropharvest.utils import memoized
+
+
+@memoized
+def load_country_shapefile():
+    return geopandas.read_file(str(Path(__file__).parent / "country_shapefile"))
 
 
 @dataclass
@@ -83,7 +88,8 @@ class BBox:
 
 def get_country_bbox(country_name: str, largest_only: bool = False) -> List[BBox]:
 
-    country = COUNTRY_SHAPEFILE[COUNTRY_SHAPEFILE.NAME_EN == country_name]
+    country_shapefile = load_country_shapefile()
+    country = country_shapefile[country_shapefile.NAME_EN == country_name]
     if len(country) != 1:
         raise RuntimeError(f"Unrecognized country {country_name}")
     polygon = country.geometry.iloc[0]
@@ -112,4 +118,4 @@ def get_country_bbox(country_name: str, largest_only: bool = False) -> List[BBox
 
 
 def get_countries() -> List[str]:
-    return list(COUNTRY_SHAPEFILE.NAME_EN.unique())
+    return list(load_country_shapefile().NAME_EN.unique())
