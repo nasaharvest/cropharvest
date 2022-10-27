@@ -4,9 +4,9 @@ CropHarvest is an open source remote sensing dataset for agriculture with benchm
 
 <img src="diagrams/labels_spatial_distribution.png" alt="Spatial distribution of labels" height="400px"/>
 
-The dataset consists of **90,480** datapoints, of which **30,899** (34.2%) have multiclass labels. All other datapoints only have binary crop / non-crop labels.
+The dataset consists of **95,186** datapoints, of which **33,205** (35%) have multiclass labels. All other datapoints only have binary crop / non-crop labels.
 
-**65,690** (73%) of these labels are paired with remote sensing and climatology data, specifically [Sentinel-2](https://sentinel.esa.int/web/sentinel/missions/sentinel-2), [Sentinel-1](https://sentinel.esa.int/web/sentinel/missions/sentinel-1/), the [SRTM Digital Elevation Model](https://cgiarcsi.community/data/srtm-90m-digital-elevation-database-v4-1/) and [ERA 5 climatology data](https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5).
+**70,213** (74%) of these labels are paired with remote sensing and climatology data, specifically [Sentinel-2](https://sentinel.esa.int/web/sentinel/missions/sentinel-2), [Sentinel-1](https://sentinel.esa.int/web/sentinel/missions/sentinel-1/), the [SRTM Digital Elevation Model](https://cgiarcsi.community/data/srtm-90m-digital-elevation-database-v4-1/) and [ERA 5 climatology data](https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5).
 
 21 datasets are aggregated into CropHarvest - these are documented [here](https://github.com/nasaharvest/cropharvest/blob/main/datasets.md).
 
