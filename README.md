@@ -66,18 +66,17 @@ from sklearn.ensemble import RandomForestClassifier
 from cropharvest.datasets import Task, CropHarvest
 from cropharvest.countries import get_country_bbox
 
-my_dataset = CropHarvest(
-    # the first argument to the dataset is the (already existing)
-    # folder into which the data will be downloaded / already exists
-    "data",
-    Task(
-        # get_country_bbox returns a list of bounding boxes.
-        # the one representing Metropolitan France is the
-        # 2nd box
-        bounding_box=get_country_bbox("France")[1],
-        normalize=True
-    )
-)
+# folder into which the data will be downloaded / already exists
+data_dir = "data"
+
+# get_country_bbox returns a list of bounding boxes.
+# the one representing Metropolitan France is the 2nd box
+metropolitan_france_bbox = get_country_bbox("France")[1]
+
+task = Task(bounding_box=metropolitan_france_bbox, normalize=True)
+
+my_dataset = CropHarvest(data_dir, task)
+
 X, y = my_dataset.as_array(flatten_x=True)
 model = RandomForestClassifier(random_state=0)
 model.fit(X, y)
