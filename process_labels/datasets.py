@@ -202,6 +202,51 @@ DATASETS = {
         "description": "Hand-labelled crop / non crop labels in Tanzania",
         "externally_contributed": False,
     },
+    "tanania-copernicusgeoglam": {
+        "function": loading_funcs.load_tanzania_copernicusgeoglam,
+        "description": ( 
+            "Crop Mapping for GEOGLAM Country Level Support"
+            "Tanzania Copernicus4Geoglam field campaign"
+            "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/Copernicus4GEOGLAM/"
+            ),
+        "externally_contributed": False,
+    },
+    "kenya-coperpenicusgeoglam-shortrain": {
+        "function": loading_funcs.load_kenya_copernicusgeoglam_shortrain,
+        "description": (
+            "Crop Mapping for GEOGLAM Country Level Support"
+            "Kenya Copernicus4Geoglam field campaign"
+            "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/Copernicus4GEOGLAM/"
+            ),
+        "externally_contributed": False,
+    },
+    "kenya-coperpenicusgeoglam-longrain": {
+        "function": loading_funcs.load_kenya_copernicusgeoglam_longrain,
+        "description": (
+            "Crop Mapping for GEOGLAM Country Level Support"
+            "Kenya Copernicus4Geoglam field campaign"
+            "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/Copernicus4GEOGLAM/"
+            ),
+        "externally_contributed": False,
+    },
+    "uganda-coperpenicusgeoglam-shortrain": {
+        "function": loading_funcs.load_uganda_copernicusgeoglam_shortrain,
+        "description": (
+            "Crop Mapping for GEOGLAM Country Level Support"
+            "Uganda Copernicus4Geoglam field campaign"
+            "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/Copernicus4GEOGLAM/"
+            ),
+        "externally_contributed": False,
+    },
+    "uganda-coperpenicusgeoglam-longrain": {
+        "function": loading_funcs.load_uganda_copernicusgeoglam_longrain,
+        "description": (
+            "Crop Mapping for GEOGLAM Country Level Support"
+            "Uganda Copernicus4Geoglam field campaign"
+            "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/Copernicus4GEOGLAM/"
+            ),
+        "externally_contributed": False,
+    },
 }
 
 
