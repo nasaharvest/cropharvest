@@ -6,7 +6,7 @@ from shapely.geometry import Polygon
 from cropharvest.columns import RequiredColumns, NullableColumns
 
 from ..utils import DATASET_PATH
-from .utils import export_date_from_row
+from .utils import _process_copernicusgeoglam, export_date_from_row
 
 from typing import Tuple, List
 
@@ -47,7 +47,6 @@ def _load_single_stac(path_to_stac: Path) -> List[Tuple[Polygon, str, datetime, 
 
 
 def load_uganda():
-
     data_folder = DATASET_PATH / "uganda"
     # first, get all files
     stac_folders = list(
@@ -90,3 +89,19 @@ def load_uganda():
     df = df.reset_index(drop=True)
     df[RequiredColumns.INDEX] = df.index
     return df
+
+
+def load_uganda_copernicusgeoglam_shortrain():
+    df = geopandas.read_file(
+        DATASET_PATH
+        / ("uganda/copernicusgeoglam/cop4geoglam_uganda_aoi_field_data_points_short_rains.shp")
+    )
+    return _process_copernicusgeoglam(df)
+
+
+def load_uganda_copernicusgeoglam_longrain():
+    df = geopandas.read_file(
+        DATASET_PATH
+        / ("uganda/copernicusgeoglam/cop4geoglam_uganda_aoi_field_data_points_2021.shp")
+    )
+    return _process_copernicusgeoglam(df)

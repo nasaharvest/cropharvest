@@ -6,6 +6,7 @@ from datetime import datetime
 from .utils import process_crop_non_crop, export_date_from_row, LATLON_CRS
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
 from cropharvest.columns import RequiredColumns, NullableColumns
+from .utils import _process_copernicusgeoglam
 from ..utils import DATASET_PATH
 
 from typing import List
@@ -29,7 +30,6 @@ LABEL_TO_CLASSIFICATION = {
 
 
 def load_kenya():
-
     subfolders = [f"ref_african_crops_kenya_01_labels_0{i}" for i in [0, 1, 2]]
 
     dfs: List[geopandas.GeoDataFrame] = []
@@ -77,7 +77,6 @@ def load_kenya():
 
 
 def load_kenya_non_crop():
-
     dfs: List[geopandas.GeoDataFrame] = []
 
     base = DATASET_PATH / "kenya" / "kenya_non_crop"
@@ -107,3 +106,18 @@ def load_kenya_non_crop():
     df[RequiredColumns.EXPORT_END_DATE] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
 
     return df
+
+
+def load_kenya_copernicusgeoglam_shortrain():
+    df = geopandas.read_file(
+        DATASET_PATH
+        / ("kenya/copernicusgeoglam/cop4geoglam_kenya_aoi_field_data_points_short_rains.shp")
+    )
+    return _process_copernicusgeoglam(df)
+
+
+def load_kenya_copernicusgeoglam_longrain():
+    df = geopandas.read_file(
+        DATASET_PATH / ("kenya/copernicusgeoglam/cop4geoglam_kenya_aoi_field_data_points.shp")
+    )
+    return _process_copernicusgeoglam(df)
