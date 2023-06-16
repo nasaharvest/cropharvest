@@ -65,6 +65,7 @@ jobs:
     - name: Install conda dependencies (Windows)
       run: |
         conda install 'fiona>=1.5' 'rasterio>=1.2.6'
+        python .github/fix_paths.py
       if: ${{ runner.os == 'Windows' }}
     - name: Cache pip
       uses: actions/cache@v2
