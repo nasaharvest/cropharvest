@@ -65,7 +65,6 @@ jobs:
     - name: Install conda dependencies (Windows)
       run: |
         conda install 'fiona>=1.5' 'rasterio>=1.2.6'
-        python .github/fix_paths.py
       if: ${{ runner.os == 'Windows' }}
     - name: Cache pip
       uses: actions/cache@v2
@@ -82,7 +81,9 @@ jobs:
       env:
         PROJ_LIB: C:\Miniconda\envs\test\Library\share\proj
         GDAL_DATA: C:\Miniconda\envs\test\Library\share\gdal
-      run: python -m pytest
+      run: |
+        python .github/fix_paths.py
+        python -m pytest
     - name: Run tests
       if: ${{ runner.os != 'Windows' }}
       run: python -m pytest
