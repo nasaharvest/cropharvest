@@ -69,7 +69,6 @@ class Classifier(nn.Module):
         self.global_classifier = nn.ModuleList(classification_layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-
         for _, lstm in enumerate(self.base):
             x, (hn, _) = lstm(x)
             x = x[:, 0, :, :]
@@ -105,7 +104,6 @@ class UnrolledLSTM(nn.Module):
     def forward(  # type: ignore
         self, x: torch.Tensor, state: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
     ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
-
         sequence_length = x.shape[1] if self.batch_first else x.shape[0]
         batch_size = x.shape[0] if self.batch_first else x.shape[1]
 

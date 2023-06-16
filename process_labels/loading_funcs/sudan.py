@@ -12,7 +12,6 @@ from ..utils import DATASET_PATH
 
 
 def load_sudan() -> geopandas.GeoDataFrame:
-
     output_dfs: List[geopandas.GeoDataFrame] = []
 
     filenames = ["sudan_crop", "sudan_non_crop"]

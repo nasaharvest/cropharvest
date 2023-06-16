@@ -58,7 +58,6 @@ class Learner:
         update_val_size: int = 8,
         val_size: float = 0.1,
     ) -> None:
-
         # update val size needs to be divided by 2 since
         # k is multiplied by 2 (k = number of positive / negative vals)
         min_total_k = k + (update_val_size // 2)
@@ -135,7 +134,6 @@ class Learner:
         val_size: int,
         calc_auc_roc: bool,
     ) -> Tuple[torch.Tensor, Optional[float], Optional[torch.Tensor], Optional[float]]:
-
         batch_size = k * 2  # k is the number of positive, negative examples
         data, labels = batch
 
@@ -183,7 +181,6 @@ class Learner:
         save_best_val: bool = True,
         checkpoint_every: int = 20,
     ) -> None:
-
         self.train_info = {
             "update_lr": update_lr,
             "meta_lr": meta_lr,
@@ -210,7 +207,6 @@ class Learner:
         labels = self.train_dl.task_labels
 
         for iteration_num in tqdm(range(num_iterations)):
-
             opt.zero_grad()
             meta_train_error = 0.0
             meta_valid_error = 0.0
@@ -258,7 +254,6 @@ class Learner:
                 num_instances_in_batch += 1
 
                 if ((idx % task_batch_size) == 0) or (idx == len(epoch_labels) - 1):
-
                     for p in self.maml.parameters():
                         p.grad.data.mul_(1.0 / num_instances_in_batch)
                     opt.step()
@@ -337,7 +332,6 @@ class Learner:
             dill.dump(self, mf)
 
     def checkpoint(self, iteration: int) -> None:
-
         checkpoint_files = list(self.version_folder.glob("checkpoint*"))
         if len(checkpoint_files) > 0:
             for filepath in checkpoint_files:
@@ -381,7 +375,6 @@ class Learner:
                 continue
             country_bboxes = countries.get_country_bbox(country)
             for _, country_bbox in enumerate(country_bboxes):
-
                 try:
                     task = CropHarvest(
                         self.root,

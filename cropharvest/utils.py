@@ -67,13 +67,11 @@ def download_and_extract_archive(root: str, filename: str) -> None:
 
 
 def load_normalizing_dict(path_to_dict: Path) -> Dict[str, np.ndarray]:
-
     hf = h5py.File(path_to_dict, "r")
     return {"mean": hf.get("mean")[:], "std": hf.get("std")[:]}
 
 
 def deterministic_shuffle(x: List, seed: int) -> List:
-
     output_list: List = []
     x = x.copy()
 
@@ -95,7 +93,6 @@ def deterministic_shuffle(x: List, seed: int) -> List:
 def sample_with_memory(
     indices: List[int], k: int, state: Optional[List[int]] = None
 ) -> Tuple[List[int], List[int]]:
-
     if state is None:
         state = []
 

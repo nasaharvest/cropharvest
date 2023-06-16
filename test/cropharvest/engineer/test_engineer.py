@@ -11,7 +11,6 @@ TIF_FILE = Path(__file__).parent.parent / "98-togo_2019-02-06_2020-02-01.tif"
 
 
 def test_load_tif_file():
-
     loaded_file, _ = Engineer.load_tif(TIF_FILE, start_date=datetime(2019, 2, 6))
     assert loaded_file.shape[0] == DEFAULT_NUM_TIMESTEPS
     assert loaded_file.shape[1] == len(DYNAMIC_BANDS) + len(STATIC_BANDS)
@@ -30,7 +29,6 @@ def test_load_tif_file():
 
 
 def test_fillna_real():
-
     loaded_file, average_slope = Engineer.load_tif(TIF_FILE, start_date=datetime(2019, 2, 6))
 
     # slope is calculated from neighbouring points, so the
@@ -49,7 +47,6 @@ def test_fillna_real():
 
 
 def test_fillna_simulated():
-
     array = np.array([[1, float("NaN"), 3]] * len(BANDS)).T
     expected_array = np.array([[1, 2, 3]] * len(BANDS)).T
     new_array = Engineer.fillna(array, average_slope=1)
@@ -86,14 +83,12 @@ def test_find_nearest():
 
 
 def test_filename_correctly_processed():
-
     idx, dataset = Engineer.process_filename(TIF_FILE.name)
     assert idx == 98
     assert dataset == "togo"
 
 
 def test_filename_correctly_processed_2():
-
     filename = "98-geowiki-landcover-2017_2019-02-06_2020-02-01.tif"
     idx, dataset = Engineer.process_filename(filename)
     assert idx == 98

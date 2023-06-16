@@ -444,7 +444,6 @@ class CropHarvest(BaseDataset):
         return self.task.id
 
     def _get_positive_and_negative_indices(self) -> Tuple[List[int], List[int]]:
-
         positive_indices: List[int] = []
         negative_indices: List[int] = []
 

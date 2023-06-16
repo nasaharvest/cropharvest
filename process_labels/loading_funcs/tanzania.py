@@ -56,7 +56,6 @@ def _load_single_stac(path_to_stac: Path) -> List[Tuple[Polygon, str, datetime, 
 
 
 def load_tanzania():
-
     data_folder = DATASET_PATH / "tanzania"
     # first, get all files
     stac_folders = list(
@@ -103,7 +102,6 @@ def load_tanzania():
 
 
 def load_tanzania_ceo():
-
     ceo_files = (DATASET_PATH / "tanzania" / "ceo_labels").glob("*.csv")
 
     gdfs: List[geopandas.GeoDataFrame] = []
@@ -134,7 +132,6 @@ def load_tanzania_ceo():
 
 
 def load_tanzania_ecaas():
-
     ecaas_files = (DATASET_PATH / "tanzania" / "tanzania_rice_ecaas").glob("*.csv")
 
     gdfs: List[geopandas.GeoDataFrame] = []

@@ -20,7 +20,6 @@ LABEL_TO_CLASSIFICATION = {
 
 
 def load_central_asia():
-
     df = geopandas.read_file(DATASET_PATH / "central_asia")
 
     def make_harvest_date(row) -> datetime:

@@ -12,7 +12,6 @@ LABEL_TO_CLASSIFICATION = {"Maize": "cereals"}
 
 
 def load_zimbabwe():
-
     df = pd.read_excel(
         DATASET_PATH / "zimbabwe/zimbabwe_fewsnet_2021_crop_tour_obs_crop_type2.xlsx",
         engine="openpyxl",
