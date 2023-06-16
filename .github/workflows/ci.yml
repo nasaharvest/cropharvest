@@ -46,6 +46,8 @@ jobs:
         exclude:
         - os: macos-latest
           python-version: 3.7
+        - os: windows-latest
+          python-version: 3.9
         include:
           - os: ubuntu-20.04
             python-version: 3.6
@@ -82,7 +84,6 @@ jobs:
         PROJ_LIB: C:\Miniconda\envs\test\Library\share\proj
         GDAL_DATA: C:\Miniconda\envs\test\Library\share\gdal
       run: |
-        python .github/fix_paths.py
         python -m pytest
     - name: Run tests
       if: ${{ runner.os != 'Windows' }}
