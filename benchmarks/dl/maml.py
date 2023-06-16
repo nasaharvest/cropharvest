@@ -9,13 +9,13 @@ import torch
 from torch import nn
 from torch import optim
 
-import learn2learn as l2l
 from tqdm import tqdm
 from sklearn.metrics import roc_auc_score
 import numpy as np
 import subprocess
 
 from .lstm import Classifier
+from .l2l_maml import MAML
 
 from cropharvest.datasets import CropHarvest, CropHarvestLabels, Task
 from cropharvest import countries
@@ -107,7 +107,7 @@ class Learner:
         }
 
         self.train_info: Dict = {}
-        self.maml: Optional[l2l.algorithms.MAML] = None
+        self.maml: Optional[MAML] = None
 
         self.model_folder = self.root / model_name
         self.model_folder.mkdir(exist_ok=True)
@@ -199,7 +199,7 @@ class Learner:
         with (self.version_folder / "train_info.json").open("w") as f:
             json.dump(self.train_info, f)
 
-        self.maml = l2l.algorithms.MAML(self.model, lr=update_lr, first_order=False)
+        self.maml = MAML(self.model, lr=update_lr, first_order=False)
         opt = optim.Adam(self.maml.parameters(), meta_lr)
         best_val_score = np.inf
 
