@@ -5,7 +5,7 @@ from urllib.request import urlopen, Request
 import numpy as np
 import random
 import geopandas
-import collections
+import collections.abc
 import functools
 import tarfile
 
@@ -121,7 +121,7 @@ class memoized(object):
         self.cache = {}
 
     def __call__(self, *args):
-        if not isinstance(args, collections.Hashable):
+        if not isinstance(args, collections.abc.Hashable):
             # uncacheable. a list, for instance.
             # better to not cache than blow up.
             return self.func(*args)
