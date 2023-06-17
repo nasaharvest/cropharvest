@@ -23,6 +23,7 @@ setup(
     ],
     packages=["cropharvest"] + [f"cropharvest.{f}" for f in find_packages("cropharvest")],
     install_requires=[
+        "pandas<2.0.0",
         "geopandas==0.9.0",
         "xarray>=0.16.2",
         "tqdm>=4.61.1",
