@@ -25,7 +25,7 @@ setup(
     install_requires=[
         "pandas<2.0.0",
         "geopandas==0.9.0",
-        "xarray>=0.16.2",
+        "xarray>=0.16.2, <0.20.0",
         "tqdm>=4.61.1",
         # h5py 3.7.0 breaks windows, see
         # https://github.com/h5py/h5py/issues/2110
