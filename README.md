@@ -38,6 +38,7 @@ Windows users must install the CropHarvest within a [conda](https://docs.conda.i
 conda install 'fiona>=1.5' 'rasterio>=1.2.6'
 pip install cropharvest
 ```
+In addition, it [may be necessary](https://github.com/h5py/h5py/issues/1774) to install `h5py` using conda as well (`conda install 'h5py>3.7.0'`) prior to pip-installing cropharvest.
 
 ### Getting started [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nasaharvest/cropharvest/blob/main/demo.ipynb)
 See the [`demo.ipynb`](https://github.com/nasaharvest/cropharvest/blob/main/demo.ipynb) notebook for an example on how to download the data from [Zenodo](https://zenodo.org/record/7257688) and train a random forest against this data.
