@@ -204,11 +204,11 @@ DATASETS = {
     },
     "tanania-copernicusgeoglam": {
         "function": loading_funcs.load_tanzania_copernicusgeoglam,
-        "description": ( 
+        "description": (
             "Crop Mapping for GEOGLAM Country Level Support"
             "Tanzania Copernicus4Geoglam field campaign"
             "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/Copernicus4GEOGLAM/"
-            ),
+        ),
         "externally_contributed": False,
     },
     "kenya-coperpenicusgeoglam-shortrain": {
@@ -217,7 +217,7 @@ DATASETS = {
             "Crop Mapping for GEOGLAM Country Level Support"
             "Kenya Copernicus4Geoglam field campaign"
             "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/Copernicus4GEOGLAM/"
-            ),
+        ),
         "externally_contributed": False,
     },
     "kenya-coperpenicusgeoglam-longrain": {
@@ -226,7 +226,7 @@ DATASETS = {
             "Crop Mapping for GEOGLAM Country Level Support"
             "Kenya Copernicus4Geoglam field campaign"
             "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/Copernicus4GEOGLAM/"
-            ),
+        ),
         "externally_contributed": False,
     },
     "uganda-coperpenicusgeoglam-shortrain": {
@@ -235,7 +235,7 @@ DATASETS = {
             "Crop Mapping for GEOGLAM Country Level Support"
             "Uganda Copernicus4Geoglam field campaign"
             "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/Copernicus4GEOGLAM/"
-            ),
+        ),
         "externally_contributed": False,
     },
     "uganda-coperpenicusgeoglam-longrain": {
@@ -244,7 +244,7 @@ DATASETS = {
             "Crop Mapping for GEOGLAM Country Level Support"
             "Uganda Copernicus4Geoglam field campaign"
             "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/Copernicus4GEOGLAM/"
-            ),
+        ),
         "externally_contributed": False,
     },
 }
