@@ -29,7 +29,6 @@ LABEL_TO_CLASSIFICATION = {
 
 
 def load_kenya():
-
     subfolders = [f"ref_african_crops_kenya_01_labels_0{i}" for i in [0, 1, 2]]
 
     dfs: List[geopandas.GeoDataFrame] = []
@@ -77,7 +76,6 @@ def load_kenya():
 
 
 def load_kenya_non_crop():
-
     dfs: List[geopandas.GeoDataFrame] = []
 
     base = DATASET_PATH / "kenya" / "kenya_non_crop"

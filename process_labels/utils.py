@@ -13,7 +13,6 @@ DATASET_PATH = Path(__file__).parent / "raw_data"
 
 
 def add_is_test_column(labels: geopandas.GeoDataFrame) -> geopandas.GeoDataFrame:
-
     # adds an `is_test` column for all test datapoints.
     labels[RequiredColumns.IS_TEST] = False
     for _, region_bbox in config.TEST_REGIONS.items():

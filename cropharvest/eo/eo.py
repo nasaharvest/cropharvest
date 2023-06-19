@@ -160,7 +160,6 @@ class EarthEngineExporter:
     def _filter_labels(
         labels: geopandas.GeoDataFrame, checkpoint: Optional[Path]
     ) -> geopandas.GeoDataFrame:
-
         # does not sort
         datasets = labels.dataset.unique()
 
@@ -212,7 +211,6 @@ class EarthEngineExporter:
         file_dimensions: Optional[int] = None,
         test: bool = False,
     ) -> ee.batch.Export:
-
         kwargs = dict(
             image=image.clip(region),
             description=description[:100],
@@ -259,7 +257,6 @@ class EarthEngineExporter:
         test: bool = False,
         file_dimensions: Optional[int] = None,
     ) -> bool:
-
         filename = str(polygon_identifier)
         if (checkpoint is not None) and (checkpoint / f"{filename}.tif").exists():
             print("File already exists! Skipping")
@@ -349,7 +346,6 @@ class EarthEngineExporter:
     def _labels_to_polygons_and_years(
         cls, labels: geopandas.GeoDataFrame, surrounding_metres: int
     ) -> List[Tuple[ee.Geometry.Polygon, str, date, date]]:
-
         output: List[ee.Geometry.Polygon] = []
 
         print(f"Exporting {len(labels)} labels")
@@ -381,7 +377,6 @@ class EarthEngineExporter:
 
     @staticmethod
     def make_identifier(bbox: BBox, start_date, end_date) -> str:
-
         # Identifier is rounded to the nearest ~10m
         min_lon = round(bbox.min_lon, 4)
         min_lat = round(bbox.min_lat, 4)
@@ -397,7 +392,6 @@ class EarthEngineExporter:
         padding_metres: int = 160,
         checkpoint: Optional[Path] = None,
     ) -> None:
-
         for identifier, bbox in TEST_REGIONS.items():
             polygon = EEBoundingBox.from_bounding_box(
                 bounding_box=bbox, padding_metres=padding_metres
@@ -423,7 +417,6 @@ class EarthEngineExporter:
         metres_per_polygon: Optional[int] = 10000,
         file_dimensions: Optional[int] = None,
     ) -> Dict[str, bool]:
-
         if start_date > end_date:
             raise ValueError(f"Start date {start_date} is after end date {end_date}")
 
@@ -456,7 +449,6 @@ class EarthEngineExporter:
         checkpoint: Optional[Path] = None,
         start_from_last: bool = False,
     ) -> None:
-
         if labels is None:
             labels = self.load_default_labels(
                 dataset=dataset, start_from_last=start_from_last, checkpoint=checkpoint

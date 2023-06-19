@@ -47,7 +47,6 @@ def _load_single_stac(path_to_stac: Path) -> List[Tuple[Polygon, str, datetime, 
 
 
 def load_uganda():
-
     data_folder = DATASET_PATH / "uganda"
     # first, get all files
     stac_folders = list(

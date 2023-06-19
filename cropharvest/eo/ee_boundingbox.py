@@ -39,7 +39,6 @@ class EEBoundingBox(BBox):
         return delta_lat * m_per_deg_lat, delta_lon * m_per_deg_lon
 
     def to_polygons(self, metres_per_patch: int = 3300) -> List[ee.Geometry.Polygon]:
-
         lat_metres, lon_metres = self.to_metres()
 
         num_cols = int(lon_metres / metres_per_patch)
@@ -106,7 +105,6 @@ class EEBoundingBox(BBox):
     def from_centre(
         mid_lat: float, mid_lon: float, surrounding_metres: Union[int, Tuple[int, int]]
     ) -> "EEBoundingBox":
-
         m_per_deg_lat, m_per_deg_lon = EEBoundingBox.metre_per_degree(mid_lat)
 
         if isinstance(surrounding_metres, int):

@@ -15,7 +15,6 @@ from ..utils import DATASET_PATH
 
 
 def _process_eval_shapefile(filepaths: Sequence[Tuple[Path, str, bool]]) -> geopandas.GeoDataFrame:
-
     labels: List[str] = []
     lat_labels: List[str] = []
     lon_labels: List[str] = []
@@ -82,7 +81,6 @@ def _process_eval_shapefile(filepaths: Sequence[Tuple[Path, str, bool]]) -> geop
 
 
 def load_togo() -> geopandas.GeoDataFrame:
-
     output_dfs: List[geopandas.GeoDataFrame] = []
 
     filenames = ["crop_merged_v2", "noncrop_merged_v2"]
@@ -101,7 +99,6 @@ def load_togo() -> geopandas.GeoDataFrame:
 
 
 def load_togo_eval() -> geopandas.GeoDataFrame:
-
     # the boolean indicates whether or not the coordinates need to
     # be transformed from 32631 to 4326
     evaluation_shapefiles = (

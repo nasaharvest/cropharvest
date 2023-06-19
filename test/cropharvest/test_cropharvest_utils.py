@@ -8,7 +8,6 @@ from cropharvest.utils import deterministic_shuffle, read_geopandas, download_an
 
 
 def test_deterministic_shuffle():
-
     input_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     all_outputs = []
@@ -23,7 +22,6 @@ def test_deterministic_shuffle():
 
 
 def test_labels_share_memory(tmpdir):
-
     geopandas.GeoDataFrame(
         data={"a": [1, 2, 3]}, geometry=[Point(1, 1), Point(2, 2), Point(3, 3)]
     ).to_file(tmpdir / LABELS_FILENAME, driver="GeoJSON")

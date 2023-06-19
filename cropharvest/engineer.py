@@ -31,7 +31,6 @@ from typing import cast, Optional, Dict, Union, Tuple, List, Sequence
 
 @dataclass
 class DataInstance:
-
     dataset: str
     label_lat: float
     label_lon: float
@@ -76,7 +75,6 @@ class TestInstance:
 
     @classmethod
     def load_from_nc(cls, filepaths: Union[Path, List[Path]]) -> Tuple:
-
         y: List[np.ndarray] = []
         preds: List[np.ndarray] = []
         lats: List[np.ndarray] = []
@@ -268,7 +266,6 @@ class Engineer:
             self.norm_interim["M2"] += delta * (x - self.norm_interim["mean"])
 
     def calculate_normalizing_dict(self) -> Optional[Dict[str, np.ndarray]]:
-
         if "mean" not in self.norm_interim:
             print("No normalizing dict calculated! Make sure to call update_normalizing_values")
             return None
@@ -281,7 +278,6 @@ class Engineer:
     def adjust_normalizing_dict(
         dicts: Sequence[Tuple[int, Optional[Dict[str, np.ndarray]]]]
     ) -> Optional[Dict[str, np.ndarray]]:
-
         for _, single_dict in dicts:
             if single_dict is None:
                 return None
@@ -589,7 +585,6 @@ class Engineer:
 
             instance = self.process_single_file(file_path, row=file_row)
             if instance is not None:
-
                 hf = h5py.File(arrays_dir / file_name, "w")
                 hf.create_dataset("array", data=instance.array)
 

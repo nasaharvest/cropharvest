@@ -8,7 +8,6 @@ from typing import Optional
 
 @dataclass
 class BBox:
-
     min_lat: float
     max_lat: float
     min_lon: float
@@ -53,7 +52,6 @@ class BBox:
         return [cos(lat) * cos(lon), cos(lat) * sin(lon), sin(lat)]
 
     def get_centre(self, in_radians: bool = True) -> Tuple[float, float]:
-
         # roughly calculate the centres
         lat = self.min_lat + ((self.max_lat - self.min_lat) / 2)
         lon = self.min_lon + ((self.max_lon - self.min_lon) / 2)

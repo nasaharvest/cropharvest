@@ -5,7 +5,7 @@ from urllib.request import urlopen, Request
 import numpy as np
 import random
 import geopandas
-import collections
+import collections.abc
 import functools
 import tarfile
 
@@ -67,13 +67,11 @@ def download_and_extract_archive(root: str, filename: str) -> None:
 
 
 def load_normalizing_dict(path_to_dict: Path) -> Dict[str, np.ndarray]:
-
     hf = h5py.File(path_to_dict, "r")
     return {"mean": hf.get("mean")[:], "std": hf.get("std")[:]}
 
 
 def deterministic_shuffle(x: List, seed: int) -> List:
-
     output_list: List = []
     x = x.copy()
 
@@ -95,7 +93,6 @@ def deterministic_shuffle(x: List, seed: int) -> List:
 def sample_with_memory(
     indices: List[int], k: int, state: Optional[List[int]] = None
 ) -> Tuple[List[int], List[int]]:
-
     if state is None:
         state = []
 
@@ -121,7 +118,7 @@ class memoized(object):
         self.cache = {}
 
     def __call__(self, *args):
-        if not isinstance(args, collections.Hashable):
+        if not isinstance(args, collections.abc.Hashable):
             # uncacheable. a list, for instance.
             # better to not cache than blow up.
             return self.func(*args)

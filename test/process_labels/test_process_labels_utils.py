@@ -4,7 +4,6 @@ from process_labels.utils import add_is_test_column
 
 
 def test_is_test_column():
-
     labels = geopandas.GeoDataFrame(
         data={
             "dataset": ["togo-eval", "geowiki", "geowiki"],

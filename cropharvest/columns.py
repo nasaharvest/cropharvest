@@ -17,7 +17,6 @@ class Columns:
 
 
 class RequiredColumns(Columns):
-
     INDEX = "index"
     IS_CROP = "is_crop"
     LAT = "lat"

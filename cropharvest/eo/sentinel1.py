@@ -12,7 +12,6 @@ image_collection = "COPERNICUS/S1_GRD"
 def get_image_collection(
     region: ee.Geometry, start_date: date, end_date: date
 ) -> Tuple[ee.ImageCollection, ee.ImageCollection]:
-
     dates = ee.DateRange(
         date_to_string(start_date),
         date_to_string(end_date),
@@ -65,7 +64,6 @@ def get_single_image(
     vv_imcol: ee.ImageCollection,
     vh_imcol: ee.ImageCollection,
 ) -> ee.Image:
-
     mid_date = start_date + ((end_date - start_date) / 2)
 
     kept_vv = _get_closest_dates(mid_date, vv_imcol)

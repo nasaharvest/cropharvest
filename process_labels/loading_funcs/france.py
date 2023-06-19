@@ -129,7 +129,6 @@ def _process_france_2019_rpg(df: geopandas.GeoDataFrame) -> geopandas.GeoDataFra
 
 
 def load_ile_de_france():
-
     df = geopandas.read_file(
         DATASET_PATH
         / (
