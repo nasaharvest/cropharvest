@@ -10,7 +10,6 @@ from ..utils import DATASET_PATH
 
 
 def load_geowiki_landcover_2017():
-
     # we will use the data collected from all participants
     data = pd.read_csv(DATASET_PATH / "geowiki_landcover_2017" / "loc_all_2.txt", sep="\t")
 

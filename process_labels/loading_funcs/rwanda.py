@@ -12,7 +12,6 @@ from typing import List
 
 
 def load_rwanda_ceo():
-
     ceo_files = (DATASET_PATH / "rwanda/ceo_labels").glob("*.csv")
 
     gdfs: List[geopandas.GeoDataFrame] = []

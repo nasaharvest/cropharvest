@@ -5,7 +5,6 @@ from typing import List
 
 
 def test_to_one_hot():
-
     encodings: List = []
     for x in CropClassifications:
         encodings.append(to_one_hot(x.name))

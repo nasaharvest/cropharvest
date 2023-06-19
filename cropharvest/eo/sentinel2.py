@@ -29,7 +29,6 @@ cloudFreeKeepThresh = 3
 
 
 def get_single_image(region: ee.Geometry, start_date: date, end_date: date) -> ee.Image:
-
     dates = ee.DateRange(
         date_to_string(start_date),
         date_to_string(end_date),

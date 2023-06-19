@@ -20,7 +20,6 @@ LABEL_TO_CLASSIFICATION = {
 
 
 def load_central_asia():
-
     df = geopandas.read_file(DATASET_PATH / "central_asia")
 
     def make_harvest_date(row) -> datetime:
@@ -65,7 +64,7 @@ def load_central_asia():
     # two manual changes to replace multipolygons with polygons.
     # the first polygon is 10^5 times smaller than the second, so
     # we use the second
-    df.loc[df["index"] == 5162, "geometry"] = df.iloc[5162].geometry[1]
-    df.loc[df["index"] == 4049, "geometry"] = df.iloc[4049].geometry[1]
+    df.loc[df["index"] == 5162, "geometry"] = df.iloc[5162].geometry.geoms[1]
+    df.loc[df["index"] == 4049, "geometry"] = df.iloc[4049].geometry.geoms[1]
 
     return df

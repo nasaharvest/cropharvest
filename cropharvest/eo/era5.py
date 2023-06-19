@@ -8,7 +8,6 @@ image_collection = "ECMWF/ERA5_LAND/MONTHLY"
 
 
 def get_single_image(region: ee.Geometry, start_date: date, end_date: date) -> ee.Image:
-
     # This only really works with the values currently in config.
     # What happens is that the images are associated with the first day of the month,
     # so if we just use the given start_date and end_date, then we will often get

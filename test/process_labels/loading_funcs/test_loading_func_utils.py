@@ -4,7 +4,6 @@ from process_labels.loading_funcs.utils import _overlapping_year
 
 
 def test_overlapping_year():
-
     test_cases = [
         (2019, datetime(2018, 4, 3), datetime(2019, 4, 3)),
         (2021, datetime(2021, 1, 1), datetime(2021, 2, 1)),

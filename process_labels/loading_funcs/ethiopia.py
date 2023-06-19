@@ -11,7 +11,6 @@ from ..utils import DATASET_PATH
 
 
 def load_ethiopia() -> geopandas.GeoDataFrame:
-
     output_dfs: List[geopandas.GeoDataFrame] = []
 
     filenames = [

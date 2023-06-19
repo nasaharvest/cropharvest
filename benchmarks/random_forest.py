@@ -15,7 +15,6 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
     results_folder.mkdir(exist_ok=True)
 
     for dataset in evaluation_datasets:
-
         sample_sizes = DATASET_TO_SIZES[dataset.id]
 
         for seed in SHUFFLE_SEEDS:
@@ -33,7 +32,6 @@ def run(data_folder: Path = DATAFOLDER_PATH) -> None:
                 model.fit(train_x, train_y)
 
                 for test_id, test_instance in dataset.test_data(flatten_x=True, max_size=10000):
-
                     results_json = results_folder / f"{test_id}_{json_suffix}"
                     results_nc = results_folder / f"{test_id}_{nc_suffix}"
 

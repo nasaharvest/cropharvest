@@ -297,7 +297,6 @@ def combine_datasets(datasets: Optional[List[str]] = None) -> geopandas.GeoDataF
 def update_processed_datasets(
     data_folder: Path = DATAFOLDER_PATH, overwrite: bool = False
 ) -> None:
-
     original_labels: Optional[geopandas.GeoDataFrame] = None
     datasets_to_combine = list_datasets()
 

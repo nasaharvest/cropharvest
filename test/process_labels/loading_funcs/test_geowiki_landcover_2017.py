@@ -2,7 +2,6 @@ from process_labels import datasets
 
 
 def test_geowiki_landcover_2017():
-
     data = datasets.load("geowiki-landcover-2017")
 
     non_crops = data[data.mean_sumcrop <= 0.5]

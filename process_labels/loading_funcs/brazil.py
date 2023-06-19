@@ -23,7 +23,6 @@ LABEL_TO_CLASSIFICATION = {
 
 
 def load_lem_brazil():
-
     df = geopandas.read_file(DATASET_PATH / "brazil/lem_brazil")
     df = df[df.geometry.is_valid]
 
@@ -86,7 +85,6 @@ def load_lem_brazil():
 
 
 def load_brazil_noncrop() -> geopandas.GeoDataFrame:
-
     filepath = DATASET_PATH / "brazil" / "brazil_noncrop"
     df = process_crop_non_crop(filepath)
 

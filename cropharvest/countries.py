@@ -13,7 +13,6 @@ def load_country_shapefile():
 
 
 def get_country_bbox(country_name: str, largest_only: bool = False) -> List[BBox]:
-
     country_shapefile = load_country_shapefile()
     country = country_shapefile[country_shapefile.NAME_EN == country_name]
     if len(country) != 1:

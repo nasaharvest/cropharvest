@@ -25,7 +25,6 @@ class CropClassifications(Enum):
 
 
 def to_one_hot(crop_name: str) -> List[float]:
-
     if crop_name in [x.name for x in CropClassifications]:
         encoding = np.zeros(len(CropClassifications))
         encoding[CropClassifications.__getitem__(crop_name).value] = 1

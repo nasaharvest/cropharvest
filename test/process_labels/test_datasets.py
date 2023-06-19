@@ -15,7 +15,6 @@ class_to_ptype = {
 
 
 def _check_columns_and_types(df: geopandas.GeoDataFrame) -> None:
-
     for expected_column, expected_type in [
         ("index", int),
         ("lat", float),
@@ -35,7 +34,6 @@ def _check_columns_and_types(df: geopandas.GeoDataFrame) -> None:
 
 
 def _check_lat_lon(df: geopandas.GeoDataFrame) -> None:
-
     assert df["lon"].max() <= 180
     assert df["lon"].min() >= -180
 
@@ -44,7 +42,6 @@ def _check_lat_lon(df: geopandas.GeoDataFrame) -> None:
 
 
 def _check_export_end_date(df: geopandas.GeoDataFrame) -> None:
-
     assert (df["export_end_date"].dt.month == EXPORT_END_MONTH).all()
     assert (df["export_end_date"].dt.day == EXPORT_END_DAY).all()
 
@@ -62,7 +59,6 @@ def _check_labels(df: geopandas.GeoDataFrame) -> None:
 
 
 def test_consistency() -> None:
-
     all_datasets = datasets.list_datasets()
 
     for dataset in all_datasets:
@@ -77,7 +73,6 @@ def test_consistency() -> None:
 
 
 def test_combination() -> None:
-
     combined_dataset = datasets.combine_datasets()
 
     expected_columns = datasets.RequiredColumns.tolist() + datasets.NullableColumns.tolist()

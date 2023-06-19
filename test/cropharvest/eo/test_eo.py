@@ -69,7 +69,6 @@ def test_get_cloud_tif_list_error():
 
 @patch("cropharvest.eo.EarthEngineExporter._export_for_polygon")
 def test_export_for_labels(mock_export_for_polygon, mock_polygon):
-
     start_date_str = "2019-04-22"
     end_date_str = "2020-04-16"
 
@@ -115,7 +114,6 @@ def test_export_for_labels(mock_export_for_polygon, mock_polygon):
 @patch("cropharvest.eo.EarthEngineExporter._export_for_polygon")
 @pytest.mark.parametrize("metres_per_polygon", (None, 10000))
 def test_export_for_bbox(mock_export_for_polygon, metres_per_polygon, mock_polygon):
-
     start_date, end_date = date(2019, 4, 1), date(2020, 4, 1)
     EarthEngineExporter(check_gcp=False, check_ee=False).export_for_bbox(
         bbox=BBox(min_lon=-0.1501, max_lon=1.7779296875, min_lat=6.08940429687, max_lat=11.115625),
@@ -155,7 +153,6 @@ def test_export_for_bbox(mock_export_for_polygon, metres_per_polygon, mock_polyg
 
 
 def test_google_cloud_storage_errors():
-
     with pytest.raises(Exception) as e:
         EarthEngineExporter(check_gcp=True, check_ee=False)
 
