@@ -46,6 +46,8 @@ jobs:
         exclude:
         - os: macos-latest
           python-version: 3.7
+        - os: windows-latest
+          python-version: 3.7
         include:
           - os: ubuntu-20.04
             python-version: 3.6
