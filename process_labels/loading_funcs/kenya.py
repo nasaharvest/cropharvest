@@ -6,6 +6,7 @@ from datetime import datetime
 from .utils import process_crop_non_crop, export_date_from_row, LATLON_CRS
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
 from cropharvest.columns import RequiredColumns, NullableColumns
+from .utils import _process_copernicusgeoglam
 from ..utils import DATASET_PATH
 
 from typing import List
@@ -105,3 +106,18 @@ def load_kenya_non_crop():
     df[RequiredColumns.EXPORT_END_DATE] = datetime(2020, EXPORT_END_MONTH, EXPORT_END_DAY)
 
     return df
+
+
+def load_kenya_copernicusgeoglam_shortrain():
+    df = geopandas.read_file(
+        DATASET_PATH
+        / ("kenya/copernicusgeoglam/cop4geoglam_kenya_aoi_field_data_points_short_rains.shp")
+    )
+    return _process_copernicusgeoglam(df, export_end_year=2023)
+
+
+def load_kenya_copernicusgeoglam_longrain():
+    df = geopandas.read_file(
+        DATASET_PATH / ("kenya/copernicusgeoglam/cop4geoglam_kenya_aoi_field_data_points.shp")
+    )
+    return _process_copernicusgeoglam(df, export_end_year=2023)

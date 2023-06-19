@@ -9,7 +9,7 @@ from shapely import wkt
 from cropharvest.columns import RequiredColumns, NullableColumns
 from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
 
-from .utils import export_date_from_row
+from .utils import _process_copernicusgeoglam, export_date_from_row
 from ..utils import DATASET_PATH
 
 from typing import Tuple, List
@@ -122,7 +122,8 @@ def load_tanzania_ceo():
             "is_crop_mean": "mean",
         }
     )
-
+    # np.where(
+    # (df['crops'] == 'no'), 0, 1)
     df[RequiredColumns.COLLECTION_DATE] = datetime(2019, 1, 2)
     df[RequiredColumns.EXPORT_END_DATE] = datetime(2019, EXPORT_END_MONTH, EXPORT_END_DAY)
     df[RequiredColumns.IS_CROP] = np.where(df["is_crop_mean"] > 0.5, 1, 0)
@@ -198,3 +199,11 @@ def load_tanzania_ecaas():
     df[RequiredColumns.INDEX] = df.index
 
     return df
+
+
+def load_tanzania_copernicusgeoglam():
+    df = geopandas.read_file(
+        DATASET_PATH
+        / ("tanzania/copernicusgeoglam/cop4geoglam_tanzania_aoi_field_data_points.shp")
+    )
+    return _process_copernicusgeoglam(df, export_end_year=2023)

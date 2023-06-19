@@ -6,7 +6,7 @@ from shapely.geometry import Polygon
 from cropharvest.columns import RequiredColumns, NullableColumns
 
 from ..utils import DATASET_PATH
-from .utils import export_date_from_row
+from .utils import _process_copernicusgeoglam, export_date_from_row
 
 from typing import Tuple, List
 
@@ -89,3 +89,19 @@ def load_uganda():
     df = df.reset_index(drop=True)
     df[RequiredColumns.INDEX] = df.index
     return df
+
+
+def load_uganda_copernicusgeoglam_shortrain():
+    df = geopandas.read_file(
+        DATASET_PATH
+        / ("uganda/copernicusgeoglam/cop4geoglam_uganda_aoi_field_data_points_short_rains.shp")
+    )
+    return _process_copernicusgeoglam(df, export_end_year=2023)
+
+
+def load_uganda_copernicusgeoglam_longrain():
+    df = geopandas.read_file(
+        DATASET_PATH
+        / ("uganda/copernicusgeoglam/cop4geoglam_uganda_aoi_field_data_points_2021.shp")
+    )
+    return _process_copernicusgeoglam(df, export_end_year=2023)
