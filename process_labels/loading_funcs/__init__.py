@@ -5,9 +5,23 @@ from .brazil import load_lem_brazil, load_brazil_noncrop
 from .geowiki_landcover_2017 import load_geowiki_landcover_2017
 from .central_asia import load_central_asia
 from .rwanda import load_rwanda_ceo
-from .kenya import load_kenya, load_kenya_non_crop, load_kenya_copernicusgeoglam_shortrain, load_kenya_copernicusgeoglam_longrain
-from .uganda import load_uganda, load_uganda_copernicusgeoglam_longrain, load_uganda_copernicusgeoglam_shortrain
-from .tanzania import load_tanzania, load_tanzania_ecaas, load_tanzania_ceo, load_tanzania_copernicusgeoglam
+from .kenya import (
+    load_kenya,
+    load_kenya_non_crop,
+    load_kenya_copernicusgeoglam_shortrain,
+    load_kenya_copernicusgeoglam_longrain,
+)
+from .uganda import (
+    load_uganda,
+    load_uganda_copernicusgeoglam_longrain,
+    load_uganda_copernicusgeoglam_shortrain,
+)
+from .tanzania import (
+    load_tanzania,
+    load_tanzania_ecaas,
+    load_tanzania_ceo,
+    load_tanzania_copernicusgeoglam,
+)
 from .croplands import load_croplands
 from .zimbabwe import load_zimbabwe
 from .mali import load_mali, load_mali_crop_noncrop, load_mali_hlc

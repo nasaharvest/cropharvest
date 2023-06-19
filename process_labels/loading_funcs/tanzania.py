@@ -206,4 +206,4 @@ def load_tanzania_copernicusgeoglam():
         DATASET_PATH
         / ("tanzania/copernicusgeoglam/cop4geoglam_tanzania_aoi_field_data_points.shp")
     )
-    return _process_copernicusgeoglam(df)
+    return _process_copernicusgeoglam(df, export_end_year=2023)

@@ -86,18 +86,22 @@ def export_date_from_row(row: pd.Series) -> datetime:
 
     return datetime(overlapping_year, EXPORT_END_MONTH, EXPORT_END_DAY)
 
-def _process_copernicusgeoglam(df:
-    geopandas.GeoDataFrame) -> geopandas.GeoDataFrame:
+
+def _process_copernicusgeoglam(
+    df: geopandas.GeoDataFrame, export_end_year: int = 2023
+) -> geopandas.GeoDataFrame:
     df = df.to_crs(LATLON_CRS)
-    
+
     gdf = geopandas.GeoDataFrame(crs=LATLON_CRS, geometry=df.geometry)
     gdf[RequiredColumns.LAT] = df.geometry.y
     gdf[RequiredColumns.LON] = df.geometry.x
     gdf[RequiredColumns.COLLECTION_DATE] = df.today
-    gdf[RequiredColumns.EXPORT_END_DATE] = datetime(2023, EXPORT_END_MONTH, EXPORT_END_DAY)
-    gdf[RequiredColumns.IS_CROP] = df.crops.apply(lambda x: 0 if x == 'no' else 1)
+    gdf[RequiredColumns.EXPORT_END_DATE] = datetime(
+        export_end_year, EXPORT_END_MONTH, EXPORT_END_DAY
+    )
+    gdf[RequiredColumns.IS_CROP] = df.crops.apply(lambda x: 0 if x == "no" else 1)
     gdf = gdf.reset_index(drop=True)
     gdf[RequiredColumns.INDEX] = gdf.index
-    gdf = gdf.drop(columns=['geometry'])
-    
+    gdf = gdf.drop(columns=["geometry"])
+
     return gdf

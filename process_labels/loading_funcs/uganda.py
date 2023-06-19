@@ -96,7 +96,7 @@ def load_uganda_copernicusgeoglam_shortrain():
         DATASET_PATH
         / ("uganda/copernicusgeoglam/cop4geoglam_uganda_aoi_field_data_points_short_rains.shp")
     )
-    return _process_copernicusgeoglam(df)
+    return _process_copernicusgeoglam(df, export_end_year=2023)
 
 
 def load_uganda_copernicusgeoglam_longrain():
@@ -104,4 +104,4 @@ def load_uganda_copernicusgeoglam_longrain():
         DATASET_PATH
         / ("uganda/copernicusgeoglam/cop4geoglam_uganda_aoi_field_data_points_2021.shp")
     )
-    return _process_copernicusgeoglam(df)
+    return _process_copernicusgeoglam(df, export_end_year=2023)

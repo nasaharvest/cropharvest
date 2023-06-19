@@ -113,11 +113,11 @@ def load_kenya_copernicusgeoglam_shortrain():
         DATASET_PATH
         / ("kenya/copernicusgeoglam/cop4geoglam_kenya_aoi_field_data_points_short_rains.shp")
     )
-    return _process_copernicusgeoglam(df)
+    return _process_copernicusgeoglam(df, export_end_year=2023)
 
 
 def load_kenya_copernicusgeoglam_longrain():
     df = geopandas.read_file(
         DATASET_PATH / ("kenya/copernicusgeoglam/cop4geoglam_kenya_aoi_field_data_points.shp")
     )
-    return _process_copernicusgeoglam(df)
+    return _process_copernicusgeoglam(df, export_end_year=2023)
