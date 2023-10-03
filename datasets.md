@@ -6,7 +6,7 @@
 |NASA Harvest | Sudan         | 422                   | Binary     | CC BY-4.0|
 |NASA Harvest | Mali          | 142                   | Binary     | CC BY-4.0|
 |NASA Harvest | Brazil        | 36                    | Binary     | CC BY-4.0|
-|NASA Harvest | Tanzania        | 2400                    | Binary     | CC BY-4.0|
+|NASA Harvest | Tanzania      | 2400                  | Binary     | CC BY-4.0|
 |[[1]](#1)    | Togo          | 1,582                 | Binary     | CC BY-4.0|
 |[[2]](#2)| France (Ile de France) | 6,184 |Multi-class| etalab Open License |
 |[[2]](#2)| France (Reunion) | 2,776       |Multi-class| etalab Open License |
@@ -24,6 +24,7 @@
 | Harvest Partner | Mali      | 148                   | Multi-class| CC BY-4.0|
 | Harvest Partner | Mali      | 1506                  | Multi-class| CC BY-4.0|
 | FEWS NET| Zimbabwe          | 49                 | Multi-class| CC BY-SA-4.0|
+| [13](#13) | Global          | 13005              | Multi-class| CC BY-SA-4.0|
 
 
 ## References
@@ -51,3 +52,5 @@ https://doi.org/10.34911/RDNT.5VX40R, 2019.
 <a id="11">[11]</a> Christophe Bocquet. Dalberg data insights uganda crop classification. https://doi.org/10.34911/RDNT.EII04X, 2019.
 
 <a id="12">[12]</a> Catherine Nakalembe, Andreas Schlueter, Sixbert Maurice, & Taryn Devereux. (2022). 2022 Rice Crop-type Data for Western Tanzania (Version 1). https://doi.org/10.5281/zenodo.6824200
+
+<a id="13">[13]</a> Jolivot A, Lebourgeois V, Leroux L, Ameline M, Andriamanga V, Bellón B, Castets M, Crespin-Boucaud A, Defourny P, Diaz S, Dieye M. Harmonized in situ datasets for agricultural land use mapping and monitoring in tropical countries. Earth System Science Data. 2021. https://doi.org/10.18167/DVN1/P7OLAP
