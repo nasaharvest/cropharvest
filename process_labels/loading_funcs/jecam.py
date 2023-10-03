@@ -93,7 +93,6 @@ def load_jecam():
     df = geopandas.read_file(DATASET_PATH / "jecam")
     df = df.to_crs(LATLON_CRS)
 
-    df["EOS"] = pd.to_datetime(df["EOS"])
     df = df[~df["EOS"].isnull()]
     df[RequiredColumns.EXPORT_END_DATE] = np.vectorize(export_end_date)(df.EOS)
     df = df[df[RequiredColumns.EXPORT_END_DATE].dt.year > 2017]
