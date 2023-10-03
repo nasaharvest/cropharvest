@@ -78,9 +78,11 @@ LABEL_TO_CLASSIFICATION = {
     "Cucurbit": "vegetables_melons",
 }
 
+
 def str_to_timestamp(d: str) -> datetime:
     year, month, day = d.split("-")
     return datetime(int(year), int(month), int(day))
+
 
 def export_end_date(d: str) -> datetime:
     eos_date = str_to_timestamp(d)
