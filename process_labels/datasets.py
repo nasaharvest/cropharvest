@@ -202,6 +202,15 @@ DATASETS = {
         "description": "Hand-labelled crop / non crop labels in Tanzania",
         "externally_contributed": False,
     },
+    "jecam": {
+        "function": loading_funcs.load_jecam,
+        "description": (
+            "Ground data collected within the framework of the international",
+            "JECAM initiative. For more information, visit",
+            "https://doi.org/10.18167/DVN1/P7OLAP"
+        ),
+        "externally_contributed": False,
+    },
 }
 
 
