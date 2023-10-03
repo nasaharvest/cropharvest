@@ -124,6 +124,7 @@ def load_jecam():
     df[RequiredColumns.IS_CROP] = (df[NullableColumns.CLASSIFICATION_LABEL] != "non_crop").astype(
         int
     )
+    df = df.explode()
 
     df = df.reset_index(drop=True)
     df[RequiredColumns.INDEX] = df.index
