@@ -65,6 +65,17 @@ LABEL_TO_CLASSIFICATION = {
     "Cauliflower and brocoli": "vegetables_melons",
     "Root/tuber crop with high starch or inulin content": "root_tuber",
     "Eggplant": "vegetables_melons",
+    "Mixed annual crops": "other",
+    "Weakly vegetated agricultural": "other",
+    "Mid fallow": "non_crop",
+    "Mixed Cereals": "cereals",
+    "Banana": "fruits_nuts",
+    "Sugarcane": "sugar",
+    "Orange tree": "fruits_nuts",
+    "Annual crop": "other",
+    "Root": "root_tuber",
+    "Vegetables": "vegetables_melons",
+    "Cucurbit": "vegetables_melons",
 }
 
 
@@ -73,9 +84,9 @@ def export_end_date(eos_date: date) -> datetime:
     if (eos_date.month > EXPORT_END_MONTH) or (
         eos_date.month == EXPORT_END_MONTH and eos_date.day > EXPORT_END_DAY
     ):
-        return datetime(eos_date.year + 1, EXPORT_END_MONTH, EXPORT_END_DAY)
+        return datetime(int(eos_date.year + 1), EXPORT_END_MONTH, EXPORT_END_DAY)
     else:
-        return datetime(eos_date.year, EXPORT_END_MONTH, EXPORT_END_DAY)
+        return datetime(int(eos_date.year), EXPORT_END_MONTH, EXPORT_END_DAY)
 
 
 def load_jecam():
@@ -83,12 +94,16 @@ def load_jecam():
     df = df.to_crs(LATLON_CRS)
 
     df["EOS"] = pd.to_datetime(df["EOS"])
+    df = df[~df["EOS"].isnull()]
     df[RequiredColumns.EXPORT_END_DATE] = np.vectorize(export_end_date)(df.EOS)
     df = df[df[RequiredColumns.EXPORT_END_DATE].dt.year > 2017]
 
     df[RequiredColumns.LON] = df.geometry.centroid.x.values
     df[RequiredColumns.LAT] = df.geometry.centroid.y.values
-    df = df.rename(columns={"AcquiDate": RequiredColumns.COLLECTION_DATE})
+    df = df.rename(columns={
+        "AcquiDate": RequiredColumns.COLLECTION_DATE,
+        "CropType1": NullableColumns.LABEL
+    })
 
     df[NullableColumns.CLASSIFICATION_LABEL] = df.apply(
         lambda x: LABEL_TO_CLASSIFICATION[x[NullableColumns.LABEL]], axis=1
