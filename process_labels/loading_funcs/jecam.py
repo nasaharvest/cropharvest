@@ -1,7 +1,7 @@
 import geopandas
 import numpy as np
+from datetime import datetime
 import pandas as pd
-from datetime import date, datetime
 
 from cropharvest.columns import RequiredColumns, NullableColumns
 from cropharvest.config import EXPORT_END_DAY, EXPORT_END_MONTH
@@ -78,9 +78,12 @@ LABEL_TO_CLASSIFICATION = {
     "Cucurbit": "vegetables_melons",
 }
 
+def str_to_timestamp(d: str) -> datetime:
+    year, month, day = d.split("-")
+    return datetime(int(year), int(month), int(day))
 
-def export_end_date(eos_date: date) -> datetime:
-    eos_date = pd.to_datetime(eos_date)
+def export_end_date(d: str) -> datetime:
+    eos_date = str_to_timestamp(d)
     if (eos_date.month > EXPORT_END_MONTH) or (
         eos_date.month == EXPORT_END_MONTH and eos_date.day > EXPORT_END_DAY
     ):
@@ -94,15 +97,23 @@ def load_jecam():
     df = df.to_crs(LATLON_CRS)
 
     df = df[~df["EOS"].isnull()]
+    df = df[~df["AcquiDate"].isnull()]
+    df = df[~df["SOS"].isnull()]
+
     df[RequiredColumns.EXPORT_END_DATE] = np.vectorize(export_end_date)(df.EOS)
     df = df[df[RequiredColumns.EXPORT_END_DATE].dt.year > 2017]
 
     df[RequiredColumns.LON] = df.geometry.centroid.x.values
     df[RequiredColumns.LAT] = df.geometry.centroid.y.values
-    df = df.rename(columns={
-        "AcquiDate": RequiredColumns.COLLECTION_DATE,
-        "CropType1": NullableColumns.LABEL
-    })
+    df = df.rename(
+        columns={
+            "AcquiDate": RequiredColumns.COLLECTION_DATE,
+            "CropType1": NullableColumns.LABEL,
+            "SOS": NullableColumns.PLANTING_DATE,
+        }
+    )
+    df[RequiredColumns.COLLECTION_DATE] = pd.to_datetime(df[RequiredColumns.COLLECTION_DATE])
+    df[NullableColumns.PLANTING_DATE] = pd.to_datetime(df[NullableColumns.PLANTING_DATE])
 
     df[NullableColumns.CLASSIFICATION_LABEL] = df.apply(
         lambda x: LABEL_TO_CLASSIFICATION[x[NullableColumns.LABEL]], axis=1
@@ -115,4 +126,22 @@ def load_jecam():
     df = df.reset_index(drop=True)
     df[RequiredColumns.INDEX] = df.index
 
-    return df
+    return df[
+        (
+            [
+                x
+                for x in RequiredColumns.tolist()
+                if x
+                not in [
+                    RequiredColumns.DATASET,
+                    RequiredColumns.IS_TEST,
+                    RequiredColumns.EXTERNALLY_CONTRIBUTED_DATASET,
+                ]
+            ]
+            + [
+                NullableColumns.LABEL,
+                NullableColumns.CLASSIFICATION_LABEL,
+                NullableColumns.PLANTING_DATE,
+            ]
+        )
+    ]
