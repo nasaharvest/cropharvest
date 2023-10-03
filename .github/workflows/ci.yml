@@ -32,7 +32,7 @@ jobs:
     - name: Black & mypy
       run: |
         python -m black --check --diff .
-        python -m flake8 .
+        python -m ruff .
         python -m mypy cropharvest process_labels test benchmarks
         python -m mypy benchmarks/dl
   test:

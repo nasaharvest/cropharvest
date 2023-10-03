@@ -14,6 +14,7 @@ from .mali import load_mali, load_mali_crop_noncrop, load_mali_hlc
 from .france import load_ile_de_france, load_reunion, load_martinique
 from .canada import load_canada
 from .germany import load_germany
+from .jecam import load_jecam
 
 
 __all__ = [
@@ -42,4 +43,5 @@ __all__ = [
     "load_mali_hlc",
     "load_tanzania_ecaas",
     "load_tanzania_ceo",
+    "load_jecam"
 ]
