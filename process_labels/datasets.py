@@ -207,7 +207,7 @@ DATASETS = {
         "description": (
             "Ground data collected within the framework of the international",
             "JECAM initiative. For more information, visit",
-            "https://doi.org/10.18167/DVN1/P7OLAP"
+            "https://doi.org/10.18167/DVN1/P7OLAP",
         ),
         "externally_contributed": False,
     },
