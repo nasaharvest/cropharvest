@@ -32,7 +32,7 @@ jobs:
     - name: Black & mypy
       run: |
         python -m black --check --diff .
-        python -m ruff .
+        python -m flake8 .
         python -m mypy cropharvest process_labels test
   test:
     runs-on: ${{ matrix.os }}

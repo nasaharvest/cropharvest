@@ -2,6 +2,6 @@
 black
 earthengine-api>=0.1.271
 mypy
-ruff
+flake8
 jupyter
 pytest-mock
