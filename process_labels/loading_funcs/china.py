@@ -106,6 +106,7 @@ def load_china() -> geopandas.GeoDataFrame:
         data=df, geometry=geopandas.points_from_xy(df.lon, df.lat), crs=LATLON_CRS
     )
     gdf = df.reset_index(drop=True)
+    gdf = gdf.rename(columns={"crop": RequiredColumns.IS_CROP})
     gdf[RequiredColumns.INDEX] = df.index
     gdf[RequiredColumns.EXPORT_END_DATE] = df.apply(
         lambda x: datetime(x.year, EXPORT_END_MONTH, EXPORT_END_DAY), axis=1
