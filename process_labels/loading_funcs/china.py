@@ -108,6 +108,6 @@ def load_china() -> geopandas.GeoDataFrame:
     gdf = df.reset_index(drop=True)
     gdf[RequiredColumns.INDEX] = df.index
     gdf[RequiredColumns.EXPORT_END_DATE] = df.apply(
-        lambda x: datetime(x.year, EXPORT_END_MONTH, EXPORT_END_DAY)
+        lambda x: datetime(x.year, EXPORT_END_MONTH, EXPORT_END_DAY), axis=1
     )
     return gdf
