@@ -211,6 +211,11 @@ DATASETS = {
         ),
         "externally_contributed": False,
     },
+    "china-crop": {
+        "function": loading_funcs.load_china,
+        "description": "Hand-labelled crop / non crop labels in China",
+        "externally_contributed": False,
+    },
 }
 
 

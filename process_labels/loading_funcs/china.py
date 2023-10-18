@@ -1,4 +1,12 @@
 import pandas as pd
+import geopandas
+from datetime import datetime
+
+from cropharvest.config import EXPORT_END_MONTH, EXPORT_END_DAY
+from cropharvest.columns import RequiredColumns
+
+from .utils import LATLON_CRS
+from ..utils import DATASET_PATH
 
 
 def raw_from_ceo():
@@ -90,3 +98,16 @@ def raw_from_ceo():
     ]:
         dfs.append(combine_csvs(filename, year, name_2))
     return pd.concat(dfs)
+
+
+def load_china() -> geopandas.GeoDataFrame:
+    df = pd.read_csv(DATASET_PATH / "china" / "combined_and_anonymised_points.csv")
+    gdf = geopandas.GeoDataFrame(
+        data=df, geometry=geopandas.points_from_xy(df.lon, df.lat), crs=LATLON_CRS
+    )
+    gdf = df.reset_index(drop=True)
+    gdf[RequiredColumns.INDEX] = df.index
+    gdf[RequiredColumns.EXPORT_END_DATE] = df.apply(
+        lambda x: datetime(x.year, EXPORT_END_MONTH, EXPORT_END_DAY)
+    )
+    return gdf
