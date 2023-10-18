@@ -46,4 +46,4 @@ TEST_REGIONS: Dict[str, BBox] = {
     ),
 }
 
-TEST_DATASETS = {"Togo": "togo-eval", "China": "china-crop"}
+TEST_DATASETS = {"Togo": "togo-eval", "People's Republic of China": "china-crop"}
