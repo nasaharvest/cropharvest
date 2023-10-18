@@ -17,9 +17,9 @@ def test_full_integration():
         print("Zenodo could not be reached - skipping")
         return None
 
-    assert len(evaluation_datasets) == 3, "There should be 3 evaluation datasets"
+    assert len(evaluation_datasets) == 4, "There should be 4 evaluation datasets"
 
-    togo_dataset = evaluation_datasets[-1]
+    togo_dataset = evaluation_datasets[-2]
     X, y = togo_dataset.as_array(flatten_x=True)
     assert X.shape[0] == 1290
     assert y.shape[0] == 1290
