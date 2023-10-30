@@ -26,12 +26,12 @@ from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
 from cropharvest import countries
 
-from typing import cast, List, Optional, Tuple, Generator
+from typing import cast, List, Optional, Tuple, Generator, Union
 
 
 @dataclass
 class Task:
-    bounding_box: Optional[BBox] = None
+    bounding_box: Optional[Union[BBox, List[BBox]]] = None
     target_label: Optional[str] = None
     balance_negative_crops: bool = False
     test_identifier: Optional[str] = None
@@ -47,9 +47,12 @@ class Task:
                 )
 
         if self.bounding_box is None:
-            self.bounding_box = BBox(
-                min_lat=-90, max_lat=90, min_lon=-180, max_lon=180, name="global"
-            )
+            self.bounding_box = [
+                BBox(min_lat=-90, max_lat=90, min_lon=-180, max_lon=180, name="global")
+            ]
+        else:
+            if isinstance(self.bounding_box, BBox):
+                self.bounding_box = [self.bounding_box]
 
     @property
     def id(self) -> str:
@@ -87,17 +90,31 @@ class CropHarvestLabels(BaseDataset):
         # the CropHarvestLabels class should not modify it
         self._labels = read_geopandas(self.root / LABELS_FILENAME)
 
+    def update(self, df: geopandas.GeoDataFrame) -> None:
+        self._labels = df
+
     def as_geojson(self) -> geopandas.GeoDataFrame:
         return self._labels
 
     @staticmethod
     def filter_geojson(
-        gpdf: geopandas.GeoDataFrame, bounding_box: BBox, include_external_contributions: bool
+        gpdf: geopandas.GeoDataFrame,
+        bboxes: Union[BBox, List[BBox]],
+        include_external_contributions: bool,
     ) -> geopandas.GeoDataFrame:
+        if isinstance(bboxes, BBox):
+            bboxes = [BBox]
+
+        def in_bboxes(lat, lon):
+            for box in bboxes:
+                if box.contains(lat, lon):
+                    return True
+            return False
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             # warning: invalid value encountered in ? (vectorized)
-            include_condition = np.vectorize(bounding_box.contains)(
+            include_condition = np.vectorize(in_bboxes)(
                 gpdf[RequiredColumns.LAT], gpdf[RequiredColumns.LON]
             )
         if not include_external_contributions:
@@ -107,10 +124,10 @@ class CropHarvestLabels(BaseDataset):
         return gpdf[include_condition]
 
     def classes_in_bbox(
-        self, bounding_box: BBox, include_external_contributions: bool
+        self, bboxes: Union[BBox, List[BBox]], include_external_contributions: bool
     ) -> List[str]:
         bbox_geojson = self.filter_geojson(
-            self.as_geojson(), bounding_box, include_external_contributions
+            self.as_geojson(), bboxes, include_external_contributions
         )
         unique_labels = [x for x in bbox_geojson.label.unique() if x is not None]
         return unique_labels
@@ -203,6 +220,15 @@ class CropHarvestTifs(BaseDataset):
 class CropHarvest(BaseDataset):
     """Dataset consisting of satellite data and associated labels"""
 
+    filepaths: List[Path]
+    y_vals: List[int]
+    positive_indices: List[int]
+    negative_indices: List[int]
+    # used in the sample() function, to ensure filepaths are sampled without
+    # duplication as much as possible
+    sampled_positive_indices: List[int]
+    sampled_negative_indices: List[int]
+
     def __init__(
         self,
         root,
@@ -218,37 +244,40 @@ class CropHarvest(BaseDataset):
             print("Using the default task; crop vs. non crop globally")
             task = Task()
         self.task = task
+        self.is_val = is_val
+        self.val_ratio = val_ratio
 
         self.normalizing_dict = load_normalizing_dict(
             Path(root) / f"{FEATURES_DIR}/normalizing_dict.h5"
         )
+        self.update_labels(labels)
 
+    def paths_from_labels(self, labels: CropHarvestLabels) -> Tuple[List[Path], List[Path]]:
         positive_paths, negative_paths = labels.construct_positive_and_negative_labels(
-            task, filter_test=True
+            self.task, filter_test=True
         )
-        if val_ratio > 0.0:
+        if self.val_ratio > 0.0:
             # the fixed seed is to ensure the validation set is always
             # different from the training set
             positive_paths = deterministic_shuffle(positive_paths, seed=42)
             negative_paths = deterministic_shuffle(negative_paths, seed=42)
-            if is_val:
-                positive_paths = positive_paths[: int(len(positive_paths) * val_ratio)]
-                negative_paths = negative_paths[: int(len(negative_paths) * val_ratio)]
+            if self.is_val:
+                positive_paths = positive_paths[: int(len(positive_paths) * self.val_ratio)]
+                negative_paths = negative_paths[: int(len(negative_paths) * self.val_ratio)]
             else:
-                positive_paths = positive_paths[int(len(positive_paths) * val_ratio) :]
-                negative_paths = negative_paths[int(len(negative_paths) * val_ratio) :]
+                positive_paths = positive_paths[int(len(positive_paths) * self.val_ratio) :]
+                negative_paths = negative_paths[int(len(negative_paths) * self.val_ratio) :]
+        return positive_paths, negative_paths
 
-        self.filepaths: List[Path] = positive_paths + negative_paths
-        self.y_vals: List[int] = [1] * len(positive_paths) + [0] * len(negative_paths)
+    def update_labels(self, labels: CropHarvestLabels) -> None:
+        positive_paths, negative_paths = self.paths_from_labels(labels)
+        self.filepaths = positive_paths + negative_paths
+        self.y_vals = [1] * len(positive_paths) + [0] * len(negative_paths)
         self.positive_indices = list(range(len(positive_paths)))
         self.negative_indices = list(
             range(len(positive_paths), len(positive_paths) + len(negative_paths))
         )
-
-        # used in the sample() function, to ensure filepaths are sampled without
-        # duplication as much as possible
-        self.sampled_positive_indices: List[int] = []
-        self.sampled_negative_indices: List[int] = []
+        self.reset_sampled_indices()
 
     def reset_sampled_indices(self) -> None:
         self.sampled_positive_indices = []
