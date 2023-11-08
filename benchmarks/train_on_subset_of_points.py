@@ -1,18 +1,16 @@
 from pathlib import Path
+import pandas as pd
 import json
-from copy import deepcopy
 
 from cropharvest.utils import DATAFOLDER_PATH
 from cropharvest.datasets import CropHarvest, Task, CropHarvestLabels
 from cropharvest.engineer import TestInstance
+from cropharvest.columns import RequiredColumns
 
 from sklearn.ensemble import RandomForestClassifier
 
 
-METHOD = "BoundingBoxes"
-
-
-def select_points(evaluation_dataset: CropHarvest, all_labels: CropHarvestLabels) -> CropHarvest:
+def select_points(evaluation_dataset: CropHarvest, all_labels: CropHarvestLabels) -> pd.DataFrame:
     """
     This is what participants would implement.
     Given an evaluation dataset, they would need
@@ -21,38 +19,37 @@ def select_points(evaluation_dataset: CropHarvest, all_labels: CropHarvestLabels
     show two examples - one uses bounding boxes, the other directly
     overwrites the CropHarvestLabels geojson
     """
-    if METHOD == "BoundingBoxes":
-        training_task = deepcopy(evaluation_dataset.task)
-        training_task.test_identifier = None
-        return CropHarvest(evaluation_dataset.root, training_task)
-    elif METHOD == "manual_modification":
-        # if we don't set a bounding box for the task, no spatial filtering
-        # happens on the labels
-        training_task = Task(
-            target_label=evaluation_dataset.task.target_label,
-            balance_negative_crops=evaluation_dataset.task.balance_negative_crops,
-        )
+    # let's manually select points in the labels to be within the bounding box.
+    # 1. Make a new geojson. We do it according to the bounding boxes but this could be done
+    # in any way
+    filtered_geojson = all_labels.filter_geojson(
+        all_labels.as_geojson(),
+        evaluation_dataset.task.bounding_box,
+        include_external_contributions=True,
+    )
 
-        # let's manually select points in the labels to be within the bounding box.
-        # 1. Make a new geojson. We do it according to the bounding boxes but this could be done
-        # in any way
-        filtered_geojson = all_labels.filter_geojson(
-            all_labels.as_geojson(),
-            evaluation_dataset.task.bounding_box,
-            include_external_contributions=True,
-        )
-        # 2. make a new CropHarvestLabels object with this new geojson
-        new_labels = deepcopy(all_labels)
-        new_labels.update(filtered_geojson)
-        # create a CropHarvest training task with this data
-        training_dataset = CropHarvest(evaluation_dataset.root, training_task)
-        training_dataset.update_labels(new_labels)
-        return training_dataset
+    # the csv will contain the ids and datasets of the selected rows
+    return pd.DataFrame(filtered_geojson[[RequiredColumns.DATASET, RequiredColumns.INDEX]])
 
 
 def train_and_eval(
-    training_dataset: CropHarvest, evaluation_dataset: CropHarvest, results_folder: Path
+    training_labels: pd.DataFrame, evaluation_dataset: CropHarvest, results_folder: Path
 ):
+    # 1. we make a training dataset from the labels
+    labels = CropHarvestLabels(DATAFOLDER_PATH)
+    filtered_labels = labels.as_geojson().merge(
+        training_labels, on=[RequiredColumns.DATASET, RequiredColumns.INDEX]
+    )
+    labels._labels = filtered_labels
+    training_dataset = CropHarvest(
+        evaluation_dataset.root,
+        Task(
+            target_label=evaluation_dataset.task.target_label,
+            balance_negative_crops=evaluation_dataset.task.balance_negative_crops,
+        ),
+    )
+    training_dataset.update_labels(labels)
+
     train_x, train_y = training_dataset.as_array(flatten_x=True)
     # train a model
     model = RandomForestClassifier()
@@ -94,9 +91,9 @@ def main():
     results_folder = DATAFOLDER_PATH / "data_centric_test"
     results_folder.mkdir(exist_ok=True)
 
-    for evaluation_dataset in evaluation_datasets:
-        training_dataset = select_points(evaluation_dataset, all_labels)
-        train_and_eval(training_dataset, evaluation_dataset, results_folder)
+    togo_eval = [x for x in evaluation_datasets if "Togo" in x.task.name]
+    training_points_df = select_points(togo_eval, all_labels)
+    train_and_eval(training_points_df, togo_eval, results_folder)
 
 
 if __name__ == "__main__":
