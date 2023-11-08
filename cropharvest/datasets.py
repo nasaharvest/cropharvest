@@ -31,7 +31,7 @@ from typing import cast, List, Optional, Tuple, Generator, Union
 
 @dataclass
 class Task:
-    bounding_box: Optional[Union[BBox, List[BBox]]] = None
+    bounding_box: Optional[BBox] = None
     target_label: Optional[str] = None
     balance_negative_crops: bool = False
     test_identifier: Optional[str] = None
@@ -47,12 +47,9 @@ class Task:
                 )
 
         if self.bounding_box is None:
-            self.bounding_box = [
-                BBox(min_lat=-90, max_lat=90, min_lon=-180, max_lon=180, name="global")
-            ]
-        else:
-            if isinstance(self.bounding_box, BBox):
-                self.bounding_box = [self.bounding_box]
+            self.bounding_box = BBox(
+                min_lat=-90, max_lat=90, min_lon=-180, max_lon=180, name="global"
+            )
 
     @property
     def id(self) -> str:
