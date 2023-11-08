@@ -90,31 +90,17 @@ class CropHarvestLabels(BaseDataset):
         # the CropHarvestLabels class should not modify it
         self._labels = read_geopandas(self.root / LABELS_FILENAME)
 
-    def update(self, df: geopandas.GeoDataFrame) -> None:
-        self._labels = df
-
     def as_geojson(self) -> geopandas.GeoDataFrame:
         return self._labels
 
     @staticmethod
     def filter_geojson(
-        gpdf: geopandas.GeoDataFrame,
-        bboxes: Union[BBox, List[BBox]],
-        include_external_contributions: bool,
+        gpdf: geopandas.GeoDataFrame, bounding_box: BBox, include_external_contributions: bool
     ) -> geopandas.GeoDataFrame:
-        if isinstance(bboxes, BBox):
-            bboxes = [BBox]
-
-        def in_bboxes(lat, lon):
-            for box in bboxes:
-                if box.contains(lat, lon):
-                    return True
-            return False
-
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             # warning: invalid value encountered in ? (vectorized)
-            include_condition = np.vectorize(in_bboxes)(
+            include_condition = np.vectorize(bounding_box.contains)(
                 gpdf[RequiredColumns.LAT], gpdf[RequiredColumns.LON]
             )
         if not include_external_contributions:
@@ -124,10 +110,10 @@ class CropHarvestLabels(BaseDataset):
         return gpdf[include_condition]
 
     def classes_in_bbox(
-        self, bboxes: Union[BBox, List[BBox]], include_external_contributions: bool
+        self, bounding_box: BBox, include_external_contributions: bool
     ) -> List[str]:
         bbox_geojson = self.filter_geojson(
-            self.as_geojson(), bboxes, include_external_contributions
+            self.as_geojson(), bounding_box, include_external_contributions
         )
         unique_labels = [x for x in bbox_geojson.label.unique() if x is not None]
         return unique_labels
