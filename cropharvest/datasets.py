@@ -26,7 +26,7 @@ from cropharvest.columns import NullableColumns, RequiredColumns
 from cropharvest.engineer import TestInstance
 from cropharvest import countries
 
-from typing import cast, List, Optional, Tuple, Generator, Union
+from typing import cast, List, Optional, Tuple, Generator
 
 
 @dataclass
