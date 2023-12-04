@@ -16,7 +16,7 @@ DEFAULT_NUM_TIMESTEPS = 12
 EXPORT_END_MONTH = 2
 EXPORT_END_DAY = 1
 
-DATASET_VERSION_ID = 7257688
+DATASET_VERSION_ID = 10251170
 DATASET_URL = f"https://zenodo.org/record/{DATASET_VERSION_ID}"
 LABELS_FILENAME = "labels.geojson"
 FEATURES_DIR = "features"
@@ -46,4 +46,4 @@ TEST_REGIONS: Dict[str, BBox] = {
     ),
 }
 
-TEST_DATASETS = {"Togo": "togo-eval"}
+TEST_DATASETS = {"Togo": "togo-eval", "People's Republic of China": "china-crop"}

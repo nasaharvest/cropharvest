@@ -15,6 +15,7 @@ from .france import load_ile_de_france, load_reunion, load_martinique
 from .canada import load_canada
 from .germany import load_germany
 from .jecam import load_jecam
+from .china import load_china
 
 
 __all__ = [
@@ -44,4 +45,5 @@ __all__ = [
     "load_tanzania_ecaas",
     "load_tanzania_ceo",
     "load_jecam",
+    "load_china",
 ]
