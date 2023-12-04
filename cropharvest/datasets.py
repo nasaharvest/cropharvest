@@ -203,6 +203,15 @@ class CropHarvestTifs(BaseDataset):
 class CropHarvest(BaseDataset):
     """Dataset consisting of satellite data and associated labels"""
 
+    filepaths: List[Path]
+    y_vals: List[int]
+    positive_indices: List[int]
+    negative_indices: List[int]
+    # used in the sample() function, to ensure filepaths are sampled without
+    # duplication as much as possible
+    sampled_positive_indices: List[int]
+    sampled_negative_indices: List[int]
+
     def __init__(
         self,
         root,
@@ -218,37 +227,40 @@ class CropHarvest(BaseDataset):
             print("Using the default task; crop vs. non crop globally")
             task = Task()
         self.task = task
+        self.is_val = is_val
+        self.val_ratio = val_ratio
 
         self.normalizing_dict = load_normalizing_dict(
             Path(root) / f"{FEATURES_DIR}/normalizing_dict.h5"
         )
+        self.update_labels(labels)
 
+    def paths_from_labels(self, labels: CropHarvestLabels) -> Tuple[List[Path], List[Path]]:
         positive_paths, negative_paths = labels.construct_positive_and_negative_labels(
-            task, filter_test=True
+            self.task, filter_test=True
         )
-        if val_ratio > 0.0:
+        if self.val_ratio > 0.0:
             # the fixed seed is to ensure the validation set is always
             # different from the training set
             positive_paths = deterministic_shuffle(positive_paths, seed=42)
             negative_paths = deterministic_shuffle(negative_paths, seed=42)
-            if is_val:
-                positive_paths = positive_paths[: int(len(positive_paths) * val_ratio)]
-                negative_paths = negative_paths[: int(len(negative_paths) * val_ratio)]
+            if self.is_val:
+                positive_paths = positive_paths[: int(len(positive_paths) * self.val_ratio)]
+                negative_paths = negative_paths[: int(len(negative_paths) * self.val_ratio)]
             else:
-                positive_paths = positive_paths[int(len(positive_paths) * val_ratio) :]
-                negative_paths = negative_paths[int(len(negative_paths) * val_ratio) :]
+                positive_paths = positive_paths[int(len(positive_paths) * self.val_ratio) :]
+                negative_paths = negative_paths[int(len(negative_paths) * self.val_ratio) :]
+        return positive_paths, negative_paths
 
-        self.filepaths: List[Path] = positive_paths + negative_paths
-        self.y_vals: List[int] = [1] * len(positive_paths) + [0] * len(negative_paths)
+    def update_labels(self, labels: CropHarvestLabels) -> None:
+        positive_paths, negative_paths = self.paths_from_labels(labels)
+        self.filepaths = positive_paths + negative_paths
+        self.y_vals = [1] * len(positive_paths) + [0] * len(negative_paths)
         self.positive_indices = list(range(len(positive_paths)))
         self.negative_indices = list(
             range(len(positive_paths), len(positive_paths) + len(negative_paths))
         )
-
-        # used in the sample() function, to ensure filepaths are sampled without
-        # duplication as much as possible
-        self.sampled_positive_indices: List[int] = []
-        self.sampled_negative_indices: List[int] = []
+        self.reset_sampled_indices()
 
     def reset_sampled_indices(self) -> None:
         self.sampled_positive_indices = []
